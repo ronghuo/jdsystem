@@ -1,0 +1,87 @@
+.print-area {
+    width: 100%;
+    display: inline-block;
+}
+.plan-title {
+    font-weight: bold;
+    margin: 60px auto;
+    width: 60%;
+    text-align: center;
+}
+.plan-content {
+    margin: 20px 0 0 40px;
+}
+.plan-content:first-child {
+    margin: 80px 0 0 0;
+}
+.basic-row {
+    display: block;padding: 20px 0 0 0;
+}
+.basic-row .input {
+    border-bottom: 1px solid;
+    width: 120px;
+    display: inline-block;
+    text-align: center;
+}
+.basic-row .input-date {
+    border-bottom: 1px solid;
+    width: 80px;
+    display: inline-block;
+    text-align: center;
+}
+.large-paragraph {
+    width: 700px;
+    height: 140px;
+}
+.large-paragraph:first-child {
+    height: 130px;
+}
+.small-paragraph {
+    width: 100%;
+    height: 100px;
+}
+.inscription {
+    display: block;
+    width: 100%;
+    text-align: right;
+}
+.inscription .input {
+    border-bottom: 1px solid;
+    width: 200px;
+    display: inline-block;
+    text-align: center;
+}
+.inscription .seal {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    position: relative;
+    right: 100px;
+}
+
+.inscription .date {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    position: relative;
+    right: 40px;
+}
+.btn-print {
+    width: 60px;
+    height: 28px;
+    text-align:center;
+    border-radius: 3px;
+    text-decoration: none;
+    background-color: #D9BC17;
+    color: #000;
+    padding-top: 6px;
+    display: inline-block;
+}
+.btn-print:hover {
+    background-color: #FFCC33;
+}
+@media print {
+    @page {
+        margin: 0;
+    }
+}

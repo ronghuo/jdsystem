@@ -1,0 +1,12 @@
+.btn-size {
+    width: 100px;
+}
+.btn.mini {
+    padding: 0 5px !important;
+}
+.dropdown-menu {
+    min-width: 120px;
+}
+.dropdown-menu li > a {
+    padding: 5px 10px;
+}

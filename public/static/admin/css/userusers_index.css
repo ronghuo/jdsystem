@@ -1,0 +1,40 @@
+.btn-size {
+    width: 100px;
+}
+.btn.mini {
+    padding: 0 5px !important;
+}
+.table tr th:nth-child(1) {
+    width: 100px;
+}
+.table tr th:nth-child(2) {
+    width: 80px;
+}
+.table tr th:nth-child(3) {
+    width: 150px;
+}
+.table tr th:nth-child(4) {
+    width: 80px;
+}
+.table tr th:nth-child(5) {
+    width: 80px;
+}
+.table tr th:nth-child(6) {
+    width: 80px;
+}
+.table tr th:nth-child(7) {
+    width: 150px;
+}
+.table tr th:last-child {
+    width: 100px;
+}
+.dropdown-menu {
+    min-width: 120px;
+}
+.dropdown-menu li > a {
+    padding: 5px 10px;
+}
+.badge {
+    width: 80px;
+    text-align: center;
+}

@@ -1,0 +1,9 @@
+section {
+    border: 1px dashed #cccccc;
+    border-radius: 3px;
+    padding-left: 3px;
+    margin-bottom: 5px;
+}
+.answer {
+    width: 460px;
+}
