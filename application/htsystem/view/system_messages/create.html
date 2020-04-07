@@ -1,0 +1,50 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span3"><h3 class="page-header">新消息</h3></div>
+                    <div class="span9">
+                        <a href="javascript:history.back();" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form class="form-horizontal left-align" method="post" action="{:url('SystemMessages/create')}" enctype="multipart/form-data">
+            {notempty name="info"}
+            <input type="hidden" name="ID" value="{$info.ID}"/>
+            {/notempty}
+            <input type="hidden" name="ref" value=""/>
+
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 消息标题</label>
+                <div class="controls">
+                    <input type="text" name="TITLE" value="{if $info}{$info.TITLE}{/if}" class="input span6" placeholder=""/>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 接收端</label>
+                <div class="controls">
+                    <select name="CLIENT_TAG">
+                        {foreach name="client_tags" item="tag" key="kk"}
+                        <option value="{$kk}"{if $info&&$info.CLIENT_TAG==$kk} selected{/if}>{$tag}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 消息内容</label>
+                <div class="controls">
+                    <textarea name="CONTENT" class="span6" rows="10">{if $info}{$info.CONTENT}{/if}</textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="subbtn">立即发送</button>
+                <a href="javascript:history.back();" class="btn"><i class="icon-reply"></i> 取消</a>
+            </div>
+        </form>
+
+    </div>
+</div><!-- 主体 end-->

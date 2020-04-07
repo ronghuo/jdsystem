@@ -1,0 +1,681 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span4"><h3 class="page-header">添加/编辑康复人员</h3></div>
+                    <div class="span8">
+                        <a href="{:url('UserUsers/index')}" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form class="form-horizontal left-align" method="post" action="{if $info}{:url('UserUsers/edit')}{else/}{:url('UserUsers/create')}{/if}" enctype="multipart/form-data">
+            {notempty name="info"}
+            <input type="hidden" name="ID" value="{$info.ID}"/>
+            {/notempty}
+            <input type="hidden" name="ref" value=""/>
+
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 姓名</label>
+                <div class="controls">
+                    <input type="text" name="NAME" id="name" value="{if $info}{$info.NAME}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 证件类型</label>
+                <div class="controls">
+                    <select name="ID_NUMBER_TYPE" id="idnumbertype">
+                        <option value="">请选择</option>
+                        {foreach name="card_types" item="card"}
+                        <option value="{$card.ID}"{if $info&&$info.ID_NUMBER_TYPE==$card.ID} selected{/if}>{$card.NAME}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 证件号码</label>
+                <div class="controls">
+                    <input type="text" name="ID_NUMBER" id="idnumber" value="{if $info}{$info.ID_NUMBER}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 手机号码</label>
+                <div class="controls">
+                    <input type="text" name="MOBILE" id="mobile" value="{if $info}{$info.MOBILE}{/if}" class="input" maxlength="15" placeholder="可填入非手机号、手机号、文字说明"/>
+                </div>
+            </div>
+            {if !$info || !$info.PWSD}
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 登录密码</label>
+                <div class="controls">
+                    <input type="password" name="PWSD" id="pwsd" value="" class="input" placeholder=""/>
+                </div>
+            </div>
+            {/if}
+            <div class="control-group">
+                <label class="control-label"> 绰号别名</label>
+                <div class="controls">
+                    <input type="text" name="ALIAS_NAME" id="alias_name" value="{if $info}{$info.ALIAS_NAME}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 性别</label>
+                <div class="controls">
+
+                    <select name="GENDER" id="gender">
+                        <option value="">请选择</option>
+                        {foreach name="genders" item="gender"}
+                        <option value="{$gender.ID}"{if $info&&$info.GENDER==$gender.ID} selected{/if}>{$gender.NAME}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+            <!--<div class="control-group">-->
+                <!--<label class="control-label"><span class="error">*</span> 人员类型 </label>-->
+                <!--<div class="controls">-->
+                    <!--<select name="UTYPE_ID" id="utype">-->
+                        <!--<option value="">请选择</option>-->
+                        <!--{foreach name="utypes" item="utype" key="uk"}-->
+                        <!--<option value="{$uk}"{if $info&&$info.UTYPE_ID==$uk} selected{/if}>{$utype}</option>-->
+                        <!--{/foreach}-->
+                    <!--</select>-->
+                    <!--<select name="UTYPE_ID_218" id="utype_id_218" style="display: none;">-->
+                        <!--<option value="">请选择</option>-->
+                        <!--{foreach name="utype218" item="utyp" key="uk2"}-->
+                        <!--<option value="{$uk2}"{if $info&&$info.UTYPE_ID_218==$uk2} selected{/if}>{$utyp}</option>-->
+                        <!--{/foreach}-->
+                    <!--</select>-->
+                <!--</div>-->
+            <!--</div>-->
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 人员状态 </label>
+                <div class="controls">
+                    <select name="USER_STATUS_ID" id="ustatus">
+                        <option value="">请选择</option>
+                        {foreach name="user_status" item="ustatus"}
+                        <option value="{$ustatus.ID}"{if $info&&$info.USER_STATUS_ID==$ustatus.ID} selected{/if}>{$ustatus.NAME}</option>
+                        {/foreach}
+                    </select>
+                    <input id="userStatusName" type="hidden" name="USER_STATUS_NAME" value="{if $info}{$info.USER_STATUS_NAME}{/if}" />
+
+                    <select name="UTYPE_ID_218" id="utype_id_218" style="display: none;">
+                        <option value="">请选择</option>
+                        {foreach name="utype218" item="utyp" key="uk2"}
+                        <option value="{$uk2}"{if $info&&$info.UTYPE_ID_218==$uk2} selected{/if}>{$utyp}</option>
+                        {/foreach}
+                    </select>
+
+                    {if $info}
+                        <a id="statusChangesViewer" href="javascript:void(0);" data-url="{:url('UserUsers/statusChanges',['id'=>$info.ID])}" style="margin-left: 6px;">历史记录</a>
+                    {/if}
+                </div>
+            </div>
+            <div class="control-group status-relation">
+                <label class="control-label"><span class="error">*</span> 起止时间 </label>
+                <div class="controls">
+                    <input type="date" name="JD_START_TIME" id="jd_start_time" value="{if $info}{$info.JD_START_TIME}{/if}"/> -
+                    <input type="date" name="JD_END_TIME" id="jd_end_time" value="{if $info}{$info.JD_END_TIME}{/if}"/>
+                </div>
+            </div>
+            <div class="control-group status-relation">
+                <label class="control-label"><span class="error">*</span> 起止时间 </label>
+                <div class="controls">
+                    <input type="date" name="qzjdBeginTime" value="{if $info && isset($info.qzjdBeginTime)}{$info.qzjdBeginTime}{/if}"/> -
+                    <input type="date" name="qzjdEndTime" value="{if $info && isset($info.qzjdEndTime)}{$info.qzjdEndTime}{/if}"/>
+                </div>
+            </div>
+            <div class="control-group status-relation">
+                <label class="control-label"><span class="error">*</span> 起止时间 </label>
+                <div class="controls">
+                    <input type="date" name="serveBeginTime" value="{if $info && isset($info.serveBeginTime)}{$info.serveBeginTime}{/if}"/> -
+                    <input type="date" name="serveEndTime" value="{if $info && isset($info.serveEndTime)}{$info.serveEndTime}{/if}"/>
+                </div>
+            </div>
+            <div class="control-group status-relation">
+                <label class="control-label"><span class="error">*</span> 起止时间 </label>
+                <div class="controls">
+                    <input type="date" name="detainBeginTime" value="{if $info && isset($info.detainBeginTime)}{$info.detainBeginTime}{/if}"/> -
+                    <input type="date" name="detainEndTime" value="{if $info && isset($info.detainEndTime)}{$info.detainEndTime}{/if}"/>
+                </div>
+            </div>
+            <div class="control-group status-relation">
+                <label class="control-label"><span class="error">*</span> 移交时间 </label>
+                <div class="controls">
+                    <input type="date" name="transferTime" value="{if $info && isset($info.transferTime)}{$info.transferTime}{/if}"/>
+                </div>
+            </div>
+            <div class="control-group status-relation">
+                <label class="control-label"><span class="error">*</span> 开始时间 </label>
+                <div class="controls">
+                    <input type="date" name="zyjdBeginTime" value="{if $info && isset($info.zyjdBeginTime)}{$info.zyjdBeginTime}{/if}"/>
+                </div>
+            </div>
+            <div class="control-group status-relation">
+                <label class="control-label"><span class="error">*</span> 出国时间 </label>
+                <div class="controls">
+                    <input type="date" name="abroadTime" value="{if $info && isset($info.abroadTime)}{$info.abroadTime}{/if}"/>
+                </div>
+            </div>
+            <div class="control-group status-relation">
+                <label class="control-label"><span class="error">*</span> 死亡时间 </label>
+                <div class="controls">
+                    <input type="date" name="deathTime" value="{if $info && isset($info.deathTime)}{$info.deathTime}{/if}"/>
+                </div>
+            </div>
+            <div class="control-group status-relation">
+                <label class="control-label"><span class="error">*</span> 执行地点 </label>
+                <div class="controls">
+                    <input type="text" name="executePlace" value="{if $info && isset($info.executePlace)}{$info.executePlace}{/if}" style="width: 438px;" />
+                </div>
+            </div>
+            <div class="control-group status-relation">
+                <label class="control-label"><span class="error">*</span> 服刑地点 </label>
+                <div class="controls">
+                    <input type="text" name="servePlace" value="{if $info && isset($info.servePlace)}{$info.servePlace}{/if}" style="width: 438px;" />
+                </div>
+            </div>
+            <div class="control-group status-relation">
+                <label class="control-label"><span class="error">*</span> 拘留地点 </label>
+                <div class="controls">
+                    <input type="text" name="detainPlace" value="{if $info && isset($info.detainPlace)}{$info.detainPlace}{/if}" style="width: 438px;" />
+                </div>
+            </div>
+            <div class="control-group status-relation">
+                <label class="control-label"><span class="error">*</span> 国家名称 </label>
+                <div class="controls">
+                    <input type="text" name="country" value="{if $info && isset($info.country)}{$info.country}{/if}" />
+                </div>
+            </div>
+            <div class="control-group status-relation">
+                <div class="controls" style="margin-bottom: -20px;">
+                    <div class="mcdoc_upload_box status-file-view-box">
+                        <h6 style="margin-bottom: 10px;"><span class="error">*</span>告诫书</h6>
+                        <button type="button" class="btn btn-success wbdyyj-gjs-selector">选择图片</button>
+                        <input type="file" name="wbdyyjGJS" accept="image/*" class="wbdyyj-gjs-file hide-file-button"/>
+                        <input type="hidden" name="wbdyyjGJS_uri" value="{if $info && isset($info.wbdyyjGJS)}{$info.wbdyyjGJS}{/if}" />
+                        <div class="mt10 ml10 muted">仅允许jpg和png格式，1.5M内</div>
+                        <div class=" text-error update"></div>
+                        {if $info}
+                            <img src="{if $info && isset($info.wbdyyjGJS_url)}{$info.wbdyyjGJS_url}{else/}/static/images/empty.png{/if}"/>
+                        {/if}
+                    </div>
+                    <div class="mcdoc_upload_box status-file-view-box">
+                        <h6 style="margin-bottom: 10px;"><span class="error">*</span>逾期未报到证明</h6>
+                        <button type="button" class="btn btn-success wbdyyj-yqwbdzm-selector">选择图片</button>
+                        <input type="file" name="wbdyyjYQWBDZM" accept="image/*" class="wbdyyj-yqwbdzm-file hide-file-button"/>
+                        <input type="hidden" name="wbdyyjYQWBDZM_uri" value="{if $info && isset($info.wbdyyjYQWBDZM)}{$info.wbdyyjYQWBDZM}{/if}" />
+                        <div class="mt10 ml10 muted">仅允许jpg和png格式，1.5M内</div>
+                        <div class=" text-error update"></div>
+                        {if $info}
+                            <img src="{if $info && isset($info.wbdyyjYQWBDZM_url)}{$info.wbdyyjYQWBDZM_url}{else/}/static/images/empty.png{/if}"/>
+                        {/if}
+                    </div>
+                    <div class="mcdoc_upload_box status-file-view-box">
+                        <h6 style="margin-bottom: 10px;"><span class="error">*</span>移交回执</h6>
+                        <button type="button" class="btn btn-success wbdyyj-yjhz-selector">选择图片</button>
+                        <input type="file" name="wbdyyjYJHZ" accept="image/*" class="wbdyyj-yjhz-file hide-file-button"/>
+                        <input type="hidden" name="wbdyyjYJHZ_uri" value="{if $info && isset($info.wbdyyjYJHZ)}{$info.wbdyyjYJHZ}{/if}" />
+                        <div class="mt10 ml10 muted">仅允许jpg和png格式，1.5M内</div>
+                        <div class=" text-error update"></div>
+                        {if $info}
+                            <img src="{if $info && isset($info.wbdyyjYJHZ_url)}{$info.wbdyyjYJHZ_url}{else/}/static/images/empty.png{/if}"/>
+                        {/if}
+                    </div>
+                </div>
+            </div>
+            <div class="control-group status-relation">
+                <div class="controls" style="margin-bottom: -20px;">
+                    <div class="mcdoc_upload_box status-file-view-box">
+                        <h6 style="margin-bottom: 10px;"><span class="error">*</span>告诫书</h6>
+                        <button type="button" class="btn btn-success wfxyyyj-gjs-selector">选择图片</button>
+                        <input type="file" name="wfxyyyjGJS" accept="image/*" class="wfxyyyj-gjs-file hide-file-button" />
+                        <input type="hidden" name="wfxyyyjGJS_uri" value="{if $info && isset($info.wfxyyyjGJS)}{$info.wfxyyyjGJS}{/if}" />
+                        <div class="mt10 ml10 muted">仅允许jpg和png格式，1.5M内</div>
+                        <div class=" text-error update"></div>
+                        {if $info}
+                            <img src="{if $info && isset($info.wfxyyyjGJS_url)}{$info.wfxyyyjGJS_url}{else/}/static/images/empty.png{/if}" />
+                        {/if}
+                    </div>
+                    <div class="mcdoc_upload_box status-file-view-box">
+                        <h6 style="margin-bottom: 10px;"><span class="error">*</span>吸毒检测通知书</h6>
+                        <button type="button" class="btn btn-success wfxyyyj-xdjctzs-selector">选择图片</button>
+                        <input type="file" name="wfxyyyjXDJCTZS" accept="image/*" class="wfxyyyj-xdjctzs-file hide-file-button"/>
+                        <input type="hidden" name="wfxyyyjXDJCTZS_uri" value="{if $info && isset($info.wfxyyyjXDJCTZS)}{$info.wfxyyyjXDJCTZS}{/if}" />
+                        <div class="mt10 ml10 muted">仅允许jpg和png格式，1.5M内</div>
+                        <div class=" text-error update"></div>
+                        {if $info}
+                            <img src="{if $info && isset($info.wfxyyyjXDJCTZS_url)}{$info.wfxyyyjXDJCTZS_url}{else/}/static/images/empty.png{/if}"/>
+                        {/if}
+                    </div>
+                    <div class="mcdoc_upload_box status-file-view-box">
+                        <h6 style="margin-bottom: 10px;"><span class="error">*</span>严重违反协议证明</h6>
+                        <button type="button" class="btn btn-success wfxyyyj-yzwfxyzm-selector">选择图片</button>
+                        <input type="file" name="wfxyyyjYZWFXYZM" accept="image/*" class="wfxyyyj-yzwfxyzm-file hide-file-button"/>
+                        <input type="hidden" name="wfxyyyjYZWFXYZM_uri" value="{if $info && isset($info.wfxyyyjYZWFXYZM)}{$info.wfxyyyjYZWFXYZM}{/if}" />
+                        <div class="mt10 ml10 muted">仅允许jpg和png格式，1.5M内</div>
+                        <div class=" text-error update"></div>
+                        {if $info}
+                            <img src="{if $info && isset($info.wfxyyyjYZWFXYZM_url)}{$info.wfxyyyjYZWFXYZM_url}{else/}/static/images/empty.png{/if}"/>
+                        {/if}
+                    </div>
+                    <div class="mcdoc_upload_box status-file-view-box">
+                        <h6 style="margin-bottom: 10px;"><span class="error">*</span>移交回执</h6>
+                        <button type="button" class="btn btn-success wfxyyyj-yjhz-selector">选择图片</button>
+                        <input type="file" name="wfxyyyjYJHZ" accept="image/*" class="wfxyyyj-yjhz-file hide-file-button"/>
+                        <input type="hidden" name="wfxyyyjYJHZ_uri" value="{if $info && isset($info.wfxyyyjYJHZ)}{$info.wfxyyyjYJHZ}{/if}" />
+                        <div class="mt10 ml10 muted">仅允许jpg和png格式，1.5M内</div>
+                        <div class=" text-error update"></div>
+                        {if $info}
+                            <img src="{if $info && isset($info.wfxyyyjYJHZ_url)}{$info.wfxyyyjYJHZ_url}{else/}/static/images/empty.png{/if}"/>
+                        {/if}
+                    </div>
+                </div>
+            </div>
+            <!------------------------------------------二级状态分割线---------------------------------------------->
+            <div class="control-group status-relation">
+                <label class="control-label"> 二级状态 </label>
+                <div class="controls">
+                    <select id="userSubStatusSelector" name="USER_SUB_STATUS_ID">
+                        <option value="">请选择</option>
+                        {foreach name="user_sub_status" item="subStatus"}
+                            <option value="{$subStatus.ID}" {if $info && $info.USER_SUB_STATUS_ID == $subStatus.ID}selected{/if}>{$subStatus.NAME}</option>
+                        {/foreach}
+                    </select>
+                    <input id="userSubStatusName" type="hidden" name="USER_SUB_STATUS_NAME" value="{if $info}{$info.USER_SUB_STATUS_NAME}{/if}" />
+                </div>
+            </div>
+            <div class="control-group sub-status-relation">
+                <label class="control-label"><span class="error">*</span> 起止时间 </label>
+                <div class="controls">
+                    <input type="date" name="leaveBeginTime" value="{if $info && isset($info.leaveBeginTime)}{$info.leaveBeginTime}{/if}"/> -
+                    <input type="date" name="leaveEndTime" value="{if $info && isset($info.leaveEndTime)}{$info.leaveEndTime}{/if}"/>
+                </div>
+            </div>
+            <div class="control-group sub-status-relation">
+                <label class="control-label"><span class="error">*</span> 起止时间 </label>
+                <div class="controls">
+                    <input type="date" name="suspendBeginTime" value="{if $info && isset($info.suspendBeginTime)}{$info.suspendBeginTime}{/if}"/> -
+                    <input type="date" name="suspendEndTime" value="{if $info && isset($info.suspendEndTime)}{$info.suspendEndTime}{/if}"/>
+                </div>
+            </div>
+            <div class="control-group sub-status-relation">
+                <label class="control-label"><span class="error">*</span> 开始时间 </label>
+                <div class="controls">
+                    <input type="date" name="sxgkBeginTime" value="{if $info && isset($info.sxgkBeginTime)}{$info.sxgkBeginTime}{/if}"/>
+                </div>
+            </div>
+            <div class="control-group sub-status-relation">
+                <label class="control-label"><span class="error">*</span> 终止时间 </label>
+                <div class="controls">
+                    <input type="date" name="terminateTime" value="{if $info && isset($info.terminateTime)}{$info.terminateTime}{/if}"/>
+                </div>
+            </div>
+            <div class="control-group sub-status-relation">
+                <label class="control-label"><span class="error">*</span> 解除时间 </label>
+                <div class="controls">
+                    <input type="date" name="relieveTime" value="{if $info && isset($info.relieveTime)}{$info.relieveTime}{/if}"/>
+                </div>
+            </div>
+            <div class="control-group sub-status-relation">
+                <div class="controls" style="margin-bottom: -20px;">
+                    <div class="mcdoc_upload_box status-file-view-box">
+                        <h6 style="margin-bottom: 10px;"><span class="error">*</span>中止程序说明</h6>
+                        <button type="button" class="btn btn-success suspend-cxsm-selector">选择图片</button>
+                        <input type="file" name="suspendZZCXSM" accept="image/*" class="suspend-cxsm-file hide-file-button"/>
+                        <input type="hidden" name="suspendZZCXSM_uri" value="{if $info && isset($info.suspendZZCXSM)}{$info.suspendZZCXSM}{/if}" />
+                        <div class="mt10 ml10 muted">仅允许jpg和png格式，1.5M内</div>
+                        <div class=" text-error update"></div>
+                        {if $info}
+                            <img src="{if $info && isset($info.suspendZZCXSM_url)}{$info.suspendZZCXSM_url}{else/}/static/images/empty.png{/if}" />
+                        {/if}
+                    </div>
+                </div>
+            </div>
+            <div class="control-group sub-status-relation">
+                <div class="controls" style="margin-bottom: -20px;">
+                    <div class="mcdoc_upload_box status-file-view-box">
+                        <h6 style="margin-bottom: 10px;"><span class="error">*</span>终止程序说明</h6>
+                        <button type="button" class="btn btn-success terminate-cxsm-selector">选择图片</button>
+                        <input type="file" name="terminateZZCXSM" accept="image/*" class="terminate-cxsm-file hide-file-button"/>
+                        <input type="hidden" name="terminateZZCXSM_uri" value="{if $info && isset($info.terminateZZCXSM)}{$info.terminateZZCXSM}{/if}" />
+                        <div class="mt10 ml10 muted">仅允许jpg和png格式，1.5M内</div>
+                        <div class=" text-error update"></div>
+                        {if $info}
+                            <img src="{if $info && isset($info.terminateZZCXSM_url)}{$info.terminateZZCXSM_url}{else/}/static/images/empty.png{/if}" />
+                        {/if}
+                    </div>
+                </div>
+            </div>
+            <div class="control-group sub-status-relation">
+                <div class="controls" style="margin-bottom: -20px;">
+                    <div class="mcdoc_upload_box status-file-view-box">
+                        <h6 style="margin-bottom: 10px;"><span class="error">*</span>双向管控函</h6>
+                        <button type="button" class="btn btn-success sxgkh-selector">选择图片</button>
+                        <input type="file" name="SXGKH" accept="image/*" class="sxgkh-file hide-file-button"/>
+                        <input type="hidden" name="SXGKH_uri" value="{if $info && isset($info.SXGKH)}{$info.SXGKH}{/if}" />
+                        <div class="mt10 ml10 muted">仅允许jpg和png格式，1.5M内</div>
+                        <div class=" text-error update"></div>
+                        {if $info}
+                            <img src="{if $info && isset($info.SXGKH_url)}{$info.SXGKH_url}{else/}/static/images/empty.png{/if}"/>
+                        {/if}
+                    </div>
+                </div>
+            </div>
+            <div class="control-group sub-status-relation">
+                <div class="controls" style="margin-bottom: -20px;">
+                    <div class="mcdoc_upload_box status-file-view-box">
+                        <h6 style="margin-bottom: 10px;"><span class="error">*</span>解除书</h6>
+                        <button type="button" class="btn btn-success jcs-selector">选择图片</button>
+                        <input type="file" name="JCS" accept="image/*" class="jcs-file hide-file-button"/>
+                        <input type="hidden" name="JCS_uri" value="{if $info && isset($info.JCS)}{$info.JCS}{/if}" />
+                        <div class="mt10 ml10 muted">仅允许jpg和png格式，1.5M内</div>
+                        <div class=" text-error update"></div>
+                        {if $info}
+                            <img src="{if $info && isset($info.JCS_url)}{$info.JCS_url}{else/}/static/images/empty.png{/if}"/>
+                        {/if}
+                    </div>
+                </div>
+            </div>
+            <div class="control-group sub-status-relation">
+                <label class="control-label"><span class="error">*</span> 中止原因 </label>
+                <div class="controls">
+                    <textarea rows="5" name="suspendReason" style="width: 438px;">{if $info && isset($info.suspendReason)}{$info.suspendReason}{/if}</textarea>
+                </div>
+            </div>
+            <div class="control-group sub-status-relation">
+                <label class="control-label"><span class="error">*</span> 终止原因 </label>
+                <div class="controls">
+                    <textarea rows="5" name="terminateReason" style="width: 438px;">{if $info && isset($info.terminateReason)}{$info.terminateReason}{/if}</textarea>
+                </div>
+            </div>
+            <div class="control-group sub-status-relation">
+                <label class="control-label"><span class="error">*</span> 双向管控原因 </label>
+                <div class="controls">
+                    <textarea rows="5" name="sxgkReason" style="width: 438px;">{if $info && isset($info.sxgkReason)}{$info.sxgkReason}{/if}</textarea>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"> 风险等级 </label>
+                <div class="controls">
+                    <select name="DANGER_LEVEL_ID" id="danger">
+                        <option value="">请选择</option>
+                        {foreach name="danger_level" item="danger"}
+                        <option value="{$danger.ID}"{if $info&&$info.DANGER_LEVEL_ID==$danger.ID} selected{/if}>{$danger.NAME}</option>
+                        {/foreach}
+                    </select>
+                    {if $info}
+                    <a href="{:url('UserEstimates/index',['id'=>$info.ID])}" target="_blank">《风险评估》</a>
+                    {/if}
+                </div>
+
+            </div>
+
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 国籍 </label>
+                <div class="controls">
+
+                    <select name="NATIONALITY_ID" id="nationality">
+                        <option value="">请选择</option>
+                        {foreach name="nationality" item="nationa"}
+                        <option value="{$nationa.ID}"{if $info&&$info.NATIONALITY_ID==$nationa.ID} selected{/if}>{$nationa.NAME}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 民族 </label>
+                <div class="controls">
+                    <select name="NATION_ID" id="nation">
+                        <option value="">请选择</option>
+                        {foreach name="nations" item="nation"}
+                        <option value="{$nation.ID}"{if $info&&$info.NATION_ID==$nation.ID} selected{/if}>{$nation.NAME}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"> 身高（厘米） </label>
+                <div class="controls">
+                    <input type="number" id="height" name="HEIGHT" value="{if $info}{$info.HEIGHT}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label"> 文化程度 </label>
+                <div class="controls">
+                    <select name="EDUCATION_ID" id="education">
+                        <option value="">请选择</option>
+                        {foreach name="edus" item="edu"}
+
+                        <option value="{$edu.ID}"{if $info&&$info.EDUCATION_ID==$edu.ID} selected{/if}>{$edu.NAME}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"> 就业状况 </label>
+                <div class="controls">
+                    <select name="JOB_STATUS_ID" id="job_status">
+                        <option value="">请选择</option>
+                        {foreach name="job_status" item="job"}
+
+                        <option value="{$job.ID}"{if $info&&$info.JOB_STATUS_ID==$job.ID} selected{/if}>{$job.NAME}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">工作单位 </label>
+                <div class="controls">
+                    <input type="text" name="JOB_UNIT" value="{if $info}{$info.JOB_UNIT}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label"> 婚姻状况 </label>
+                <div class="controls">
+                    <select name="MARITAL_STATUS_ID" id="martial_status">
+                        <option value="">请选择</option>
+                        {foreach name="marital_status" item="marry"}
+
+                        <option value="{$marry.ID}"{if $info&&$info.MARITAL_STATUS_ID==$marry.ID} selected{/if}>{$marry.NAME}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 户籍地 </label>
+                <div class="controls" id="areas1">
+                    <select name="domicileplace[]" class="lv1" data-value="{if $info}{$info.DOMICILE_IDS[0]}{else/}{$sessionSelects['jd_domicileplace'][0]}{/if}"></select>
+                    <select name="domicileplace[]" class="lv2" data-value="{if $info}{$info.DOMICILE_IDS[1]}{else/}{$sessionSelects['jd_domicileplace'][1]}{/if}"></select>
+                    <select name="domicileplace[]" class="lv3" data-value="{if $info}{$info.DOMICILE_IDS[2]}{else/}{$sessionSelects['jd_domicileplace'][2]}{/if}"></select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 户籍地详细地址 </label>
+                <div class="controls">
+                    <input type="text" name="DOMICILE_ADDRESS" id="domicile_address" value="{if $info}{$info.DOMICILE_ADDRESS}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 户籍地派出所名称 </label>
+                <div class="controls">
+                    <input type="text" name="DOMICILE_POLICE_STATION" id="domicile_police_name" value="{if $info}{$info.DOMICILE_POLICE_STATION}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"> 户籍地派出所代码 </label>
+                <div class="controls">
+                    <input type="text" name="DOMICILE_POLICE_STATION_CODE" id="domicile_police_code" value="{if $info}{$info.DOMICILE_POLICE_STATION_CODE}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 居住地 </label>
+                <div class="controls" id="areas2">
+                    <select name="liveplace[]" class="lv1" data-value="{if $info}{$info.LIVE_IDS[0]}{else/}{$sessionSelects['jd_liveplace'][0]}{/if}"></select>
+                    <select name="liveplace[]" class="lv2" data-value="{if $info}{$info.LIVE_IDS[1]}{else/}{$sessionSelects['jd_liveplace'][1]}{/if}"></select>
+                    <select name="liveplace[]" class="lv3" data-value="{if $info}{$info.LIVE_IDS[2]}{else/}{$sessionSelects['jd_liveplace'][2]}{/if}"></select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 居住地详细地址 </label>
+                <div class="controls">
+                    <input type="text" name="LIVE_ADDRESS" id="live_address" value="{if $info}{$info.LIVE_ADDRESS}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 居住地派出所名称 </label>
+                <div class="controls">
+                    <input type="text" name="LIVE_POLICE_STATION" id="live_police_name" value="{if $info}{$info.LIVE_POLICE_STATION}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"> 居住地派出所代码 </label>
+                <div class="controls">
+                    <input type="text" name="LIVE_POLICE_STATION_CODE" id="live_police_code" value="{if $info}{$info.LIVE_POLICE_STATION_CODE}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label"> 吸毒方式 </label>
+                <div class="controls">
+                    <select name="DRUG_TYPE_ID" id="drug_type">
+                        <option value="">请选择</option>
+                        {foreach name="drug_types" item="drug"}
+
+                        <option value="{$drug.ID}"{if $info&&$info.DRUG_TYPE_ID==$drug.ID} selected{/if}>{$drug.NAME}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"> 毒品种类 </label>
+                <div class="controls">
+                    <select name="NARCOTICS_TYPE_ID" id="narcotics_type">
+                        <option value="">请选择</option>
+                        {foreach name="narcotics_types" item="narc"}
+
+                        <option value="{$narc.ID}"{if $info&&$info.NARCOTICS_TYPE_ID==$narc.ID} selected{/if}>{$narc.NAME}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+
+            {php}/* <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 尿检频率 </label>
+                <div class="controls">
+                    <select name="URAN_RATE">
+                        {foreach name="uran_rates" item="nar" key="uk"}
+
+                        <option value="{$uk}"{if $info&&$info.URAN_RATE==$uk} selected{/if}>{$nar}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div> */ {/php}
+
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 所在社区 </label>
+                <div class="controls" id="areas3">
+                    <select name="levelarea[]" class="lv1" data-value="{if $info}{$info.COUNTY_ID_12}{else/}{$sessionSelects['jd_levelarea'][0]}{/if}"></select>
+                    <select name="levelarea[]" class="lv2" data-value="{if $info}{$info.STREET_ID}{else/}{$sessionSelects['jd_levelarea'][1]}{/if}"></select>
+                    <select name="levelarea[]" class="lv3" data-value="{if $info}{$info.COMMUNITY_ID}{else/}{$sessionSelects['jd_levelarea'][2]}{/if}"></select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 所属禁毒办</label>
+                <div class="controls" id="areas4">
+                    <select name="dmmc[]" class="lv1" data-value="{if $info}{$info.DMMC_IDS[0]}{else/}{$sessionSelects['jd_dmmids'][0]}{/if}"></select>
+                    <select name="dmmc[]" class="lv2" data-value="{if $info}{$info.DMMC_IDS[1]}{else/}{$sessionSelects['jd_dmmids'][1]}{/if}"></select>
+                    <select name="dmmc[]" class="lv3" data-value="{if $info}{$info.DMMC_IDS[2]}{else/}{php}$sessionSelects['jd_dmmids'][2] ?? 0{/php}{/if}"></select>
+                    <select name="dmmc[]" class="lv4" data-value="{if $info}{$info.DMMC_IDS[3]}{else/}{php}$sessionSelects['jd_dmmids'][3] ?? 0{/php}{/if}"></select>
+                </div>
+            </div>
+
+           <!-- <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 管辖警务区代码 </label>
+                <div class="controls">
+                    <input type="text" name="LOG" value="" class="input" placeholder=""/>
+                </div>
+            </div>-->
+
+            <div class="control-group">
+                <label class="control-label"> 责任民警警号</label>
+                <div class="controls">
+                    <input type="text" name="POLICE_LIABLE_CODE" id="police_code" value="{if $info}{$info.POLICE_LIABLE_CODE}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"> 责任民警姓名 </label>
+                <div class="controls">
+                    <input type="text" name="POLICE_LIABLE_NAME" id="police_name" value="{if $info}{$info.POLICE_LIABLE_NAME}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"> 责任民警联系电话</label>
+                <div class="controls">
+                    <input type="text" name="POLICE_LIABLE_MOBILE" id="police_mobile" value="{if $info}{$info.POLICE_LIABLE_MOBILE}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 负责专干姓名 </label>
+                <div class="controls">
+                    <input type="text" name="JD_ZHUANGAN" id="jd_zhuangan" value="{if $info}{$info.JD_ZHUANGAN}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 负责专干联系电话</label>
+                <div class="controls">
+                    <input type="text" name="JD_ZHUANGAN_MOBILE" id="jd_zhuangan_mobile" value="{if $info}{$info.JD_ZHUANGAN_MOBILE}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+
+
+            <div class="control-group">
+                <label class="control-label"> 头像</label>
+                <div class="controls">
+
+                    <div class="mcdoc_upload_box" style="width: 300px;">
+                        <button type="button" class="btn btn-success jdselectimg">选择图片</button>
+                        <input type="file" name="images" accept="image/*" class="jdfileinput"/>
+                        <div class="mt10 ml10 muted">仅允许jpg和png格式，1.5M内，大小 600x600（px）</div>
+                        <div class=" text-error update"></div>
+                        <p>&nbsp;</p>
+                        {if $info}
+                        <div class="qiniu_doc_line">
+
+                            <p><img src="{if $info}{$info.HEAD_IMG_URL}{else/}/data/image/default.png{/if}" style="height: 120px;"/> </p>
+                            <!--<input type="hidden" name="HEAD_IMG" class="p_doc" value="{$info.HEAD_IMG}"/>-->
+
+                            <!--<p><a href="javascript:;" class="text-error del_localfile"><i class="icon-trash"></i> 删除</a></p>-->
+                        </div>
+                        {/if}
+                    </div>
+
+                </div>
+            </div>
+
+
+            <div class="control-group">
+                <label class="control-label"> 备注</label>
+                <div class="controls"><textarea class="span8 ml0" id="remarks" name="JD_REMARKS" rows="20" style="height: 400px;" placeholder="">{if $info}{$info.JD_REMARKS}{/if}</textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="subbtn">保存资料</button>
+                <a href="javascript:history.back();" class="btn"><i class="icon-reply"></i> 取消</a>
+            </div>
+        </form>
+
+    </div>
+</div><!-- 主体 end-->
+<script type="text/javascript">
+    var ed_url = "{:url('Ueditor/index')}";
+    STATUS = "{if $info}{$info.USER_STATUS_NAME}{/if}";
+    SUB_STATUS = "{if $info}{$info.USER_SUB_STATUS_NAME}{/if}";
+</script>

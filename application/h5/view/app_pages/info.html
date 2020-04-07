@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no,  viewport-fit=cover"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>{if $info}{$info.TITLE}{/if}</title>
+    <style type="text/css">
+        .page-div{color: #444;padding: 0 1rem;}
+        .page-title{text-align: center;font-size: 1.1rem;}
+        .page-time{text-align: center;color: #666;font-size: .8rem;}
+        .page-line{height: 1px;background: #eee;margin: 1rem 0;}
+        .page-content{line-height: 22px;font-size: .9rem;}
+        .page-img{width: 100%;}
+        .empty{padding: 5rem;text-align: center;color: #999;}
+    </style>
+</head>
+<body>
+<div class="page-div">
+    {if $info}
+    <h3 class="page-title">{if $info}{$info.TITLE}{/if}</h3>
+    <div class="page-time">{if $info}{$info.ADD_TIME}{/if}</div>
+    <div class="page-line"></div>
+    <div class="page-content">
+        <div>
+            {if $info}{$info.CONTENT|raw}{/if}
+            </div>
+        <div>
+            {if $images}
+            {foreach name="images" item="img"}
+            <img src="{$img.IMG_URL}" class="page-img"/>
+            {/foreach}
+            {/if}
+        </div>
+    </div>
+
+    {else}
+
+    <div class="empty">该内容不存在</div>
+    {/if}
+</div>
+</body>
+</html>

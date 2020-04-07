@@ -1,0 +1,71 @@
+{__NOLAYOUT__}
+{include file="common/layerheader"/}
+<div class="container">
+
+    <div class="row-fluid">
+        <fieldset class="default padd10">
+            <legend>轮播</legend>
+            <form class="form-horizontal mt10" action="{:url('Carousel/create')}" method="post" id="postform" enctype="multipart/form-data">
+                {notempty name="info"}
+                <input type="hidden" name="ID" value="{$info.ID}"/>
+                {/notempty}
+
+                {if $sinfo}
+                <input type="hidden" name="STABLE" value="{$stable}"/>
+                <input type="hidden" name="SID" value="{$sid}"/>
+                {/if}
+                <div class="mb10">
+                    <span class="b">展示端：</span>
+                    <select name="CLIENT_TAG">
+                        {foreach name="client_tags" item="tag" key="kk"}
+                        <option value="{$kk}"{if $info&&$info.CLIENT_TAG==$kk} selected{/if}>{$tag}</option>
+                        {/foreach}
+                    </select>
+                </div>
+                <div class="mb10">
+                    <span class="b">跳转链接：</span>
+                    {if $sinfo}
+                        <a href="{$sinfo.admin_info_url}" target="_blank">{$sinfo.TITLE}</a>
+                    {else}
+                        <input type="text" name="JUMP_LINK" class="span6" value="{if $info}{$info.JUMP_LINK}{/if}"/>
+                    {/if}
+                </div>
+                {if $sinfo}
+                <div class="mb10">
+                    <span class="b">轮播图片：</span>
+                    <div class="qiniu_doc_line">
+                        <p><img src="{$sinfo.IMG_URL}" style="height: 120px;"/> </p>
+                    </div>
+                </div>
+
+                {else}
+                <div class="mb10">
+                    <span class="b">轮播图片：</span>
+                    <div class="mcdoc_upload_box" style="width: 300px;">
+                        <button type="button" class="btn btn-success jdselectimg">选择图片</button>
+                        <input type="file" name="images" accept="image/*" class="jdfileinput"/>
+                        <div class="mt10 ml10 muted">仅允许jpg和png格式，1.5M内，大小 600x600（px）</div>
+                        <div class=" text-error update"></div>
+
+                        <p>&nbsp;</p>
+                        {if $info}
+                        <div class="qiniu_doc_line">
+                            <p><img src="{if $info}{$info.IMG_URL}{else/}/data/image/default.png{/if}" style="height: 120px;"/> </p>
+                            <!--<p><a href="javascript:;" class="text-error del_localfile"><i class="icon-trash"></i> 删除</a></p>-->
+                        </div>
+                        {/if}
+                    </div>
+                </div>
+                {/if}
+
+
+                <div id="page-mesg"></div>
+                <div class="form-actions">
+                    <input type="submit" class="btn btn-primary" value="保存设置" id="savedata"/>
+                    <a href="javascript:;" class="btn" onclick="closePlayer();">取消</a>
+                </div>
+            </form>
+        </fieldset>
+    </div>
+</div>
+{include file="common/layerfooter"/}

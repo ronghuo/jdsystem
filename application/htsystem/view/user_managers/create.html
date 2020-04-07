@@ -1,0 +1,204 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span3"><h3 class="page-header">添加/编辑管理人员</h3></div>
+                    <div class="span9">
+                        <a href="javascript:history.back();" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form class="form-horizontal left-align" method="post" action="{$post_url}" enctype="multipart/form-data">
+            {notempty name="info"}
+            <input type="hidden" name="ID" value="{$info.ID}"/>
+            {/notempty}
+            <input type="hidden" name="ref" value=""/>
+
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 姓名</label>
+                <div class="controls">
+                    <input type="text" name="NAME" id="name" value="{if $info}{$info.NAME}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 证件类型</label>
+                <div class="controls">
+                    <select name="ID_NUMBER_TYPE" id="idnumbertype">
+                        <option value="">请选择</option>
+                        {foreach name="card_types" item="card"}
+                        <option value="{$card.ID}"{if $info&&$info.ID_NUMBER_TYPE==$card.ID} selected{/if}>{$card.NAME}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 证件号码</label>
+                <div class="controls">
+                    <input type="text" name="ID_NUMBER" id="idnumber" value="{if $info}{$info.ID_NUMBER}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 性别</label>
+                <div class="controls">
+                    <select name="GENDER" id="gender">
+                        <option value="">请选择</option>
+                        {foreach name="genders" item="gender"}
+                        <option value="{$gender.ID}"{if $info&&$info.GENDER==$gender.ID} selected{/if}>{$gender.NAME}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 手机号码</label>
+                <div class="controls">
+                    <input type="text" name="MOBILE" id="mobile" value="{if $info}{$info.MOBILE}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+            {if !$info || !$info.PWSD}
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 登录密码</label>
+                <div class="controls">
+                    <input type="password" name="PWSD" id="pwsd" value="" class="input" placeholder=""/>
+                </div>
+            </div>
+            {/if}
+            <div class="control-group">
+                <label class="control-label">QQ</label>
+                <div class="controls">
+                    <input type="text" name="QQ" id="qq" value="{if $info}{$info.QQ}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"> 微信</label>
+                <div class="controls">
+                    <input type="text" name="WECHAT" id="wechat" value="{if $info}{$info.WECHAT}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label">职业 </label>
+                <div class="controls">
+                    <input type="text" name="JOB" id="job" value="{if $info}{$info.JOB}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">特殊能力 </label>
+                <div class="controls">
+                    <input type="text" name="SPECIAL_ABILITY" id="special" value="{if $info}{$info.SPECIAL_ABILITY}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label">单位名称 </label>
+                <div class="controls">
+                    <input type="text" name="UNIT_NAME" value="{if $info}{$info.UNIT_NAME}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">单位地址 </label>
+                <div class="controls">
+                    <input type="text" name="UNIT_ADDRESS" value="{if $info}{$info.UNIT_ADDRESS}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 籍贯 </label>
+                <div class="controls" id="areas1">
+                    <select name="domicileplace[]" class="lv1" data-value="{if $info}{$info.DOMICILE_IDS[0]}{/if}"></select>
+                    <select name="domicileplace[]" class="lv2" data-value="{if $info}{$info.DOMICILE_IDS[1]}{/if}"></select>
+                    <select name="domicileplace[]" class="lv3" data-value="{if $info}{$info.DOMICILE_IDS[2]}{/if}"></select>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 现住址 </label>
+                <div class="controls" id="areas2">
+                    <select name="liveplace[]" class="lv1" data-value="{if $info}{$info.PROVINCE_ID}{/if}"></select>
+                    <select name="liveplace[]" class="lv2" data-value="{if $info}{$info.CITY_ID}{/if}"></select>
+                    <select name="liveplace[]" class="lv3" data-value="{if $info}{$info.COUNTY_ID}{/if}"></select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 现住址社区 </label>
+                <div class="controls" id="areas3">
+                    <select name="levelarea[]" class="lv1" data-value="{if $info}{$info.COUNTY_ID_12}{/if}"></select>
+                    <select name="levelarea[]" class="lv2" data-value="{if $info}{$info.STREET_ID}{/if}"></select>
+                    <select name="levelarea[]" class="lv3" data-value="{if $info}{$info.COMMUNITY_ID}{/if}"></select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 现住详细地址 </label>
+                <div class="controls">
+                    <input type="text" name="ADDRESS" id="address" value="{if $info}{$info.ADDRESS}{/if}" class="input span5" placeholder=""/>
+                </div>
+            </div>
+
+
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 所属禁毒办</label>
+                <div class="controls" id="areas4">
+                    <select name="dmmc[]" class="lv1" data-value="{if $info}{$info.DMMC_IDS[0]}{/if}"></select>
+                    <select name="dmmc[]" class="lv2" data-value="{if $info}{$info.DMMC_IDS[1]}{/if}"></select>
+                    <select name="dmmc[]" class="lv3" data-value="{if $info}{$info.DMMC_IDS[2]}{/if}"></select>
+                    <select name="dmmc[]" class="lv4" data-value="{if $info}{$info.DMMC_IDS[3]}{/if}"></select>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label"> 备注</label>
+                <div class="controls">
+                    <textarea class="span6" name="MARK">{if $info}{$info.MARK}{/if}</textarea>
+                </div>
+            </div>
+
+
+            <div class="control-group">
+                <label class="control-label"> 头像</label>
+                <div class="controls">
+
+                    <div class="mcdoc_upload_box" style="width: 300px;">
+                        <button type="button" class="btn btn-success jdselectimg">选择图片</button>
+                        <input type="file" name="images" accept="image/*" class="jdfileinput"/>
+                        <div class="mt10 ml10 muted">仅允许jpg和png格式，1.5M内，大小 600x600（px）</div>
+                        <div class=" text-error update"></div>
+
+                        <p>&nbsp;</p>
+                        {if $info}
+                        <div class="qiniu_doc_line">
+
+                            <p><img src="{if $info}{$info.HEAD_IMG_URL}{else/}/data/image/default.png{/if}" style="height: 120px;"/> </p>
+                            <!--<input type="hidden" name="HEAD_IMG" class="p_doc" value="{$info.HEAD_IMG}"/>-->
+
+                            <!--<p><a href="javascript:;" class="text-error del_localfile"><i class="icon-trash"></i> 删除</a></p>-->
+                        </div>
+                        {/if}
+                    </div>
+
+                </div>
+            </div>
+
+            {if $act=='check'}
+
+            <div class="form-actions">
+                <input type="hidden" name="check_result" id="check_result" value=""/>
+                <button type="submit" class="btn btn-success" id="subbtn1">审批通过</button>
+                <button type="submit" class="btn btn-danger" id="subbtn2">审批不通过</button>
+                <a href="javascript:history.back();" class="btn"><i class="icon-reply"></i> 取消</a>
+            </div>
+            {else /}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="subbtn">保存资料</button>
+                <a href="javascript:history.back();" class="btn"><i class="icon-reply"></i> 取消</a>
+            </div>
+            {/if}
+        </form>
+
+    </div>
+</div><!-- 主体 end-->
+<script type="text/javascript">
+
+</script>

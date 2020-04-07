@@ -1,0 +1,71 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span3"><h3 class="page-header">管理人员管辖区配置</h3></div>
+                    <div class="span9">
+                        <a href="javascript:history.back();" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <form class="form-horizontal left-align" method="post" action="{:url('UserManagers/access')}" id="roleform">
+        <input type="hidden" name="id" value="{$uid}"/>
+        <input type="hidden" name="PROVINCE_ID" value="{$prove_id}"/>
+        <input type="hidden" name="CITY_ID" value="{$city_id}"/>
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+            <tr>
+                <th>市级</th>
+                <th>区县-街道-社区</th>
+            </tr>
+            {foreach name="trees" item="lv1" key="k"}
+            <tr>
+                {if $k==0}
+                <td rowspan="{$trees_count}">
+                    <label class="label"><input type="checkbox" name="lv1[]" value="{$city_id}" {if $access&&in_array(1,$levels)&&in_array($city_id,$areaids)} checked{/if}/> 怀化市</label>
+                </td>
+                {/if}
+                <td>
+                    <label class="label"><input type="checkbox" name="lv2[]" value="{$lv1.ID}" {if $access&&in_array(2,$levels)&&in_array($lv1.ID,$areaids)} checked{/if}/> {$lv1.NAME}</label> <a href="javascript:;" class="togglebtn">下级</a>
+                    {notempty name="lv1.SUB"}
+
+                    <ul style="display: none;">
+                        {foreach name="lv1.SUB" item="lv2"}
+
+                            <li>
+                                <label class="label"><input type="checkbox"  name="lv3[]" id="a{$lv2.ID}" value="{$lv1.ID}-{$lv2.ID}" {if $access&&in_array(3,$levels)&&in_array($lv2.ID,$areaids)} checked{/if}/> {$lv2.NAME}</label> <a href="javascript:;" class="togglebtn">下级</a>
+                                {notempty name="lv2.SUB"}
+                                    <ul style="display: none;">
+                                        {foreach name="lv2.SUB" item="lv3"}
+                                        <li><label class="label"><input type="checkbox"  id="a{$lv3.ID}" name="lv4[]" value="{$lv1.ID}-{$lv2.ID}-{$lv3.ID}" {if $access&&in_array(4,$levels)&&in_array($lv3.ID,$areaids)} checked{/if}/> {$lv3.NAME}</label></li>
+                                        {/foreach}
+                                    </ul>
+                                {/notempty}
+                            </li>
+
+                        {/foreach}
+                    </ul>
+                    {/notempty}
+                </td>
+            </tr>
+            {/foreach}
+            </tbody>
+
+        </table>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="subform">确定保存</button>
+                <a href="javascript:history.back();" class="btn"><i class="icon-reply"></i> 取消</a>
+            </div>
+
+        </form>
+    </div>
+</div>
+<script type="text/javascript">
+    var areaids = {$areaidsjson|raw};
+</script>

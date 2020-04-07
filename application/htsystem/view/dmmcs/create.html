@@ -1,0 +1,39 @@
+{__NOLAYOUT__}
+{include file="common/layerheader"/}
+<div class="container">
+
+    <div class="row-fluid padd10">
+
+
+            <form class="form-horizontal mt10" action="{:url('Dmmcs/edit', ['id'=>$info.ID])}" method="post" id="postform">
+                <input type="hidden" name="ID" value="{$info.ID}"/>
+                <div class="mb10">
+                    <span class="b">机构编码：</span>
+                    <span>{$info.DEPTCODE}</span>
+                </div>
+                <div class="mb10">
+                    <span class="b">机构名称：</span>
+                    <input type="text" name="DEPTNAME" value="{$info.DEPTNAME}" placeholder=""/>
+                </div>
+                <div class="mb10">
+                    <span class="b">机构描述：</span>
+                    <input type="text" name="DEPTDESC" value="{$info.DEPTDESC}" placeholder="" style="width: 350px;"/>
+                </div>
+                <div class="mb10">
+                    <span class="b">显示设置：</span>
+
+                    <label style="display: inline-block"><input type="radio" name="FLAG" value="0" {if $info.FLAG==0}checked{/if}> 显示</label>
+                    <label style="display: inline-block"><input type="radio" name="FLAG" value="1" {if $info.FLAG==1}checked{/if}> 隐藏</label>
+
+                </div>
+
+                <div id="page-mesg"></div>
+                <div class="form-actions">
+                    <input type="button" class="btn btn-primary" value="确定保存" id="savedata"/>
+                    <a href="javascript:;" class="btn" onclick="closePlayer();">取消</a>
+                </div>
+            </form>
+
+    </div>
+</div>
+{include file="common/layerfooter"/}

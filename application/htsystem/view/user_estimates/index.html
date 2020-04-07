@@ -1,0 +1,53 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span7"><h4 class="page-header">康复人员【{$user.NAME}】风险评估</h4></div>
+                    <div class="span5">
+                        <a href="javascript:history.back();" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                        <a href="{:url('UserEstimates/create', ['id'=>$user.ID])}" class="btn btn-primary pull-right"><i class="icon-plus"></i>新增评估</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!---->
+
+        {empty name="list"}
+        <tr><td>没有找到相关的信息</td></tr>
+        {else/}
+        {foreach name="list" item="da"}
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+
+
+            <tr>
+                <th style="width:120px;">评估时间</th><td>{$da.ADD_TIME}</td></tr>
+            <tr> <th>风险等级</th><td>{$da.danger_level}</td>
+            </tr>
+            <tr>
+                <th>评估内容</th>
+                <td>{$da.CONTENT|raw}</td>
+            </tr>
+            <tr>
+                <th>操　　作</th>
+                <td>
+                    <a href="javascript:;" data-href="{:url('UserEstimates/delete',array('uuid' => $da['UUID'], 'esid' => $da['ID']))}" class="btn mini btn-danger" onclick="deldata(this);"><i class="icon-trash"></i>删除</a>
+                </td>
+            </tr>
+            </tbody>
+
+        </table>
+        {/foreach}
+        {/empty}
+
+        <!--<div class="row-fluid">-->
+        <!--<div class="span6"><div class="dataTables_info"></div></div>-->
+        <!--<div class="span6"><div class="dataTables_paginate paging_bootstrap pagination">-->
+        <!--{ $ page| r aw}-->
+        <!--</div></div>-->
+        <!--</div>-->
+    </div>
+</div>

@@ -1,0 +1,36 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span5"><h3 class="page-header">康复人员【{$info.NAME}】手机数据</h3></div>
+                    <div class="span7">
+                        <a href="javascript:history.back();" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div>
+            <a href="{:url('UserUsers/phoneData',['id'=>$info.ID])}?type=address" class="btn {if $type=='address'}btn-primary{/if}">手机通讯录</a>
+            <a href="{:url('UserUsers/phoneData',['id'=>$info.ID])}?type=calls" class="btn {if $type=='calls'}btn-primary{/if}">手机通话记录</a>
+            <a href="{:url('UserUsers/phoneData',['id'=>$info.ID])}?type=sms" class="btn {if $type=='sms'}btn-primary{/if}">手机短信</a>
+        </div>
+        {if $type=='calls'}
+            {include file="user_users/phone_data_calls"/}
+        {elseif $type=='sms'}
+            {include file="user_users/phone_data_sms"/}
+        {else}
+            {include file="user_users/phone_data_address"/}
+        {/if}
+
+        <div class="row-fluid">
+            <div class="span6"><div class="dataTables_info"></div></div>
+            <div class="span6"><div class="dataTables_paginate paging_bootstrap pagination">
+                {$page|raw}
+            </div></div>
+        </div>
+    </div>
+</div>

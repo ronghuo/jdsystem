@@ -1,0 +1,23 @@
+<table class="stat-table responsive table table-stats table-striped table-bordered">
+    <tbody>
+    <tr>
+        <th>类型</th>
+        <th>号码</th>
+        <th>时间</th>
+        <th>内容</th>
+    </tr>
+    {empty name="list"}
+    <tr><td colspan="4">还未有相关数据</td></tr>
+    {else/}
+    {foreach name="list" item="da"}
+        <tr>
+            <td>{$da.TYPE}</td>
+            <td>{$da.ADDRESS}</td>
+            <td>{$da.SMS_DATE}</td>
+            <td>{$da.BODY}</td>
+        </tr>
+    {/foreach}
+    {/empty}
+    </tbody>
+
+</table>

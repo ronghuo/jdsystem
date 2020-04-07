@@ -1,0 +1,41 @@
+{__NOLAYOUT__}
+{include file="common/layerheader"/}
+<div class="container">
+
+    <div class="row-fluid">
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+            <tr><th class="align-c">问</th></tr>
+                <tr><th>
+                    {$info.QUESTION}
+                    <hr style="margin: 0"/>
+                    <p style="font-weight: normal;">{$info.ASKER_NAME}        {$info.ADD_TIME}</p>
+                </th></tr>
+
+                <tr><th class="align-c">答</th></tr>
+                {foreach name="info.ANSWERS" item="anw"}
+                <tr><td>
+                    {$anw.CONTENT}
+                    <hr style="margin: 0"/>
+                    <p>{$anw.ANSWERER_NAME} {$anw.ADD_TIME}</p>
+                </td></tr>
+                {/foreach}
+                <tr><td>
+                    <form class="form-horizontal mt10" action="{:url('UserManageQas/reply')}" method="post" id="postform">
+                        <input type="hidden" name="askid" value="{$info.ID}"/>
+                        <div class="mb10">
+                            <textarea name="content" rows="5" class="span8"></textarea>
+                        </div>
+
+                        <div id="page-mesg"></div>
+                        <div class="form-actions">
+                            <input type="button" class="btn btn-primary" value="确认回复" id="savedata"/>
+                            <a href="javascript:;" class="btn" onclick="closePlayer();">取消</a>
+                        </div>
+                    </form>
+                </td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{include file="common/layerfooter"/}

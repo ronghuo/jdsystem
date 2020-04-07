@@ -1,0 +1,44 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span3"><h3 class="page-header">后台首页</h3></div>
+                    <div class="span9">
+                        <h5 class="text-info pull-right"><i class="icon-time"></i> {:date('Y-m-d H:i:s')}</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row-fluid">
+            <div class="span7">
+                <a href="{:url('Index/downloadInstruction')}"><h5>后台操作手册</h5></a>
+            </div>
+        </div>
+        <div class="row-fluid">
+
+            <div class="span7">
+
+                <table class="stat-table responsive table table-stats table-striped table-bordered">
+                    <tbody>
+                    <tr>
+                        <th class="text-center">管理端APP</th>
+                        <th class="text-center">康复端APP</th>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><div id="managerAPPImg"></div></td>
+                        <td class="text-center"><div id="userAPPImg"></div></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+    var user_app_link = '{$user_app_link}';
+    var manager_app_link = '{$manager_app_link}';
+</script>

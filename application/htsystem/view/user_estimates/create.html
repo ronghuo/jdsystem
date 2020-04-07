@@ -1,0 +1,63 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span5"><h4 class="page-header">风险评估 - {$user.NAME}</h4></div>
+                    <div class="span7">
+                        <a href="javascript:history.back();" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form class="form-horizontal left-align" method="post" action="{:url('UserEstimates/create',['id'=>$user.ID])}">
+
+            <input type="hidden" name="UUID" value="{$user.ID}"/>
+
+            <!--<div class="control-group">-->
+                <!--<label class="control-label">标题</label>-->
+                <!--<div class="controls">-->
+                    <!--<input type="text" name="TITLE" value="{if $info}{$info.TITLE}{/if}" class="input span6" placeholder=""/>-->
+                <!--</div>-->
+            <!--</div>-->
+            <div class="control-group">
+                <label class="control-label"> 风险等级 </label>
+                <div class="controls">
+                    <select name="DANGER_LEVEL_ID" id="danger">
+                        <option value="">请选择</option>
+                        {foreach name="danger_level" item="danger"}
+                        <option value="{$danger.ID}"{if $info&&$info.DANGER_LEVEL_ID==$danger.ID} selected{/if}>{$danger.NAME}</option>
+                        {/foreach}
+                    </select>
+
+                </div>
+
+            </div>
+
+            <div class="control-group">
+                <label class="control-label"> 评估时间 </label>
+                <div class="controls">
+                    <input type="date" name="ADD_TIME" value="{if $info}{$info.ADD_TIME}{/if}"/>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 评估内容</label>
+                <div class="controls"><textarea class="span8 ml0" id="content" name="CONTENT" rows="20" style="height: 400px;" placeholder="">{if $info}{$info.CONTENT}{/if}</textarea>
+                </div>
+            </div>
+
+
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="subbtn">保存资料</button>
+                <a href="javascript:history.back();" class="btn"><i class="icon-reply"></i> 取消</a>
+            </div>
+        </form>
+
+    </div>
+</div><!-- 主体 end-->
+<script type="text/javascript">
+    var ed_url = "{:url('Ueditor/index')}";
+</script>

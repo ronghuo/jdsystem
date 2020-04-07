@@ -1,0 +1,108 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span3"><h3 class="page-header">添加权限节点</h3></div>
+                    <div class="span9">
+                        <a href="javascript:history.back();" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form class="form-horizontal left-align" id="postform" method="post" action="{:url('Syspower/nodeedit')}">
+            <input type="hidden" name="ID" value="{$info['ID']}"/>
+            <input type="hidden" name="OLDPID" value="{$info['PID']}"/>
+            <input type="hidden" name="OLDLEVEL" value="{$info['LEVEL']}"/>
+            <input type="hidden" name="ref" value="{$ref}"/>
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 中文名称</label>
+                <div class="controls">
+                    <input type="text" name="TITLE" value="{$info['TITLE']}" class="input" placeholder="有意义的名称标识"/>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 英文名称</label>
+                <div class="controls">
+                    <input type="text" name="NAME" value="{$info['NAME']}" class="input" placeholder="模块/控制/方法名"/>
+                </div>
+            </div>
+
+
+            <div class="control-group">
+                <label class="control-label">是否做为菜单</label>
+                <div class="controls">
+                    <label class="radio radio-inline"><input type="radio" name="ISMENU" value="1" {if $info['ISMENU']==1}checked{/if}>是</label>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <label class="radio radio-inline"><input type="radio" name="ISMENU" value="0" {if $info['ISMENU']==0}checked{/if}>否</label>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">使用控制</label>
+                <div class="controls">
+                    <label class="radio radio-inline"><input type="radio" name="STATUS" value="1"  {if $info['STATUS']==1}checked{/if}>启用</label>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <label class="radio radio-inline"><input type="radio" name="STATUS" value="0" {if $info['STATUS']==0}checked{/if}>禁用</label>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 父节点</label>
+                <div class="controls">
+                    <select name="PID">
+                        {empty name="pids"}
+                        <option value="0"  {if $info['PID']==0}selected{/if}>根节点</option>
+                        {else/}
+                        {foreach name="pids" item="pd"}
+                        <option value="{$pd['ID']}" {if $info['PID']==$pd['ID']}selected{/if}>{php}if($pd['LEVEL'] > 1){
+                            echo str_repeat('--',$pd['LEVEL']),'|&nbsp;';}{/php}{$pd['TITLE']}</option>
+                        {/foreach}
+                        {/empty}
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 类型</label>
+                <div class="controls">
+                    <select name="LEVEL">
+                        <option value="">请选择</option>
+                        {foreach name="ntype" item="type" key="nk"}
+                        <option value="{$nk}" {if $info['LEVEL']==$nk}selected{/if}>{$type}</option>
+                        {/foreach}
+                    </select>
+                    <span class="muted"></span>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 所属栏目</label>
+                <div class="controls">
+                    <select name="GID">
+                        <option value="0">请选择</option>
+                        {foreach name="groups" item="gp"}
+                        <option value="{$gp.ID}" {if $info['GID']==$gp.ID}selected{/if}>{$gp.NAME}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label">图标</label>
+                <div class="controls">
+                    <input type="text" name="ICON" value="{$info['ICON']}" class="input" placeholder="模块一般要个图标"/>
+                    <div class="help-inline">填写图标的class名称，参考 <a href="/icon.html" target="_blank"><i class="icon-hand-right"></i> 图标列表</a> </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label">备注</label>
+                <div class="controls"><textarea name="REMARK" class="span4" rows="4" placeholder="备注信息，选填">{$info['REMARK']}</textarea>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary" id="submitbtn">确定添加</button>
+                <a href="javascript:history.back();" class="btn"><i class="icon-reply"></i> 取消</a>
+            </div>
+        </form>
+
+    </div>
+</div>

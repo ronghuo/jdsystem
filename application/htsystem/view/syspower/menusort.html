@@ -1,0 +1,30 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span4">
+                <h4 class="side-head">分组</h4>
+                <ol class="dd-list srotbox" id="groupsrot" data-gp="1" data-target="#mainsort">
+                    {volist name="groups" id="gp"}
+                    <li class="dd-item" data-id="{$gp.ID}">
+                        <div class="dd-handle">
+                            <a href="javascript:;"  onclick="ddsort.getSubMenu(this);" data-id="{$gp.ID}"><i class="{$gp.ICON}"></i> {$gp.NAME}</a>
+                        </div>
+                    </li>
+                    {/volist}
+                    </ol>
+            </div>
+            <div class="span4">
+                <h4 class="side-head">主菜单</h4>
+                <ol class="dd-list srotbox" id="mainsort" data-gp="0" data-target="#subsort">
+
+                </ol>
+            </div>
+            <div class="span4">
+                <h4 class="side-head">子菜单</h4>
+                <ol class="dd-list srotbox" id="subsort" data-gp="0" data-target="">
+
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>

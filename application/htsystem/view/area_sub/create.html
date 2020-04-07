@@ -1,0 +1,25 @@
+{__NOLAYOUT__}
+{include file="common/layerheader"/}
+<div class="container">
+
+    <div class="row-fluid padd10">
+
+        <h5>在<span class="text-error">{$pinfo.NAME}</span>下添加新子地区</h5>
+        <form class="form-horizontal mt10" action="{:url('AreaSub/create')}" method="post" id="postform">
+            <input type="hidden" name="PID" value="{$pinfo.ID}"/>
+
+            <div class="mb10">
+                <span class="b">地区名称：</span>
+                <input type="text" name="NAME" value="" placeholder=""/>
+            </div>
+
+            <div id="page-mesg"></div>
+            <div class="form-actions">
+                <input type="button" class="btn btn-primary" value="确定保存" id="savedata"/>
+                <a href="javascript:;" class="btn" onclick="closePlayer();">取消</a>
+            </div>
+        </form>
+
+    </div>
+</div>
+{include file="common/layerfooter"/}

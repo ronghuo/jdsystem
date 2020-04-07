@@ -1,0 +1,57 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span3"><h3 class="page-header">街道社区信息</h3></div>
+                    <div class="span9">
+                        <a href="javascript:history.back();" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                        <!--<a href="{:url('areassub/create',$addquery)}" class="btn btn-primary pull-right openlayerwin"><i class="icon-plus"></i>新增用户</a>-->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+            <tr>
+                <th colspan="4">{$info.NAME} 地区信息
+                    {if $show_add}
+                    <a href="javascript:;" data-url="{:url('AreasSub/create',$addquery)}" class="btn mini btn-primary openlayerwin">添加新街道社区信息</a>
+                    {/if}
+                </th>
+            </tr>
+            {empty name="list"}
+            <tr><td colspan="18">该地区还没有街道社区信息 </td></tr>
+            {else/}
+            {foreach name="list" item="da"}
+            <tr>
+                {foreach name="da" item="v"}
+                <td>{if $v.query}
+                <a href="{:url('AreasSub/index',$v.query)}">{$v.NAME}</a>
+                {else/}
+                {$v.NAME}
+                {/if}
+                {if $show_delete}
+                    <a href="javascript:;" class="delete_area" data-id="{$v.ID}"><i class="icon-remove"></i> </a>
+                {/if}
+                </td>
+                {/foreach}
+            </tr>
+            {/foreach}
+            {/empty}
+            </tbody>
+
+        </table>
+
+        <div class="row-fluid">
+            <div class="span6"><div class="dataTables_info"></div></div>
+            <div class="span6"><div class="dataTables_paginate paging_bootstrap pagination">
+
+            </div></div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var del_url = "{:url('AreasSub/delete')}";
+</script>

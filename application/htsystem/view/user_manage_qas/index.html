@@ -1,0 +1,91 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span3"><h3 class="page-header">问答列表</h3></div>
+                    <div class="span9">
+                        <a href="javascript:history.back();" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row-fluid">
+
+            <div class="controls ml0">
+                <form class="form-horizontal">
+                    <div class="">搜索查询</div>
+                    <!--<div class="control-group">-->
+                        <!--<label class="control-label"> 所属地区 </label>-->
+                        <!--<div class="controls" id="areas3">-->
+                            <!--<select name="area1" class="lv1" data-value=""></select>-->
+                            <!--<select name="area2" class="lv2" data-value=""></select>-->
+                            <!--<select name="area3" class="lv3" data-value=""></select>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                    <div class="control-group">
+                        <label class="control-label"> <select name="sok" class="input" style="width: 100px;height: 28px;">{$fselect|raw}</select></label>
+                        <div class="controls">
+                            <input type="text" name="sov" class="input" value="{$param['sov']}" placeholder="搜索的内容"/>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label"></label>
+                        <div class="controls">
+                            <button class="btn btn-success"><i class="icon-search"></i> 搜索</button>
+                            {if $is_so}
+                            <a href="./" class="btn btn-warning"><i class="icon-trash"></i> 清空搜索</a>
+                            {/if}
+
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+            <p class="align-c text-info">总记录： {$total} 条</p>
+            <hr/>
+        </div>
+
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+            <tr>
+                <th>留言时间</th>
+                <th>留言人</th>
+                <th>留言内容</th>
+                <th>回答数量</th>
+                <th>操作</th>
+            </tr>
+        {empty name="list"}
+            <tr><td colspan="4">暂时还没有问答信息</td></tr>
+        {else /}
+
+            {foreach name="list" item="da"}
+                <tr>
+                    <td>{$da.ADD_TIME}</td>
+                    <td><a href="javascript:;" data-url="{:url('UserManagers/read',array('id'=>$da['ASKER_UID']))}"  class="openlayerwin">{$da.ASKER_NAME}</a></td>
+                    <td>
+                        <a href="javascript:;" data-url="{:url('UserManageQas/read',array('id'=>$da['ID']))}" class="openlayerwin2">{$da.QUESTION}</a>
+                    </td>
+                    <td>{$da.count_answer}</td>
+                    <td>
+                        <a href="javascript:;" data-href="{:url('UserManageQas/delete',array('id'=>$da['ID']))}" class="btn mini btn-danger" onclick="deldata(this);"><i class="icon-trash"></i>删除</a>
+                    </td>
+                </tr>
+            {/foreach}
+
+        {/empty}
+            </tbody>
+        </table>
+        <div class="row-fluid">
+            <div class="span6"><div class="dataTables_info"></div></div>
+            <div class="span6"><div class="dataTables_paginate paging_bootstrap pagination">
+                {$page|raw}
+            </div></div>
+        </div>
+    </div>
+</div>

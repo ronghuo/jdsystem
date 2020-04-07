@@ -1,0 +1,16 @@
+{__NOLAYOUT__}
+{include file="common/layerheader"/}
+<div class="container">
+
+    <div class="row-fluid">
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+            <tr><th class="align-c">{$info.TITLE}</th></tr>
+            <tr><td class="align-c">{$info.ADD_TIME}</td></tr>
+            <tr><td class="align-c"><img src="{$info.COVER_IMG_URL}" style="height: 100px;" /></td></tr>
+
+            <tr><td>{$info.CONTENT|raw}</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>

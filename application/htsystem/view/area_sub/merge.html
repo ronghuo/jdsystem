@@ -1,0 +1,43 @@
+{__NOLAYOUT__}
+{include file="common/layerheader"/}
+<div class="container">
+
+    <div class="row-fluid padd10">
+
+        <h5>合并<span class="text-error">{$pinfo.NAME}</span>下的乡镇</h5>
+        <p class="text-error">该操作无法回撤，请谨慎操作</p>
+        <form class="form-horizontal mt10" action="{:url('AreaSub/merge')}" method="post" id="postform">
+        <table class="stat-table responsive table table-stats table-striped "  style="width: 480px;">
+            <tbody>
+            <tr>
+                <td>
+                    {foreach name="childs" item="child"}
+                    <label><input type="checkbox" name="selected[]" value="{$child.ID}"/>{$child.NAME}</label>
+                    {/foreach}
+                </td>
+                <td style="vertical-align: middle !important;text-align: center;">
+                    合并到 =>
+                </td>
+                <td style="vertical-align: middle !important;text-align: center;">
+
+                    <select name="mergeTo">
+                        <option value="">--请选择--</option>
+                        {foreach name="childs" item="child"}
+                        <option value="{$child.ID}">{$child.NAME}</option>
+                        {/foreach}
+                    </select>
+
+                </td>
+            </tr>
+
+            </tbody>
+        </table>
+            <div id="page-mesg"></div>
+            <div class="form-actions">
+                <input type="submit" class="btn btn-primary" value="确定并合并" id="savedata"/>
+                <a href="javascript:;" class="btn" onclick="closePlayer();">取消</a>
+            </div>
+        </form>
+    </div>
+</div>
+{include file="common/layerfooter"/}

@@ -1,0 +1,19 @@
+{__NOLAYOUT__}
+{include file="common/layerheader"/}
+<div class="container">
+
+    <div class="row-fluid">
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+                <tr><th class="align-c">{$info.TITLE}</th></tr>
+                <tr><td class="align-c">{$info.UNAME}        {$info.ADD_TIME}</td></tr>
+                <tr><td>{$info.CONTENT|raw}</td></tr>
+                <tr><td class="align-c">
+                    {foreach name="info.IMGS" item="img"}
+                    <img src="{$img.SRC_PATH_URL}"/><br/>
+                    {/foreach}
+                </td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>

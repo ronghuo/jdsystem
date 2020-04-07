@@ -1,0 +1,45 @@
+{__NOLAYOUT__}<!-- 左侧菜单 begin-->
+<div class="leftbar leftbar-close clearfix">
+    <div class="admin-info clearfix">
+        <div class="admin-thumb">
+            <i class="icon-user"></i>
+        </div>
+        <div class="admin-meta">
+            <ul>
+                <li class="admin-username">{$Think.session.name}</li><li>&nbsp;</li>
+                <li><a href="{:url('SystemUsers/edit',array('id'=>$Think.session.user_id))}"><i class="icon-info-sign"></i>我的资料 </a><a href="{:url('Login/out')}"><i class="icon-lock"></i>安全退出</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="left-nav clearfix">
+        <div class="left-primary-nav">
+            <ul id="mc-left-menu">
+                {notempty name="nodes"}
+                {foreach name="nodes" item="nd"}
+                <li {if strtolower($nd['NAME'])==$contr } class="active"{/if} >
+                <a class="{$nd['ICON']} lv1" href="{:url($nd['NAME'].'/'.$nd['SUB'][0]['NAME'])}"> {$nd['TITLE']} {notempty name="nd.SUB"}<i class="{if strtolower($nd['NAME'])==$contr } icon-chevron-down{else/}icon-chevron-up{/if} "></i> {/notempty}</a>
+                {notempty name="nd.SUB"}
+                <ul class="accordion-nav"{if strtolower($nd['NAME'])!=$contr} style="display:none;"{/if}>
+                {foreach name="nd.SUB" item="nv2"}
+                <li{if strtolower($nd['NAME'])==$contr&&strtolower($nv2['NAME'])==$act} class="active"{/if}>
+                <a href="{:url($nd['NAME'].'/'.$nv2['NAME'])}"> {$nv2['TITLE']}</a></li>
+                {notempty name="nv2.SUB"}
+                {foreach name="nv2.SUB" item="nv3"}
+                <li{if strtolower($nd['NAME'])==$contr&&strtolower($nv3['NAME'])==$act} class="active"{/if}><a href="{:url($nd['NAME'].'/'.$nv3['NAME'])}"> {$nv3['TITLE']}</a></li>
+                {/foreach}
+                {/notempty}
+                {/foreach}
+            </ul>
+            {/notempty}
+            </li>
+            {/foreach}
+            {/notempty}
+            </ul>
+
+        </div>
+        <!--窄屏菜单显示控制按钮-->
+        <div class="responsive-leftbar">
+            <i class="icon-list"></i>
+        </div>
+    </div>
+</div><!-- 左侧菜单 end-->

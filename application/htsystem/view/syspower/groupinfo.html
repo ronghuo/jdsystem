@@ -1,0 +1,35 @@
+{__NOLAYOUT__}
+{include file="common/layerheader"/}
+<div class="container">
+
+    <div class="row-fluid">
+        <fieldset class="default padd10">
+            <legend>添加/编辑分组</legend>
+            <form class="form-horizontal mt10" action="{:url('Syspower/groupinfo')}" method="post" id="postform">
+                {notempty name="info"}
+                <input type="hidden" name="ID" value="{$info.ID}"/>
+                {/notempty}
+                <div class="mb10">
+                    <span class="b">名称：</span>
+                    <input type="text" name="NAME" value="{if $info}{$info.NAME}{/if}" placeholder="分组名称"/>
+                </div>
+                <div class="mb10">
+                    <span class="b">链接：</span>
+                    <input type="text" name="LINK" value="{if $info}{$info.LINK}{/if}" placeholder="分组首页链接"/>
+                    <div class="help-block">点击分组打开的页面，格式：控制器名/方法名</div>
+                </div>
+                <div class="mb10">
+                    <span class="b">图标：</span>
+                    <input type="text" name="ICON" value="{if $info}{$info.ICON}{/if}" placeholder="分组图标"/>
+                    <div class="help-block">填写图标的class名称，参考 <a href="/icon.html" target="_blank"><i class="icon-hand-right"></i> 图标列表</a></div>
+                </div>
+                <div id="page-mesg"></div>
+                <div class="form-actions">
+                    <input type="button" class="btn btn-primary" value="确定保存" id="savedata"/>
+                    <a href="javascript:;" class="btn" onclick="closePlayer();">取消</a>
+                </div>
+            </form>
+        </fieldset>
+    </div>
+</div>
+{include file="common/layerfooter"/}

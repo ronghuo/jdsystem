@@ -1,0 +1,111 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span3"><h3 class="page-header">请假列表</h3></div>
+                    <div class="span9">
+                        <a href="javascript:history.back();" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row-fluid">
+
+            <div class="controls ml0">
+                <form class="form-horizontal">
+                    <div class="">搜索查询</div>
+                    <div class="control-group">
+                        <label class="control-label"> 所属地区 </label>
+                        <div class="controls" id="areas3">
+                            <select name="area1" class="lv1" data-value="{$param['a1']}"></select>
+                            <select name="area2" class="lv2" data-value="{$param['a2']}"></select>
+                            <select name="area3" class="lv3" data-value="{$param['a3']}"></select>
+                        </div>
+                    </div>
+                    <!--<div class="control-group">-->
+                        <!--<label class="control-label"> 状态 </label>-->
+                        <!--<div class="controls" id="">-->
+                            <!--<select name="status" class="">-->
+                                <!--<option value="">全部</option>-->
+                                <!--{foreach name="status_list" item="sta" key="sk"}-->
+                                <!--<option value="{$sk}" {if $param['status']==$sk}selected{/if}>{$sta}</option>-->
+                                <!--{/foreach}-->
+                            <!--</select>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                    <div class="control-group">
+                        <label class="control-label"> <select name="sok" class="input" style="width: 100px;height: 28px;">{$fselect|raw}</select></label>
+                        <div class="controls">
+                            <input type="text" name="sov" class="input" value="{$param['sov']}" placeholder="搜索的内容"/>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label"></label>
+                        <div class="controls">
+                            <button class="btn btn-success"><i class="icon-search"></i> 搜索</button>
+                            {if $is_so}
+                            <a href="./" class="btn btn-warning"><i class="icon-trash"></i> 清空搜索</a>
+                            {/if}
+
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+            <p class="align-c text-info">总记录： {$total} 条</p>
+            <hr/>
+        </div>
+
+
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+            <tr>
+                <th>请假人</th>
+                <th>联系号码</th>
+                <th style="width:210px;">请假原因</th>
+                <th>出所时间</th>
+                <th>回所时间</th>
+                <th>审批结果</th>
+                <th>审批人</th>
+                <th>审批时间</th>
+                <th>操作</th>
+            </tr>
+            {empty name="list"}
+            <tr><td colspan="9">木有找到相关的信息</td></tr>
+            {else/}
+            {foreach name="list" item="da"}
+            <tr>
+                <td><a href="javascript:;" data-url="{:url('UserUsers/read',array('id'=>$da['lists']['UUID']))}"  class="openlayerwin">{$da.lists.UNAME}</a></td>
+                <td>{$da.lists.MOBILE}</td>
+                <td><p style="max-height: 50px;overflow: hidden;">{$da.lists.REASON}</p>
+                    </td>
+                <td>{$da.lists.OUT_TIME}</td>
+                <td>{$da.lists.BACK_TIME|raw}</td>
+                <td>{if $da.CTEXT}<span class="label label-info">{$da.CTEXT}</span> {/if}
+                    {$da.lists.status_span|raw}</td>
+                <td><a href="javascript:;" data-url="{:url('UserManagers/read',array('id'=>$da['lists']['CHECKER_UID']))}"  class="openlayerwin2">{$da.lists.CHECKER_NAME}</a></td>
+                <td>{$da.lists.CHECK_TIME}</td>
+                <td><a href="javascript:;" data-url="{:url('UserHolidays/read',array('id'=>$da['ID']))}" class="btn mini btn-primary openlayerwin3"><i class="icon-info-sign"></i>详情</a>
+                    <a href="javascript:;" data-href="{:url('UserHolidays/delete',array('id'=>$da['ID']))}" class="btn mini btn-danger" onclick="deldata(this);"><i class="icon-trash"></i>删除</a>
+                </td>
+            </tr>
+            {/foreach}
+            {/empty}
+            </tbody>
+
+        </table>
+
+        <div class="row-fluid">
+            <div class="span6"><div class="dataTables_info"></div></div>
+            <div class="span6"><div class="dataTables_paginate paging_bootstrap pagination">
+            {$page|raw}
+            </div></div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,87 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span3"><h3 class="page-header">管理人员操作日志</h3></div>
+                    <div class="span9">
+                        <a href="javascript:history.back();" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row-fluid">
+
+            <div class="controls ml0">
+                <form class="form-horizontal">
+                    <div class="">搜索查询</div>
+
+                    <div class="control-group">
+                        <label class="control-label"> 操作时间 </label>
+                        <div class="controls">
+                            <input type="date" name="oper_begin_time" value="{$param['oper_begin_time']}"/> -
+                            <input type="date" name="oper_end_time" value="{$param['oper_end_time']}"/>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <div class="controls">
+                            <input type="text" name="keywords" class="input" value="{$keywords}" placeholder="功能模块"/>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label"></label>
+                        <div class="controls">
+                            <button class="btn btn-success"><i class="icon-search"></i> 搜索</button>
+                            {if $is_so}
+                            <a id="btnClear" href="javascript:void(0);" class="btn btn-warning"><i class="icon-trash"></i> 清空搜索</a>
+                            {/if}
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+            <p class="align-c text-info">总记录： {$total} 条</p>
+            <hr/>
+        </div>
+
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+            <tr>
+                <th>管理人员ID</th>
+                <th>功能模块</th>
+                <th>设备IP</th>
+                <th>GPS纬度</th>
+                <th>GPS经度</th>
+                <th>操作时间</th>
+            </tr>
+            {empty name="list"}
+            <tr><td colspan="7">木有找到相关的信息</td></tr>
+            {else/}
+            {foreach name="list" item="da"}
+            <tr>
+                <td>{$da.UMID}</td>
+                <td>{$da.LOG_ACTION}</td>
+                <td>{$da.LOG_IP}</td>
+                <td>{$da.GPS_LAT}</td>
+                <td>{$da.GPS_LONG}</td>
+                <td>{$da.ADD_TIME}</td>
+            </tr>
+            {/foreach}
+            {/empty}
+            </tbody>
+
+        </table>
+
+        <div class="row-fluid">
+            <div class="span6"><div class="dataTables_info"></div></div>
+            <div class="span6"><div class="dataTables_paginate paging_bootstrap pagination">
+                {$page|raw}
+            </div></div>
+        </div>
+    </div>
+</div>

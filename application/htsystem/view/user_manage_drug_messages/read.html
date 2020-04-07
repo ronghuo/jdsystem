@@ -1,0 +1,48 @@
+{__NOLAYOUT__}
+{include file="common/layerheader"/}
+<div class="container">
+
+    <div class="row-fluid">
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+            <tr><th colspan="2">{$info.TITLE}</th></tr>
+            <tr><th style="width: 80px">线索编号</th><td>{$info.DMR_CODE}</td></tr>
+            <tr><th>线索状态</th><td>{$info.clue_status}</td></tr>
+            <tr><th>紧急程度</th><td>{$info.emey_level}</td></tr>
+            <tr><th>上报方式</th><td>{$info.report_type}</td></tr>
+            <tr><th>发生地区</th><td>{$info.AREAS}</td></tr>
+            <tr><th>发生地点</th><td>{$info.ADDRESS}</td></tr>
+            <tr><th>上报时间</th><td>{$info.REPORT_TIME}</td></tr>
+            <tr><th>线索类型</th><td>{$info.clue_type}</td></tr>
+
+            <tr><th>填报员编号</th><td>{$info.muser.UCODE}</td></tr>
+            <tr><th>填报员姓名</th><td>{$info.muser.NAME}</td></tr>
+            <tr><th>填报时间</th><td>{$info.WRITE_TIME}</td></tr>
+
+            <tr><th>是否发生</th><td>{$info.happened}</td></tr>
+            <tr><th>采集方式</th><td>{$info.gather_type}</td></tr>
+            <tr><th>地理位置</th><td>{$info.GPS_LOCATION}</td></tr>
+            <tr><th>地点经纬度</th><td>{$info.GPS_LONG}, {$info.GPS_LAT}</td></tr>
+            <tr><th>录音</th><td>
+                {foreach name="info.AUDIOS" item="aud"}
+                <audio src="{$aud.IMG_URL}" controls="controls">
+                    您的浏览器不支持音频播放
+                </audio>
+                {/foreach}
+            </td></tr>
+            <tr><th>视频</th><td>
+                {foreach name="info.VIDEOS" item="vid"}
+                <video width="320" height="240" controls>
+                    <source src="{$vid.IMG_URL}" type="video/mp4">
+                    <!--<source src="" type="video/ogg">-->
+                    您的浏览器不支持 video 标签。
+                </video>
+                {/foreach}
+            </td></tr>
+            <tr><th>线索内容</th><td>{$info.CONTENT|raw}</td></tr>
+            <!--<tr><th>图片</th><td></td></tr>-->
+
+            </tbody>
+        </table>
+    </div>
+</div>

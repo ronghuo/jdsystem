@@ -1,0 +1,55 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span3"><h3 class="page-header">角色列表</h3></div>
+                    <div class="span9">
+                        <a href="javascript:history.back();" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                        <a href="{:url('Syspower/roleAdd')}" class="btn btn-primary pull-right"><i class="icon-plus"></i>添加角色</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+            <tr>
+                <th>角色名称</th>
+                <th>状态</th>
+                <th>说明</th>
+                <th>操作</th>
+            </tr>
+            {empty name="data"}
+            <tr><td colspan="4">暂无数据！</td></tr>
+            {else/}
+            {foreach name="data" item="da"}
+            <tr>
+                <td>{$da.NAME}</td>
+                <td>{if $da['STATUS']==1}<span class="label label-success">已启用</span>
+                {else/}
+                    <span class="label label-important">已禁用</span>
+                {/if}
+                </td>
+                <td>{$da.REMARK}</td>
+                <td>
+                    <a href="{:url('Syspower/roleEdit',array('rid'=>$da['ID']))}" class="btn mini"><i class="icon-edit"></i>编辑</a>
+                    <a href="javascript:;" data-href="{:url('syspower/roledel',array('rid'=>$da['ID']))}" class="btn mini" onclick="deldata(this);"><i class="icon-trash"></i>删除</a>
+                </td>
+            </tr>
+            {/foreach}
+            {/empty}
+
+            </tbody>
+
+        </table>
+        {if $pagenav}
+        <div class="row-fluid">
+            <div class="span6"><div class="dataTables_info">{$pagenav.txt}</div></div>
+            <div class="span6"><div class="dataTables_paginate paging_bootstrap pagination"><ul>{$pagenav.links}</ul></div></div>
+        </div>
+        {/if}
+
+    </div>
+</div>

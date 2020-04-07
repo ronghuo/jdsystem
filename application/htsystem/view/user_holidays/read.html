@@ -1,0 +1,35 @@
+{__NOLAYOUT__}
+{include file="common/layerheader"/}
+<div class="container">
+
+    <div class="row-fluid">
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+            {foreach name="list" item="da" key="k"}
+
+            <tr><th style="width:80px;">请假人</th><td>{$da.UNAME}
+                {if $k>0&&$info.CTEXT}
+                    <span class="label label-info">续假</span>
+                {/if}
+            </td></tr>
+            <tr><th>提交时间</th><td>{$da.ADD_TIME}</td></tr>
+            <tr><th>出所时间</th><td>{$da.OUT_TIME}</td></tr>
+            <tr><th>回所时间</th><td>{$da.BACK_TIME}</td></tr>
+            <tr><th>请假原因</th><td>{$da.REASON}</td></tr>
+            <tr><th>请假时长</th><td></td></tr>
+            <tr><th>联系方式</th><td>{$da.MOBILE}</td></tr>
+            <tr><th>图片</th><td>
+                {foreach name="da.IMGS" item="img"}
+                <img src="{$img.SRC_PATH_URL}" width="100"/>
+                {/foreach}
+            </td></tr>
+            <tr><th>审批结果</th><td>{$da.status_span|raw}</td></tr>
+            <tr><th>审批人</th><td>{$da.CHECKER_NAME}</td></tr>
+            <tr><th>审批时间</th><td>{$da.CHECK_TIME}</td></tr>
+            <tr><th>审批说明</th><td>{$da.CHECK_MARK}</td></tr>
+            <tr><td colspan="2">&nbsp;</td></tr>
+            {/foreach}
+            </tbody>
+        </table>
+    </div>
+</div>

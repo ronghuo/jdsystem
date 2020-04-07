@@ -1,0 +1,25 @@
+{__NOLAYOUT__}
+{include file="common/layerheader"/}
+<div class="container">
+
+    <div class="row-fluid">
+        <fieldset class="default padd10">
+            <legend>修改【{$user.NAME}】的登录密码</legend>
+            <form class="form-horizontal mt10" action="{:url('SystemUsers/changePwd')}" method="post" id="postform">
+                <input type="hidden" name="ID" value="{$user.ID}"/>
+                <div class="mb10">
+                    <span class="b">新密码：</span>
+                    <input type="password" name="PWD" value="" placeholder="请输入新密码"/>
+                </div>
+
+
+                <div id="page-mesg"></div>
+                <div class="form-actions">
+                    <input type="button" class="btn btn-primary" value="确定保存" id="savedata"/>
+                    <a href="javascript:;" class="btn" onclick="closePlayer();">取消</a>
+                </div>
+            </form>
+        </fieldset>
+    </div>
+</div>
+{include file="common/layerfooter"/}

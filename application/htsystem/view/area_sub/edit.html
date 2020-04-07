@@ -1,0 +1,36 @@
+{__NOLAYOUT__}
+{include file="common/layerheader"/}
+<div class="container">
+
+    <div class="row-fluid padd10">
+
+
+        <form class="form-horizontal mt10" action="{:url('AreaSub/edit', ['id'=>$info.ID])}" method="post" id="postform">
+            <input type="hidden" name="ID" value="{$info.ID}"/>
+            <div class="mb10">
+                <span class="b">地区代码：</span>
+                <span>{$info.CODE12}</span>
+            </div>
+            <div class="mb10">
+                <span class="b">地区名称：</span>
+                <input type="text" name="NAME" value="{$info.NAME}" placeholder=""/>
+            </div>
+
+            <div class="mb10">
+                <span class="b">显示设置：</span>
+
+                <label style="display: inline-block"><input type="radio" name="ACTIVE" value="1" {if $info.ACTIVE!=0}checked{/if}> 显示</label>
+                <label style="display: inline-block"><input type="radio" name="ACTIVE" value="0" {if $info.ACTIVE==0}checked{/if}> 隐藏</label>
+
+            </div>
+
+            <div id="page-mesg"></div>
+            <div class="form-actions">
+                <input type="button" class="btn btn-primary" value="确定保存" id="savedata"/>
+                <a href="javascript:;" class="btn" onclick="closePlayer();">取消</a>
+            </div>
+        </form>
+
+    </div>
+</div>
+{include file="common/layerfooter"/}

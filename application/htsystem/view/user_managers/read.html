@@ -1,0 +1,40 @@
+{__NOLAYOUT__}
+{include file="common/layerheader"/}
+<div class="container">
+
+    <div class="row-fluid">
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+            <tr><td colspan="2" style="text-align: center">
+                <img src="{$info.HEAD_IMG_URL}" style="height: 150px;"/>
+            </td></tr>
+            <tr><td>人员编号</td><td>{$info.UCODE}</td></tr>
+            <tr><td>姓名</td><td>{$info.NAME} {$info.status_text|raw}</td></tr>
+            <tr><td>身份证号</td><td>{$info.ID_NUMBER}</td></tr>
+            <tr><td>性别</td><td>{$info.gender_text}</td></tr>
+
+            <tr><td>手机号码</td><td>{$info.MOBILE}</td></tr>
+            <tr><td>QQ</td><td>{$info.QQ}</td></tr>
+            <tr><td>微信</td><td>{$info.WECHAT}</td></tr>
+
+            <tr><td>特殊能力</td><td>{$info.SPECIAL_ABILITY}</td></tr>
+            <tr><td>职业</td><td>{$info.JOB}</td></tr>
+            <tr><td>单位名称</td><td>{$info.UNIT_NAME}</td></tr>
+            <tr><td>单位地址</td><td>{$info.UNIT_ADDRESS}</td></tr>
+
+            <tr><td>籍贯</td><td>{$info.DOMICILE_PLACE}</td></tr>
+
+            <tr><td>现住址</td><td>{$info.LIVE_PLACE} {$info.ADDRESS}</td></tr>
+
+
+            <tr><td>所属禁毒办代码</td><td>{$info.dmmc.DM}</td></tr>
+            <tr><td>所属禁毒办</td><td>{$info.dmmc.DMMC}</td></tr>
+            <tr><td>备注</td><td>{$info.MARK}</td></tr>
+
+
+            <tr><td>添加时间</td><td>{$info.ADD_TIME}</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{include file="common/layerfooter"/}

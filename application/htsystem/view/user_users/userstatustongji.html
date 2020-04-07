@@ -1,0 +1,30 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span3"><h3 class="page-header">人员状态统计</h3></div>
+                    <div class="span9">
+                        <a href="javascript:history.back();" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+
+            <tr><th width="100">状态</th><th>数量</th></tr>
+            {foreach name="counts" item="ct"}
+            <tr><td>{$ct.NAME}</td><td>{$ct.total}</td></tr>
+            {/foreach}
+            <tr><td><span class="text-error">未归类的状态</span></td><td>{$uncounts}</td></tr>
+
+            </tbody>
+
+        </table>
+
+
+    </div>
+</div>

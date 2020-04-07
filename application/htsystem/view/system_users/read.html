@@ -1,0 +1,27 @@
+{__NOLAYOUT__}
+{include file="common/layerheader"/}
+<div class="container">
+
+    <div class="row-fluid">
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+            <tr><td colspan="2" style="text-align: center">
+                <img src="{$info.HEAD_IMG_URL}" style="height: 150px;"/>
+            </td></tr>
+            <tr><td>姓名</td><td>{$info.NAME} {$info.work_text|raw}</td></tr>
+            <tr><td>性别</td><td>{$info.gender_text}</td></tr>
+            <tr><td>账号</td><td>{$info.LOG} {$info.status_text|raw}</td></tr>
+            <tr><td>手机号码</td><td>{$info.MOBILE}</td></tr>
+            <tr><td>单位</td><td>{$info.DMMC_NAME}</td></tr>
+            <tr><td>职位</td><td>{$info.POST}</td></tr>
+            <tr><td>其他联系方式</td><td>{$info.CONTACT}</td></tr>
+            <tr><td>备注信息</td><td>{$info.REMARK}</td></tr>
+            <tr><td>注册时间</td><td>{$info.ADD_TIME}</td></tr>
+
+            <tr><td>最近登录IP</td><td>{$info.LOGINIP}</td></tr>
+            <tr><td>最近登录时间 </td><td>{$info.LGTIME}</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{include file="common/layerfooter"/}

@@ -1,0 +1,81 @@
+{__NOLAYOUT__}
+{include file="common/layerheader"/}
+<div class="container">
+
+    <div class="row-fluid">
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+            <tr><td colspan="2" style="text-align: center">
+                <img src="{$info.HEAD_IMG_URL}" style="height: 150px;"/>
+            </td></tr>
+            <tr><td>人员编号</td><td>{$info.UUCODE}</td></tr>
+            <tr><td>姓名</td><td>{$info.NAME}({$info.ALIAS_NAME})</td></tr>
+            <tr><td>{if $cardtype}{$cardtype.NAME}{else/}身份证号{/if}</td><td>{$info.ID_NUMBER}</td></tr>
+            <tr><td>性别</td><td>{$info.gender_text}</td></tr>
+            <!--<tr><td>类型</td><td>{$info.utype_text}-->
+            <!--{if $info.UTYPE_ID == 218}-->
+                <!--{$info.user_type218}-->
+                <!--{/if}-->
+            <!--</td></tr>-->
+            <tr><td>人员状态</td><td>{$info.user_status}
+            {if $info.USER_STATUS_ID==7}
+                {$info.user_type218}
+                {/if}
+            </td></tr>
+            <tr><td>起止时间</td><td>{$info.JD_START_TIME} - {$info.JD_END_TIME}</td></tr>
+            <tr><td>风险等级</td><td>{$info.danger_level}</td></tr>
+            <tr><td>尿检频率</td><td>{$info.uarns.rate}月/次</td></tr>
+            <tr><td>已完成尿检次数</td><td>{$info.uarns.finish_count} 次</td></tr>
+            <tr><td>剩余至少尿检次数</td><td>{$info.uarns.rest_count} 次</td></tr>
+            <tr><td>下次尿检时间</td><td>{$info.uarns.next_uran_time} </td></tr>
+
+            <tr><td>负责专干姓名</td><td>{$info.JD_ZHUANGAN}</td></tr>
+            <tr><td>负责专干联系电话</td><td>{$info.JD_ZHUANGAN_MOBILE}</td></tr>
+
+            <tr><td>国藉</td><td>{$info.NATIONALITY}</td></tr>
+            <tr><td>民族</td><td>{$info.NATION}</td></tr>
+            <tr><td>身高(厘米)</td><td>{$info.HEIGHT}</td></tr>
+
+            <tr><td>文化程度</td><td>{$info.EDUCATION}</td></tr>
+            <tr><td>婚姻状况</td><td>{$info.MARITAL_STATUS}</td></tr>
+
+            <tr><td>就业状况</td><td>{$info.JOB_STATUS}</td></tr>
+            <tr><td>工作单位</td><td>{$info.JOB_UNIT}</td></tr>
+
+
+            <tr><td>户籍地</td><td>{$info.DOMICILE_PLACE}</td></tr>
+            <tr><td>户籍地详细地址</td><td>{$info.DOMICILE_ADDRESS}</td></tr>
+            <tr><td>户籍地派出所名称</td><td>{$info.DOMICILE_POLICE_STATION}</td></tr>
+            <tr><td>户籍地派出所代码</td><td>{$info.DOMICILE_POLICE_STATION_CODE}</td></tr>
+
+            <tr><td>居住地</td><td>{$info.LIVE_PLACE}</td></tr>
+            <tr><td>居住地详细地址</td><td>{$info.LIVE_ADDRESS}</td></tr>
+            <tr><td>居住地派出所名称</td><td>{$info.LIVE_POLICE_STATION}</td></tr>
+            <tr><td>居住地派出所代码</td><td>{$info.LIVE_POLICE_STATION_CODE}</td></tr>
+
+            <tr><td>吸毒方式</td><td>{$info.DRUG_TYPE}</td></tr>
+            <tr><td>毒品种类</td><td>{$info.NARCOTICS_TYPE}</td></tr>
+
+            <tr><td>所属禁毒办代码</td><td>{$info.MANAGE_POLICE_AREA_CODE}</td></tr>
+            <tr><td>所属禁毒办</td><td>{$info.MANAGE_POLICE_AREA_NAME}</td></tr>
+            <tr><td>所属社区</td><td>{$info.MANAGE_COMMUNITY}</td></tr>
+
+            <tr><td>责任民警警号</td><td>{$info.POLICE_LIABLE_CODE}</td></tr>
+            <tr><td>责任民警姓名</td><td>{$info.POLICE_LIABLE_NAME}</td></tr>
+            <tr><td>责任民警联系电话</td><td>{$info.POLICE_LIABLE_MOBILE}</td></tr>
+            <tr><td>添加时间</td><td>{$info.ADD_TIME}</td></tr>
+            <tr><td colspan="2">备注</td></tr>
+            <tr><td colspan="2">{$info.JD_REMARKS|raw}</td></tr>
+            <tr><td colspan="2">人员状态记录</td></tr>
+            {empty name="info.user_status_logs"}
+            <tr><td colspan="2">无</td></tr>
+            {else/}
+            {foreach name="info.user_status_logs" item="log"}
+            <tr><td>{$log.CREATE_TIME}</td><td>{$log.CONTENT}</td></tr>
+            {/foreach}
+            {/empty}
+            </tbody>
+        </table>
+    </div>
+</div>
+{include file="common/layerfooter"/}

@@ -1,0 +1,85 @@
+<div class="main-wrapper">
+    <div class="container-fluid" style="min-height: 1000px;">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span5"><h4 class="page-header">社区数据</h4></div>
+                    <div class="span7">
+                        <a href="javascript:history.back();" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row-fluid">
+
+            <div class="controls ml0">
+                <form class="form-horizontal">
+                    <div class="">搜索查询</div>
+                    <div class="control-group">
+                        <label class="control-label"> 所属地区 </label>
+                        <div class="controls" id="areas3">
+                            <select name="area1" class="lv1" data-value="{$area1}"></select>
+                            <select name="area2" class="lv2" data-value="{$area2}"></select>
+                            <select name="area3" class="lv3" data-value="{$area3}"></select>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label"></label>
+                        <div class="controls">
+                            <button class="btn btn-success"><i class="icon-search"></i> 搜索</button>
+                            {if $is_so}
+                            <a href="./" class="btn btn-warning"><i class="icon-trash"></i> 清空搜索</a>
+                            {/if}
+
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+
+        </div>
+
+
+        {empty name="areas"}
+            <div class="text-center">
+
+            {if $areaInfo}
+                <h5><span class="text-error">{$areaInfo.NAME}</span>下属地区  </h5>
+                {if $show_add}
+                <a href="javascript:;" data-url="{:url('AreaSub/create', ['pid'=>$areaInfo.ID])}" class="btn mini btn-primary openlayerwin2">添加新地区</a>
+                {/if}
+
+                {else}
+                <div>请先搜索需要操作的地区</div>
+            </div>
+        {/if}
+        {else}
+        <div class="text-center mb10">
+        <h5><span class="text-error">{$areaInfo.NAME}</span>下属地区  </h5>
+            {if $show_add}
+        <a href="javascript:;" data-url="{:url('AreaSub/create', ['pid'=>$areaInfo.ID])}" class="btn mini btn-primary openlayerwin2">添加新地区</a>
+            {/if}
+            {if $show_merge}
+            <a href="javascript:;" data-url="{:url('AreaSub/merge', ['pid'=>$areaInfo.ID])}" class="btn mini btn-danger openlayerwin3">合并乡镇</a>
+        {/if}
+        </div>
+        <table class="stat-table responsive table table-stats table-striped ">
+            <tbody>
+            {foreach name="areas" item="area"}
+                <tr>
+                    <td>{if $area.ACTIVE==0}<span class="text-bbb">{$area.NAME}  [已隐藏]</span>{else/}{$area.NAME}{/if}</td>
+                    <td>
+                        <a href="javascript:;" data-url="{:url('AreaSub/edit', ['id'=>$area.ID])}" class="btn mini openlayerwin"><i class="icon-edit"></i>编辑</a>
+                    </td>
+                </tr>
+            {/foreach}
+            </tbody>
+        </table>
+        {/empty}
+
+    </div>
+</div>

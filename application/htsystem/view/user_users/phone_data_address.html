@@ -1,0 +1,21 @@
+<table class="stat-table responsive table table-stats table-striped table-bordered">
+    <tbody>
+    <tr>
+        <th>联系人名称</th>
+        <th>联系电码</th>
+        <th>更新时间</th>
+    </tr>
+    {empty name="list"}
+    <tr><td colspan="3">还未有相关数据</td></tr>
+    {else/}
+    {foreach name="list" item="da"}
+        <tr>
+            <td>{$da.NAME}</td>
+            <td>{$da.NUMBER}</td>
+            <td>{$da.UPDATE_TIME}</td>
+        </tr>
+    {/foreach}
+    {/empty}
+    </tbody>
+
+</table>

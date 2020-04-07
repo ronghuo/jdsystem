@@ -1,0 +1,164 @@
+{__NOLAYOUT__}
+<!DOCTYPE HTML>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv=X-UA-Compatible content="IE=edge,chrome=1">
+    <meta content=always name=referrer>
+    <title>{:config('app.system_name')}-管理后台</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="none">
+    <link href="/static/admin/css/userusers_drugtestprint.css?1" rel="stylesheet">
+</head>
+<body style="font-family: 宋体;">
+    <div style="width: 100%;text-align: right;"><a href="javascript:window.location.reload();" class="btn-print">打印</a></div>
+    <div class="print-area">
+        <h2 class="test-title">社区戒毒(康复)人员吸毒检测记录表</h2>
+        <div class="test-content">
+            <div class="basic-row">
+                <label style="">姓　　名</label><div class="input" style="width: 120px;">{$user.NAME}</div>
+                <label>性别</label><div class="input" style="width: 100px;">{$user.GENDER}</div>
+                <label>身份证号</label><div class="input" style="width: 300px;">{$user.ID_NUMBER}</div>
+            </div>
+            <div class="basic-row">
+                <label>家庭地址</label><div class="input" style="width: 360px;">{$user.LIVE_PLACE}{$user.LIVE_ADDRESS}</div>
+                <label>联系电话</label><div class="input" style="width: 200px;">{$user.MOBILE}</div>
+            </div>
+        </div>
+        <div class="test-content">
+            <table class="test-grid" cellpadding="0" cellspacing="0">
+                <tr>
+                    <th>序号</th>
+                    <th>检测时间</th>
+                    <th>检测地点</th>
+                    <th>检测结果</th>
+                    <th>检测人</th>
+                </tr>
+                {notempty name="testList"}
+                    {foreach name="testList" item="test" key="num"}
+                        <tr>
+                            <td>{$num + 1}</td>
+                            <td>{$test.TEST_TIME}</td>
+                            <td>{$test.TEST_PLACE}</td>
+                            <td>{$test.TEST_RESULT}</td>
+                            <td>{$test.TEST_PERSON}</td>
+                        </tr>
+                    {/foreach}
+                {/notempty}
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+<!--============ javascript ===========-->
+<script src="/static/bootstrap/js/jquery.js"></script>
+<script src="/static/plugin/nlayer/layer.min.js"></script>
+<script src="/static/plugin/common/common.js?{$jd_cache_ver}" type="text/javascript"></script>
+    <script src="/static/plugin/jasonday-printThis/printThis.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $('.print-area').printThis();
+        $('.test-content .large-paragraph').each(function (i, item) {
+            $(item).html($(item).html().replace(/[\n\r]/g,'<br>'));
+        });
+    })
+</script>
+</body>
+</html>

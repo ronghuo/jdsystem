@@ -1,0 +1,29 @@
+{__NOLAYOUT__}
+{include file="common/layerheader"/}
+<div class="container">
+
+    <div class="row-fluid">
+        <fieldset class="default padd10">
+            <legend>街道/社区</legend>
+            <form class="form-horizontal mt10" action="{:url('AreasSub/create')}" method="post" id="postform">
+                <input type="hidden" name="city_id" value="{$city_id}"/>
+                <input type="hidden" name="county_id" value="{$county_id}"/>
+                <input type="hidden" name="street_id" value="{$street_id}"/>
+                <div class="mb10">
+                    正在往 <span class="text-info">{$area}</span> 中添加下级地区信息
+                </div>
+                <div class="mb10">
+                    <textarea name="arealist" rows="12" placeholder="一行一个地区"></textarea>
+                    <div class="help-block">可以一次性添加多个地区信息，每行一个</div>
+                </div>
+
+                <div id="page-mesg"></div>
+                <div class="form-actions">
+                    <input type="button" class="btn btn-primary" value="确定保存" id="savedata"/>
+                    <a href="javascript:;" class="btn" onclick="closePlayer();">取消</a>
+                </div>
+            </form>
+        </fieldset>
+    </div>
+</div>
+{include file="common/layerfooter"/}

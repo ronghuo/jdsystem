@@ -1,0 +1,75 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span3"><h3 class="page-header">资讯列表</h3></div>
+                    <div class="span9">
+                        <a href="javascript:history.back();" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                        <a href="{:url('Articles/create')}" class="btn btn-primary pull-right"><i class="icon-plus"></i>添加新资讯</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+            <tr>
+                <th>封面</th>
+                <th>标题</th>
+                <th>显示客户端</th>
+                <th>分类</th>
+                <th>阅读量</th>
+                <th>添加时间</th>
+                <th>操作</th>
+                <th>推送</th>
+            </tr>
+            {empty name="list"}
+            <tr><td colspan="7">木有找到相关的信息</td></tr>
+            {else/}
+            {foreach name="list" item="da"}
+            <tr>
+                <td><img src="{$da.COVER_IMG_URL}" style="height: 50px;"/> </td>
+                <td>{$da.TITLE}</td>
+                <td>{$da.client_tag_text}</td>
+                <td>{$da.cate.NAME}</td>
+                <td>{$da.VIEW_NUM}</td>
+                <td>{$da.ADD_TIME}</td>
+                <td><a href="javascript:;" data-url="{:url('Articles/read',array('id'=>$da['ID']))}" class="btn mini btn-primary openlayerwin"><i class="icon-info-sign"></i>详情</a>
+                    <a href="{:url('Articles/edit',array('id'=>$da['ID']))}" class="btn mini"><i class="icon-edit"></i>编辑</a>
+
+                    {if $da.CAROUSEL_ID>0}
+                    <a href="javascript:;" data-url="{:url('Carousel/edit',['id'=>$da['CAROUSEL_ID']])}" class="btn btn-info mini openlayerwin2">轮播</a>
+                    {else}
+                    <a href="javascript:;" data-url="{:url('Carousel/create',['stable'=>'news','sid'=>$da['ID']])}" class="btn btn-info mini openlayerwin2"><i class="icon-plus"></i>添加到轮播</a>
+                    {/if}
+                    <a href="javascript:;" data-href="{:url('Articles/delete',array('id'=>$da['ID']))}" class="btn mini btn-danger" onclick="deldata(this);"><i class="icon-trash"></i>删除</a>
+                </td>
+                <td>
+                    <select style="width: 140px;">
+                        <option value="">---推送选择---</option>
+                        <option value="1">推送到康复端</option>
+                        <option value="2">推送到管理端</option>
+                        <option value="3">推送到管理端+康复端</option>
+                    </select>
+                    <a href="javascript:;" data-id="{$da['ID']}" class="btn btn-success mini pushbtn">发送</a>
+                </td>
+            </tr>
+            {/foreach}
+            {/empty}
+            </tbody>
+
+        </table>
+
+        <div class="row-fluid">
+            <div class="span6"><div class="dataTables_info"></div></div>
+            <div class="span6"><div class="dataTables_paginate paging_bootstrap pagination">
+                {$page|raw}
+            </div></div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var push_url = "{:url('Articles/push')}";
+</script>

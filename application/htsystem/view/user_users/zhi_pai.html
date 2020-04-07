@@ -1,0 +1,90 @@
+{__NOLAYOUT__}
+{include file="common/layerheader"/}
+<div class="container">
+    <div class="row-fluid">
+        <div class="align-c mt5"><span class="font-18">{$info.NAME}</span> {$info.zhi_pai_text|raw}</div>
+        <div style="padding: 0 20px;"><span class="badge badge-important">参考</span><br/>
+            户藉地：{$info.DOMICILE_ADDRESS}<br/>
+            现住地：{$info.LIVE_ADDRESS}
+            <table class="stat-table responsive table table-stats table-striped table-bordered">
+                <tbody>
+                <tr>
+                    <th>操作类型</th>
+                    <th>指派地区</th>
+                    <th>指派理由</th>
+                    <th>指派人</th>
+                    <th>指派时间</th>
+                </tr>
+                {notempty name="changeLogs"}
+                    {foreach name="changeLogs" item="log"}
+                        <tr>
+                            <td>{if isset($log.CONTENT->assignName)}{$log.CONTENT->assignName}{/if}</td>
+                            <td>{if isset($log.CONTENT->newArea)}{$log.CONTENT->newArea}{/if}</td>
+                            <td>{if isset($log.CONTENT->reason)}{$log.CONTENT->reason}{/if}</td>
+                            <td>{if isset($log.OPER_USER_NAME)}{$log.OPER_USER_NAME}{/if}</td>
+                            <td>{if isset($log.CREATE_TIME)}{$log.CREATE_TIME}{/if}</td>
+                        </tr>
+                    {/foreach}
+                    {else/}
+                    <tr>
+                        <td colspan="5" style="text-align: center;">目前还没有指派记录</td>
+                    </tr>
+                {/notempty}
+                </tbody>
+            </table>
+            <div class="dataTables_paginate paging_bootstrap pagination">
+            {$page|raw}
+            </div>
+        </div>
+        <fieldset class="default padd10">
+        <legend>指派地区</legend>
+        <form class="form-horizontal mt10" action="{:url('UserUsers/zhiPai', ['id'=>$info.ID])}" method="post" id="postform">
+            <input type="hidden" name="zpact" id="zpact" value=""/>
+            <input type="hidden" name="uid" value="{$info.ID}"/>
+            <input type="hidden" name="assignReason" />
+            <div class="mb10">
+
+                <div id="areas3">
+                    {if $powerLevel gt 2}
+                        <select name="COUNTY_ID_12" id="lv1" class="lv1" powerLevel="2" disabled data-value="{if $info&&$info.COUNTY_ID_12>431200000000}{$info.COUNTY_ID_12}{/if}" style="width: 150px;"></select>
+                        <input type="hidden" name="COUNTY_ID_12" value="{$info.COUNTY_ID_12}" />
+                    {else/}
+                        <select name="COUNTY_ID_12" id="lv1" class="lv1" powerLevel="2" data-value="{if $info&&$info.COUNTY_ID_12>431200000000}{$info.COUNTY_ID_12}{/if}" style="width: 150px;"></select>
+                    {/if}
+                    {if $powerLevel gt 3}
+                        <select name="STREET_ID" id="lv2" class="lv2" powerLevel="3" disabled data-value="{if $info&&$info.STREET_ID>0}{$info.STREET_ID}{/if}"></select>
+                        <input type="hidden" name="STREET_ID" value="{$info.STREET_ID}" />
+                    {else/}
+                        <select name="STREET_ID" id="lv2" class="lv2" powerLevel="3" data-value="{if $info&&$info.STREET_ID>0}{$info.STREET_ID}{/if}"></select>
+                    {/if}
+                    {if $powerLevel gt 4}
+                        <select name="COMMUNITY_ID" id="lv3" class="lv3" powerLevel="4" disabled data-value="{if $info&&$info.COMMUNITY_ID>0}{$info.COMMUNITY_ID}{/if}"></select>
+                        <input type="hidden" name="COMMUNITY_ID" value="{$info.COMMUNITY_ID}" />
+                    {else/}
+                        <select name="COMMUNITY_ID" id="lv3" class="lv3" powerLevel="4" data-value="{if $info&&$info.COMMUNITY_ID>0}{$info.COMMUNITY_ID}{/if}"></select>
+                    {/if}
+
+                </div>
+            </div>
+
+            <div id="page-mesg"></div>
+            <div class="form-actions">
+                <input type="button" class="btn btn-primary" value="指派" id="zhipaiok"/>
+                <input type="button" class="btn btn-success" {if $info.COMMUNITY_ID == 0}disabled{/if} value="建档" id="zhipaiok1"/>
+
+                <input type="button" class="btn btn-warning" {if $info.JD_ZHI_PAI_ID == 0}disabled{/if}  value="解除社戒社康" id="jiechubtn"/>
+
+                <a href="javascript:;" class="btn" onclick="closePlayer();">取消</a>
+            </div>
+
+        </form>
+        </fieldset>
+    </div>
+</div>
+<script type="text/javascript">
+    POWER_LEVEL = '{$powerLevel}';
+</script>
+{include file="common/layerfooter"/}
+
+
+

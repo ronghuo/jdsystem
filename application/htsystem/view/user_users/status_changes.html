@@ -1,0 +1,19 @@
+{__NOLAYOUT__}
+{include file="common/layerheader"/}
+<div class="container">
+
+    <div class="row-fluid">
+        {empty name="changeLogs"}
+        <div style="width: 100%;text-align: center;color: orange;margin-top: 20px;font-size: 16px;">无数据</div>
+        {else/}
+            <table class="stat-table responsive table table-stats table-striped table-bordered">
+                <tbody>
+                {foreach name="changeLogs" item="log"}
+                <tr><td>{$log.CREATE_TIME}</td><td>{$log.CONTENT}</td><td>{$log.OPER_USER_NAME}</td></tr>
+                {/foreach}
+                </tbody>
+            </table>
+        {/empty}
+    </div>
+</div>
+{include file="common/layerfooter"/}

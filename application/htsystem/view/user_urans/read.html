@@ -1,0 +1,40 @@
+{__NOLAYOUT__}
+{include file="common/layerheader"/}
+<div class="container">
+
+    <div class="row-fluid">
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+            <tr><td colspan="2" style="text-align: center">
+                <img src="{$info.uuser.HEAD_IMG_URL}" style="height: 150px;"/>
+            </td></tr>
+            <tr><td>康复人员姓名</td><td>{$info.uuser.NAME}</td></tr>
+            <tr><td>康复人员编号</td><td>{$info.uuser.UUCODE}</td></tr>
+            <tr><td>尿检记录编号</td><td>{$info.URAN_CODE}</td></tr>
+            <tr><td>登记时间</td><td>{$info.ADD_TIME}</td></tr>
+
+            <tr><td>身份证号</td><td>{$info.uuser.ID_NUMBER}</td></tr>
+            <tr><td>尿检日期</td><td>{$info.CHECK_TIME}</td></tr>
+            <tr><td>尿检地区</td><td>{$info.AREAS}</td></tr>
+            <tr><td>尿检地点</td><td>{$info.ADDRESS}</td></tr>
+            <tr><td>尿检结果</td><td>{$info.RESULT}</td></tr>
+
+
+            <tr><td>登记人姓名</td><td>{$info.muser.NAME}</td></tr>
+            <tr><td>登记单位名称</td><td>{$info.dmmc.DMMC}</td></tr>
+            <tr><td>登记单位代码</td><td>{$info.dmmc.DM}</td></tr>
+            <tr><td>备注</td><td>{$info.REMARK}</td></tr>
+            <tr><td>图片</td><td>
+            {if $info.IMGS}
+                {foreach name="info.IMGS" item="img"}
+                    <img src="{$img.IMG_URL}" style="width: 100%;"/>
+                {/foreach}
+                {/if}
+            </td></tr>
+
+
+            </tbody>
+        </table>
+    </div>
+</div>
+{include file="common/layerfooter"/}

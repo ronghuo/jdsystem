@@ -1,0 +1,54 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span3"><h3 class="page-header">权限分组</h3></div>
+                    <div class="span9">
+                        <a href="javascript:history.back();" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                        <a href="javascript:;" data-url="{:url('Syspower/groupinfo')}" class="btn btn-primary pull-right openlayerwin"><i class="icon-plus"></i>添加新分组</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+            <tr>
+                <th class="span1">ID</th>
+                <th class="span1">图标</th>
+                <th>分组名称</th>
+                <th>链接</th>
+                <th>操作</th>
+            </tr>
+            {empty name="data"}
+            <tr><td colspan="5">木有找到相关的信息</td></tr>
+            {else/}
+            {foreach name="data" item="da"}
+            <tr><td>{$da.ID}</td>
+                <td><i class="{$da.ICON}"></i></td>
+                <td>{$da.NAME}</td>
+                <td>{$da.LINK}</td>
+                <td>
+                    <a href="javascript:;" data-url="{:url('Syspower/groupinfo',array('gid'=>$da['ID']))}" class="btn mini openlayerwin"><i class="icon-edit"></i>编辑</a>
+                    <a href="javascript:;" data-href="{:url('Syspower/groupdel',array('gid'=>$da['ID']))}" class="btn mini" onclick="deldata(this);"><i class="icon-trash"></i>删除</a>
+                </td></tr>
+            {/foreach}
+            {/empty}
+
+            </tbody>
+
+        </table>
+
+
+        {if $pagenav}
+        <div class="row-fluid">
+            <div class="span6"><div class="dataTables_info">{$pagenav.txt}</div></div>
+            <div class="span6"><div class="dataTables_paginate paging_bootstrap pagination"><ul>{$pagenav.links}</ul></div></div>
+        </div>
+        {/if}
+
+
+    </div>
+</div>

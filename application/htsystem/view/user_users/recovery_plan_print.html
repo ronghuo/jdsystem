@@ -1,0 +1,94 @@
+{__NOLAYOUT__}
+<!DOCTYPE HTML>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv=X-UA-Compatible content="IE=edge,chrome=1">
+    <meta content=always name=referrer>
+    <title>{:config('app.system_name')}-管理后台</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="none">
+    <link href="/static/admin/css/userusers_recoveryplanprint.css" rel="stylesheet">
+</head>
+<body style="font-family: 宋体;">
+    <div style="width: 100%;text-align: right;"><a href="javascript:window.location.reload();" class="btn-print">打印</a></div>
+    <div class="print-area">
+        <h1 class="plan-title">社区戒毒(康复)计划</h1>
+        <div class="plan-content">
+            一、社区戒毒(康复)人员基本情况
+            <div class="basic-row">
+                <label style="">姓　　名</label><div class="input" style="width: 120px;">{notempty name="plan.NAME"}{$plan.NAME}{else/}　{/notempty}</div>
+                <label>性别</label><div class="input" style="width: 100px;">{notempty name="plan.GENDER"}{$plan.GENDER}{else/}　{/notempty}</div>
+                <label>身份证号</label><div class="input" style="width: 300px;">{notempty name="plan.ID_NUMBER"}{$plan.ID_NUMBER}{else/}　{/notempty}</div>
+            </div>
+            <div class="basic-row">
+                <label>联系电话</label><div class="input" style="width: 200px;">{notempty name="plan.MOBILE"}{$plan.MOBILE}{else/}　{/notempty}</div>
+                <label>户籍所在地</label><div class="input" style="width: 344px;">{notempty name="plan.DOMICILE_PLACE"}{$plan.DOMICILE_PLACE}{else/}　{/notempty}</div>
+            </div>
+            <div class="basic-row">
+                <label>现居住地址</label><div class="input" style="width: 616px;">{notempty name="plan.LIVE_PLACE"}{$plan.LIVE_PLACE}{else/}　{/notempty}</div>
+            </div>
+            <div class="basic-row">
+                <label>社区戒毒(康复)时间：</label>
+                <div style="display: block;margin: 20px 0 0 0;">
+                    自<div class="input-date">{notempty name="plan.BEGIN_DATE"}{$plan.BEGIN_DATE.year}{else/}　{/notempty}</div>年
+                    <div class="input-date">{notempty name="plan.BEGIN_DATE"}{$plan.BEGIN_DATE.month}{else/}　{/notempty}</div>月
+                    <div class="input-date">{notempty name="plan.BEGIN_DATE"}{$plan.BEGIN_DATE.day}{else/}　{/notempty}</div>日起
+                    至
+                    <div class="input-date">{notempty name="plan.END_DATE"}{$plan.END_DATE.year}{else/}　{/notempty}</div>年
+                    <div class="input-date">{notempty name="plan.END_DATE"}{$plan.END_DATE.month}{else/}　{/notempty}</div>月
+                    <div class="input-date">{notempty name="plan.END_DATE"}{$plan.END_DATE.day}{else/}　{/notempty}</div>日止
+                </div>
+            </div>
+        </div>
+        <div class="plan-content">
+            二、社区戒毒(康复)人员家庭成员：
+            <p class="large-paragraph">{$plan.FAMILY_MEMBERS}</p>
+        </div>
+        <div class="plan-content">
+            三、社区戒毒(康复)人员吸毒史及治疗情况：
+            <p class="large-paragraph">{$plan.DRUG_HISTORY_AND_TREATMENT}</p>
+        </div>
+        <div class="plan-content">
+            四、社区戒毒(康复)人员当前情况：
+            <p class="large-paragraph">{$plan.CURRENT_STATUS}</p>
+        </div>
+        <div class="plan-content">
+            五、应采取的戒毒治疗措施：
+            <p class="large-paragraph">{$plan.CURE_MEASURES}</p>
+            (一)、是否动员参加药物维持治疗情况
+            <p class="small-paragraph">{$plan.WHETHER_MEDICHINE_ENCOURAGED}</p>
+            (二)、是否需要戒毒治疗
+            <p class="small-paragraph">{$plan.WHETHER_DETOXIFICATION_REQUIRED}</p>
+        </div>
+        <div class="plan-content">
+            六、心理咨询疏导计划：
+            <p class="large-paragraph">{$plan.PSYCHOLOGICAL_CONSULTING_PLAN}</p>
+        </div>
+        <div class="plan-content">
+            七、拟采取帮扶救助措施：
+            <p class="large-paragraph">{$plan.ASSISTANCE_MEASURES}</p>
+        </div>
+        <div class="inscription">
+            <div class="input">{notempty name="plan.COMMUNITY_NAME"}{$plan.COMMUNITY_NAME}{else/}　{/notempty}</div>社区戒毒社区康复工作办公室
+            <div class="seal">(盖章)</div>
+            <div class="date">{notempty name="plan.SIGN_DATE"}　{$plan.SIGN_DATE.year}　{else/}　　{/notempty}年
+                {notempty name="plan.SIGN_DATE"}　{$plan.SIGN_DATE.month}　{else/}　　{/notempty}月
+                {notempty name="plan.SIGN_DATE"}　{$plan.SIGN_DATE.day}　{else/}　　{/notempty}日</div>
+        </div>
+    </div>
+<!--============ javascript ===========-->
+<script src="/static/bootstrap/js/jquery.js"></script>
+<script src="/static/plugin/nlayer/layer.min.js"></script>
+<script src="/static/plugin/common/common.js?{$jd_cache_ver}" type="text/javascript"></script>
+    <script src="/static/plugin/jasonday-printThis/printThis.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $('.print-area').printThis();
+        $('.plan-content .large-paragraph').each(function (i, item) {
+            $(item).html($(item).html().replace(/[\n\r]/g,'<br>'));
+        });
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<table class="stat-table responsive table table-stats table-striped table-bordered">
+    <tbody>
+    <tr>
+        <th>联系人名称</th>
+        <th>联系电码</th>
+        <th>类型</th>
+        <th>时间</th>
+        <th>时长</th>
+    </tr>
+    {empty name="list"}
+    <tr><td colspan="5">还未有相关数据</td></tr>
+    {else/}
+    {foreach name="list" item="da"}
+        <tr>
+            <td>{$da.CALL_NAME}</td>
+            <td>{$da.CALL_NUMBER}</td>
+            <td>{$da.CALL_TYPE_STR}</td>
+            <td>{$da.CALL_DATE_STR}</td>
+            <td>{$da.CALL_DURATION_STR}</td>
+        </tr>
+    {/foreach}
+    {/empty}
+    </tbody>
+
+</table>

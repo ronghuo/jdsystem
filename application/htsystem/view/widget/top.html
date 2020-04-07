@@ -1,0 +1,19 @@
+{__NOLAYOUT__}
+<!-- Navbar================================================== -->
+<div class="navbar navbar-inverse top-nav">
+    <div class="navbar-inner bg-blue">
+        <div class="container">
+            <a class="brand" href="{:url('Index/index')}" style="margin-top:15px;"><img src="/static/admin/images/logo.png" style="height: 30px;"/>
+                {:config('app.system_short_name')}</a>
+            <!-- 顶级菜单 begin-->
+            <div class="nav-collapse">
+                <ul class="nav">
+                    {foreach name="groups" item="gp"}
+                    <li><a href="{:url($gp['LINK'])}"{if $cgp==$gp.ID} class="active"{/if}><i class="{$gp['ICON']}"></i>{$gp['NAME']}</a></li>
+                    {/foreach}
+                </ul>
+            </div><!-- 顶级菜单 end-->
+        </div>
+    </div>
+</div>
+

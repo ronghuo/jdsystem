@@ -1,0 +1,190 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span3"><h3 class="page-header">社区戒毒(康复)计划</h3></div>
+                    <div class="span9">
+                        <a href="{:url('UserUsers/index')}" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form class="form-horizontal left-align" method="post" action="{:url('UserUsers/saveRecoveryPlan')}" enctype="multipart/form-data">
+            {notempty name="plan"}
+                {notempty name="plan.ID"}
+                    <input type="hidden" name="ID" value="{$plan.ID}"/>
+                {/notempty}
+                <input type="hidden" name="UUID" value="{$plan.UUID}"/>
+            {/notempty}
+            <section>
+                <h5>一、社区戒毒(康复)人员基本情况</h5>
+                <div class="control-group">
+                    <label class="control-label">姓名</label>
+                    <div class="controls">
+                        <input type="text" name="NAME" id="name" value="{notempty name='plan'}{$plan.NAME}{/notempty}" class="input" placeholder=""/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">证件号码</label>
+                    <div class="controls">
+                        <input type="text" name="ID_NUMBER" id="idNumber" value="{notempty name='plan'}{$plan.ID_NUMBER}{/notempty}" class="input" placeholder=""/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">性别</label>
+                    <div class="controls">
+                        <select name="GENDER" id="gender">
+                            <option value="">请选择</option>
+                            {foreach name="genders" item="gender"}
+                                <option value="{$gender.ID}" {notempty name='plan'}{if $gender.ID == $plan.GENDER}selected{/if}{/notempty}>{$gender.NAME}</option>
+                            {/foreach}
+                        </select>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">手机号码</label>
+                    <div class="controls">
+                        <input type="text" name="MOBILE" id="mobile" value="{notempty name='plan'}{$plan.MOBILE}{/notempty}" class="input" placeholder=""/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">户籍所在地</label>
+                    <div class="controls">
+                        <input type="text" name="DOMICILE_PLACE" id="domicilePlace" value="{notempty name='plan'}{$plan.DOMICILE_PLACE}{/notempty}" class="input span5" placeholder=""/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">现居住地址</label>
+                    <div class="controls">
+                        <input type="text" name="LIVE_PLACE" id="livePlace" value="{notempty name='plan'}{$plan.LIVE_PLACE}{/notempty}" class="input span5" placeholder=""/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">社区戒毒(康复)时间</label>
+                    <div class="controls">
+                        <input type="date" name="BEGIN_DATE" id="beginDate" value="{notempty name='plan'}{$plan.BEGIN_DATE}{/notempty}"/>　-　<input type="date" name="END_DATE" id="endDate" value="{notempty name='plan'}{$plan.END_DATE}{/notempty}"/>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h5>二、社区戒毒(康复)人员家庭成员</h5>
+                <div class="control-group">
+                    <label class="control-label"></label>
+                    <div class="controls">
+                        <textarea rows="5" name="FAMILY_MEMBERS" class="answer">{notempty name='plan'}{notempty name='plan.FAMILY_MEMBERS'}{$plan.FAMILY_MEMBERS}{/notempty}{/notempty}</textarea>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h5>三、社区戒毒(康复)人员吸毒史及治疗情况</h5>
+                <div class="control-group">
+                    <label class="control-label"></label>
+                    <div class="controls">
+                        <textarea rows="5" name="DRUG_HISTORY_AND_TREATMENT" class="answer">{notempty name='plan'}{notempty name='plan.DRUG_HISTORY_AND_TREATMENT'}{$plan.DRUG_HISTORY_AND_TREATMENT}{/notempty}{/notempty}</textarea>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h5>四、社区戒毒(康复)人员当前情况</h5>
+                <div class="control-group">
+                    <label class="control-label"></label>
+                    <div class="controls">
+                        <select name="CURRENT_STATUS">
+                            <option value="">请选择</option>
+                            {foreach name="statuses" item="status" key="code"}
+                                <option value="{$code}" {notempty name='plan'}{notempty name='plan.CURRENT_STATUS'}{if $code == $plan.CURRENT_STATUS}selected{/if}{/notempty}{/notempty}>{$statuses[$code]}</option>
+                            {/foreach}
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h5>五、应采取的戒毒治疗措施</h5>
+                <div class="control-group">
+                    <label class="control-label"></label>
+                    <div class="controls">
+                        <textarea rows="5" name="CURE_MEASURES" class="answer">{notempty name='plan'}{notempty name='plan.CURE_MEASURES'}{$plan.CURE_MEASURES}{/notempty}{/notempty}</textarea>
+                    </div>
+                </div>
+                <h6>(一)、是否动员参加药物维持治疗情况</h6>
+                <div class="control-group">
+                    <label class="control-label"></label>
+                    <div class="controls">
+                        <select name="WHETHER_MEDICHINE_ENCOURAGED">
+                            <option value="">请选择</option>
+                            {foreach name="whether" item="item" key="code"}
+                                <option value="{$code}" {notempty name='plan'}{notempty name='plan.WHETHER_MEDICHINE_ENCOURAGED'}{if $code == $plan.WHETHER_MEDICHINE_ENCOURAGED && !is_null($plan.WHETHER_MEDICHINE_ENCOURAGED)}selected{/if}{/notempty}{/notempty}>{$item}</option>
+                            {/foreach}
+                        </select>
+                    </div>
+                </div>
+                <h6>(二)、是否需要戒毒治疗</h6>
+                <div class="control-group">
+                    <label class="control-label"></label>
+                    <div class="controls">
+                        <select name="WHETHER_DETOXIFICATION_REQUIRED">
+                            <option value="">请选择</option>
+                            {foreach name="whether" item="item" key="code"}
+                                <option value="{$code}" {notempty name='plan'}{notempty name='plan.WHETHER_DETOXIFICATION_REQUIRED'}{if $code == $plan.WHETHER_DETOXIFICATION_REQUIRED && !is_null($plan.WHETHER_DETOXIFICATION_REQUIRED)}selected{/if}{/notempty}{/notempty}>{$item}</option>
+                            {/foreach}
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h5>六、心理咨询疏导计划</h5>
+                <div class="control-group">
+                    <label class="control-label"></label>
+                    <div class="controls">
+                        <textarea rows="5" name="PSYCHOLOGICAL_CONSULTING_PLAN" class="answer">{notempty name='plan'}{notempty name='plan.PSYCHOLOGICAL_CONSULTING_PLAN'}{$plan.PSYCHOLOGICAL_CONSULTING_PLAN}{/notempty}{/notempty}</textarea>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h5>七、拟采取帮扶救助措施</h5>
+                <div class="control-group">
+                    <label class="control-label"></label>
+                    <div class="controls">
+                        <textarea rows="5" name="ASSISTANCE_MEASURES" class="answer">{notempty name='plan'}{notempty name='plan.ASSISTANCE_MEASURES'}{$plan.ASSISTANCE_MEASURES}{/notempty}{/notempty}</textarea>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h5>落款信息</h5>
+                <div class="control-group">
+                    <label class="control-label">社区名称</label>
+                    <div class="controls">
+                        <input type="text" name="COMMUNITY_NAME" id="communityName" value="{notempty name='plan'}{notempty name='plan.COMMUNITY_NAME'}{$plan.COMMUNITY_NAME}{/notempty}{/notempty}" class="input" placeholder=""/>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">落款时间</label>
+                    <div class="controls">
+                        <input type="date" name="SIGN_DATE" id="signDate" value="{notempty name='plan'}{notempty name='plan.SIGN_DATE'}{$plan.SIGN_DATE}{/notempty}{/notempty}"/>
+                    </div>
+                </div>
+            </section>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="subbtn">保存资料</button>
+                {notempty name="plan.ID"}
+                <a href="{:url('UserUsers/printRecoveryPlan', array('planId' => $plan.ID))}" target="_blank" class="btn btn-info"><i class="icon-print"></i>打印</a>
+                {/notempty}
+                <a href="{:url('UserUsers/index')}" class="btn"><i class="icon-reply"></i> 取消</a>
+            </div>
+        </form>
+
+    </div>
+</div><!-- 主体 end-->
+<script type="text/javascript">
+
+</script>
