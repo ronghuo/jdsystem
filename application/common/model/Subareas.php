@@ -26,8 +26,6 @@ class Subareas extends BaseModel
             }
         }
 
-
-
         $exist = self::where('CODE12', $code12)->count();
         if($exist > 0){
             return self::getNewCode12($p_code_12, ++$step);

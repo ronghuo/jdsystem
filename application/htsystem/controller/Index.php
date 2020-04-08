@@ -14,8 +14,6 @@ class Index extends Common
      */
     public function index()
     {
-//        print_r(session('_ACCESS_LIST'));
-
         $host = getCurHttpHost();
         //qrcode/jquery.qrcode
         $user_app_link = $host.'/html/app.html?f=client';

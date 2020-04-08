@@ -21,21 +21,31 @@ class Dmmcs extends Common
         $area3 = input('get.area3','');
         $area4 = input('get.area4','');
 
-        if($area4){
+        if ($area4) {
             $pid = $area4;
-        }elseif($area3){
+        } elseif ($area3) {
             $pid = $area3;
-        }elseif($area2){
+        } elseif ($area2) {
             $pid = $area2;
-        }
-        elseif($area1){
+        } elseif($area1) {
             $pid = $area1;
         }
 
 
-        $all = NbAuthDept::field('ID, PARENTDEPTID as PID, DEPTCODE, DEPTNAME as NAME,DEPTDESC,FLAG')
-            ->all();
-        $trees = create_level_tree($all,$pid);
+        $query = NbAuthDept::field('ID, PARENTDEPTID as PID, DEPTCODE, DEPTNAME as NAME,DEPTDESC,FLAG');
+        $powerLevel = $this->getPowerLevel();
+        $admin = session('info');
+        if ($this->isSuperAdmin() || self::POWER_LEVEL_CITY == $powerLevel) {
+            $all = $query->all();
+        }
+        elseif (self::POWER_LEVEL_COUNTY == $powerLevel) {
+            $countyId = substr($admin['POWER_COUNTY_ID_12'], 0, 6);
+            $all = $query->whereLike('AREACODE', "$countyId%")->select();
+        }
+        else {
+            $this->error('权限不足.');
+        }
+        $trees = create_level_tree($all, $pid);
 
         $js = $this->loadJsCss(array('p:cate/jquery.cate', 'dmmcs_index'), 'js', 'admin');
         $this->assign('footjs', $js);
@@ -93,8 +103,12 @@ class Dmmcs extends Common
         }
 
         $info = NbAuthDept::find($id);
-        if(!$info){
+        if (!$info) {
             $this->error('该机构不存在');
+        }
+
+        if (!$this->isDeptManageAllowed($info->AREACODE)) {
+            $this->error('权限不足');
         }
 
         if($request->isPost()){

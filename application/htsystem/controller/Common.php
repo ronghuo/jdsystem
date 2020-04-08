@@ -266,6 +266,58 @@ class Common extends Controller
         return $ids;
     }
 
+    /**
+     * 是否有机构管理权限
+     * @param $deptAreaCode 所属区域代码
+     * @return bool
+     */
+    protected function isDeptManageAllowed($deptAreaCode) {
+        $superadmin = session('superadmin');
+        if ($superadmin) {
+            return true;
+        }
+        $power_level = session('power_level');
+        $admin = session('info');
+        // 市级
+        if ($power_level == self::POWER_LEVEL_CITY) {
+            return true;
+        }
+        // 县级
+        elseif ($power_level == self::POWER_LEVEL_COUNTY) {
+            $countyId = substr($admin['POWER_COUNTY_ID_12'], 0, 6);
+            return strpos($deptAreaCode, $countyId) === 0;
+        }
+        else {
+            $this->error('权限不足');
+        }
+    }
+
+    /**
+     * 是否有社区数据管理权限
+     * @param $areaCode 所属区域代码
+     * @return bool
+     */
+    protected function isSubareaManageAllowed($areaCode) {
+        $superadmin = session('superadmin');
+        if ($superadmin) {
+            return true;
+        }
+        $power_level = session('power_level');
+        $admin = session('info');
+        // 市级
+        if ($power_level == self::POWER_LEVEL_CITY) {
+            return true;
+        }
+        // 县级
+        elseif ($power_level == self::POWER_LEVEL_COUNTY) {
+            $countyId = substr($admin['POWER_COUNTY_ID_12'], 0, 6);
+            return $areaCode == $countyId;
+        }
+        else {
+            $this->error('权限不足');
+        }
+    }
+
     protected function clientTags(){
         return [
             1=>'康复端',

@@ -23,29 +23,42 @@ class AreaSub extends Common{
         $show_merge = false;
         $show_add = true;
 
-        if($area3 >0){
+        if ($area3 > 0) {
             $pid = $area3;
             $show_add = false;
-        }elseif($area2 > 0){
+        } elseif ($area2 > 0) {
             $pid = $area2;
-        }elseif($area1 > 0){
+        } elseif ($area1 > 0) {
             $pid = $area1;
             $show_merge = true;
         }
         $areas = [];
         $areaInfo = [];
         $isSo = false;
-        if($pid > 0){
+        if ($pid > 0) {
             $isSo = true;
             $areaInfo = Subareas::where('CODE12', $pid)->find();
-            $areas = Subareas::where('PID', $pid)->select();
+            if (!$this->isSubareaManageAllowed($areaInfo->COUNTYID)) {
+                $areaInfo = null;
+            }
+            $query = Subareas::where('PID', $pid);
+
+            $powerLevel = $this->getPowerLevel();
+            $admin = session('info');
+            if ($this->isSuperAdmin() || self::POWER_LEVEL_CITY == $powerLevel) {
+                $areas = $query->all();
+            }
+            elseif (self::POWER_LEVEL_COUNTY == $powerLevel) {
+                $countyId = substr($admin['POWER_COUNTY_ID_12'], 0, 6);
+                $areas = $query->where('COUNTYID', $countyId)->select();
+            }
+            else {
+                $this->error('权限不足.');
+            }
         }
-//        print_r($areaInfo);
 
         $js = $this->loadJsCss(array('p:cate/jquery.cate', 'area_sub_index'), 'js', 'admin');
         $this->assign('footjs', $js);
-//        return json_encode($trees);
-//        $this->assign('trees', $trees);
         $this->assign('area1', $area1);
         $this->assign('area2', $area2);
         $this->assign('area3', $area3);

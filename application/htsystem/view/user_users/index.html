@@ -59,7 +59,7 @@
 
                 <th>所属禁毒办</th>
                 <th>管辖社区</th>
-                <th>现住址</th>
+                <th>户籍地</th>
                 <th>操作</th>
             </tr>
             {empty name="list"}
@@ -82,7 +82,7 @@
                     <td>{$da.MOBILE}</td>
                     <td><span title="{$da.MANAGE_POLICE_AREA_NAME}">{if strlen($da.MANAGE_POLICE_AREA_NAME) > 10}{:mb_substr($da.MANAGE_POLICE_AREA_NAME, 0, 10)}...{else/}{$da.MANAGE_POLICE_AREA_NAME}{/if}</span></td>
                     <td>{$da.MANAGE_COMMUNITY}</td>
-                    <td><span title="{$da.LIVE_ADDRESS}">{if strlen($da.LIVE_ADDRESS) > 15}{:mb_substr($da.LIVE_ADDRESS, 0, 15)}...{else/}{$da.LIVE_ADDRESS}{/if}</span><br/>
+                    <td><span title="{$da.DOMICILE_ADDRESS}">{if strlen($da.DOMICILE_ADDRESS) > 15}{:mb_substr($da.DOMICILE_ADDRESS, 0, 15)}...{else/}{$da.DOMICILE_ADDRESS}{/if}</span><br/>
                         {$da.zhi_pai_text|raw}
                     </td>
                     <td>
