@@ -1,7 +1,7 @@
 $(function () {
-
     $('#areas4').levelSelect({
-        url:'/static/plugin/cate/dmmcs-43.json?vv='+JD_VERSION
+        url:'/static/plugin/cate/dmmcs-43.json?vv='+JD_VERSION,
+        lv1value: $('#lv1').attr('data-value')
     });
 
     $('.lv2togglebtn').on('click', function () {
@@ -24,8 +24,7 @@ $(function () {
             self.attr('data-open', '1')
             self.children('i').removeClass('icon-chevron-up').addClass('icon-chevron-down');
         }
-
-        $(`.lv2-${_id}`).toggle();
+        $('.lv2-' + _id).toggle();
     })
 
 

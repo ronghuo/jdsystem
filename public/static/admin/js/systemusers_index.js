@@ -5,7 +5,8 @@ $(function(){
     fileview.clear();
 
     $('#dmmcsbox').levelSelect({
-        url:'/static/plugin/cate/dmmcs-43.json?vv='+JD_VERSION
+        url:'/static/plugin/cate/dmmcs-43.json?vv='+JD_VERSION,
+        lv1value: $('#lv1').attr('data-value')
     });
 
     $('a.openlayerwin').on('click',function(){

@@ -15,7 +15,6 @@
  */
 (function($){
     $.fn.levelSelect=function(settings){
-
         if(this.length<1){return;};
 
         //

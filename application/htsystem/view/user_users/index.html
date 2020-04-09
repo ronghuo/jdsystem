@@ -21,9 +21,9 @@
                 <div class="control-group">
                     <label class="control-label"> 所属地区 </label>
                     <div class="controls" id="areas3">
-                        <select name="area1" class="lv1" data-value="{$area1}"></select>
-                        <select name="area2" class="lv2" data-value="{$area2}"></select>
-                        <select name="area3" class="lv3" data-value="{$area3}"></select>
+                        <select name="area1" class="lv1" {if $powerLevel egt 2}disabled{/if} data-value="{$area1}"></select>
+                        <select name="area2" class="lv2" {if $powerLevel egt 3}disabled{/if} data-value="{$area2}"></select>
+                        <select name="area3" class="lv3" {if $powerLevel egt 4}disabled{/if} data-value="{$area3}"></select>
                     </div>
                 </div>
                 <div class="control-group">

@@ -16,10 +16,32 @@ class Dmmcs extends Common
      */
     public function index()
     {
-        $area1 = input('get.area1',10074);
-        $area2 = input('get.area2','');
-        $area3 = input('get.area3','');
-        $area4 = input('get.area4','');
+        $powerLevel = $this->getPowerLevel();
+        $admin = session('info');
+        $dmmcs = explode(',', $admin['DMMCIDS']);
+        if (self::POWER_LEVEL_COUNTY == $powerLevel) {
+            $area1 = $dmmcs[0];
+            $area2 = $dmmcs[1];
+            $area3 = input('area3', '');
+            $area4 = input('area4', '');
+        }
+        elseif (self::POWER_LEVEL_STREET == $powerLevel) {
+            $area1 = $dmmcs[0];
+            $area2 = $dmmcs[1];
+            $area3 = $dmmcs[2];
+            $area4 = input('area4', '');
+        }
+        elseif (self::POWER_LEVEL_COMMUNITY == $powerLevel) {
+            $area1 = $dmmcs[0];
+            $area2 = $dmmcs[1];
+            $area3 = $dmmcs[2];
+            $area4 = $dmmcs[3];
+        } else {
+            $area1 = input('area1', $dmmcs[0]);
+            $area2 = input('area2', '');
+            $area3 = input('area3', '');
+            $area4 = input('area4', '');
+        }
 
         if ($area4) {
             $pid = $area4;
@@ -30,7 +52,6 @@ class Dmmcs extends Common
         } elseif($area1) {
             $pid = $area1;
         }
-
 
         $query = NbAuthDept::field('ID, PARENTDEPTID as PID, DEPTCODE, DEPTNAME as NAME,DEPTDESC,FLAG');
         $powerLevel = $this->getPowerLevel();
@@ -55,6 +76,7 @@ class Dmmcs extends Common
         $this->assign('area3', $area3);
         $this->assign('area4', $area4);
         $this->assign('is_so', false);
+        $this->assign('powerLevel', $powerLevel);
         return $this->fetch();
     }
 

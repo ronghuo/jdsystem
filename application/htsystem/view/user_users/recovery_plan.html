@@ -119,7 +119,7 @@
                         <select name="WHETHER_MEDICHINE_ENCOURAGED">
                             <option value="">请选择</option>
                             {foreach name="whether" item="item" key="code"}
-                                <option value="{$code}" {notempty name='plan'}{notempty name='plan.WHETHER_MEDICHINE_ENCOURAGED'}{if $code == $plan.WHETHER_MEDICHINE_ENCOURAGED && !is_null($plan.WHETHER_MEDICHINE_ENCOURAGED)}selected{/if}{/notempty}{/notempty}>{$item}</option>
+                                <option value="{$code}" {notempty name='plan'}{if isset($plan.WHETHER_MEDICHINE_ENCOURAGED) and $code == $plan.WHETHER_MEDICHINE_ENCOURAGED}selected{/if}{/notempty}>{$item}</option>
                             {/foreach}
                         </select>
                     </div>
@@ -131,7 +131,7 @@
                         <select name="WHETHER_DETOXIFICATION_REQUIRED">
                             <option value="">请选择</option>
                             {foreach name="whether" item="item" key="code"}
-                                <option value="{$code}" {notempty name='plan'}{notempty name='plan.WHETHER_DETOXIFICATION_REQUIRED'}{if $code == $plan.WHETHER_DETOXIFICATION_REQUIRED && !is_null($plan.WHETHER_DETOXIFICATION_REQUIRED)}selected{/if}{/notempty}{/notempty}>{$item}</option>
+                                <option value="{$code}" {notempty name='plan'}{if isset($plan.WHETHER_DETOXIFICATION_REQUIRED) and $code == $plan.WHETHER_DETOXIFICATION_REQUIRED}selected{/if}{/notempty}>{$item}</option>
                             {/foreach}
                         </select>
                     </div>

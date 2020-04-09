@@ -35,6 +35,7 @@ class SystemUsers extends Common
                 $item->HEAD_IMG_URL = build_http_img_url($item->HEAD_IMG);
         });
 
+
         $js = $this->loadJsCss(array('p:cate/jquery.cate', 'systemusers_index'), 'js', 'admin');
         $css = $this->loadJsCss(array('systemusers_index'), 'css', 'admin');
         $this->assign('footjs', $js);
@@ -43,6 +44,7 @@ class SystemUsers extends Common
         $this->assign('total', $list->total());
         $this->assign('is_so', $sop['is_so']);
         $this->assign('param', $sop['p']);
+        $this->assign('powerLevel', $this->getPowerLevel());
         return $this->fetch();
     }
 
@@ -59,10 +61,32 @@ class SystemUsers extends Common
             $is_so = true;
         }
 
-        $p['a1'] = input('area1', '10074');
-        $p['a2'] = input('area2', '');
-        $p['a3'] = input('area3', '');
-        $p['a4'] = input('area4', '');
+        $powerLevel = $this->getPowerLevel();
+        $admin = session('info');
+        $dmmcs = explode(',', $admin['DMMCIDS']);
+        if (self::POWER_LEVEL_COUNTY == $powerLevel) {
+            $p['a1'] = $dmmcs[0];
+            $p['a2'] = $dmmcs[1];
+            $p['a3'] = input('area3', '');
+            $p['a4'] = input('area4', '');
+        }
+        elseif (self::POWER_LEVEL_STREET == $powerLevel) {
+            $p['a1'] = $dmmcs[0];
+            $p['a2'] = $dmmcs[1];
+            $p['a3'] = $dmmcs[2];
+            $p['a4'] = input('area4', '');
+        }
+        elseif (self::POWER_LEVEL_COMMUNITY == $powerLevel) {
+            $p['a1'] = $dmmcs[0];
+            $p['a2'] = $dmmcs[1];
+            $p['a3'] = $dmmcs[2];
+            $p['a4'] = $dmmcs[3];
+        } else {
+            $p['a1'] = input('area1', $dmmcs[0]);
+            $p['a2'] = input('area2', '');
+            $p['a3'] = input('area3', '');
+            $p['a4'] = input('area4', '');
+        }
 
         if ($p['a4'] > 0) {
             $query->where('DMMCIDS', 'like', implode(',', [$p['a1'], $p['a2'], $p['a3'], $p['a4']]).'%');

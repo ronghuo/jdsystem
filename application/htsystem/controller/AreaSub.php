@@ -15,9 +15,27 @@ class AreaSub extends Common{
 
     public function index(){
 
-        $area1 = input('get.area1','');
-        $area2 = input('get.area2','');
-        $area3 = input('get.area3','');
+        $powerLevel = $this->getPowerLevel();
+        $admin = session('info');
+        if (self::POWER_LEVEL_COUNTY == $powerLevel) {
+            $area1 = $admin['POWER_COUNTY_ID_12'];
+            $area2 = input('area2', '');
+            $area3 = input('area3', '');
+        }
+        elseif (self::POWER_LEVEL_STREET == $powerLevel) {
+            $area1 = $admin['POWER_COUNTY_ID_12'];
+            $area2 = $admin['POWER_STREET_ID'];
+            $area3 = input('area3', '');
+        }
+        elseif (self::POWER_LEVEL_COMMUNITY == $powerLevel) {
+            $area1 = $admin['POWER_COUNTY_ID_12'];
+            $area2 = $admin['POWER_STREET_ID'];
+            $area3 = $admin['POWER_COMMUNITY_ID'];
+        } else {
+            $area1 = input('area1', '');
+            $area2 = input('area2', '');
+            $area3 = input('area3', '');
+        }
 
         $pid = 0;
         $show_merge = false;
@@ -67,6 +85,7 @@ class AreaSub extends Common{
         $this->assign('is_so', $isSo);
         $this->assign('show_merge', $show_merge);
         $this->assign('show_add', $show_add);
+        $this->assign('powerLevel', $powerLevel);
         return $this->fetch();
     }
 

@@ -234,9 +234,10 @@ class UserUsers extends Common
         $this->assign('area1',$sop['p']['a1']);
         $this->assign('area2',$sop['p']['a2']);
         $this->assign('area3',$sop['p']['a3']);
-
+        $powerLevel = $this->getPowerLevel();
         // 只有市级及县市区级有删除吸毒人员的权限
-        $this->assign('remove_allowed', in_array($this->getPowerLevel(), [self::POWER_LEVEL_CITY, self::POWER_LEVEL_COUNTY]));
+        $this->assign('remove_allowed', in_array($powerLevel, [self::POWER_LEVEL_CITY, self::POWER_LEVEL_COUNTY]));
+        $this->assign('powerLevel', $powerLevel);
 
         $this->addAdminLog(self::OPER_TYPE_QUERY, '康复人员列表');
 
@@ -261,19 +262,37 @@ class UserUsers extends Common
             $is_so = true;
         }
 
-        $p['a1'] = input('area1', '');
-        $p['a2'] = input('area2', '');
-        $p['a3'] = input('area3', '');
+        $powerLevel = $this->getPowerLevel();
+        $admin = session('info');
+        if (self::POWER_LEVEL_COUNTY == $powerLevel) {
+            $p['a1'] = $admin['POWER_COUNTY_ID_12'];
+            $p['a2'] = input('area2', '');
+            $p['a3'] = input('area3', '');
+        }
+        elseif (self::POWER_LEVEL_STREET == $powerLevel) {
+            $p['a1'] = $admin['POWER_COUNTY_ID_12'];
+            $p['a2'] = $admin['POWER_STREET_ID'];
+            $p['a3'] = input('area3', '');
+        }
+        elseif (self::POWER_LEVEL_COMMUNITY == $powerLevel) {
+            $p['a1'] = $admin['POWER_COUNTY_ID_12'];
+            $p['a2'] = $admin['POWER_STREET_ID'];
+            $p['a3'] = $admin['POWER_COMMUNITY_ID'];
+        } else {
+            $p['a1'] = input('area1', '');
+            $p['a2'] = input('area2', '');
+            $p['a3'] = input('area3', '');
+        }
 
-        if($p['a1'] > 0){
+        if ($p['a1'] > 0) {
             $query->where('COUNTY_ID_12', $p['a1']);
             $is_so = true;
         }
-        if($p['a2'] > 0){
+        if ($p['a2'] > 0) {
             $query->where('STREET_ID', $p['a2']);
             $is_so = true;
         }
-        if($p['a3'] > 0){
+        if ($p['a3'] > 0) {
             $query->where('COMMUNITY_ID', $p['a3']);
             $is_so = true;
         }
@@ -1458,7 +1477,7 @@ class UserUsers extends Common
             $data['CREATE_USER_NAME'] = session('name');
             $data['CREATE_TIME'] = Carbon::now()->toDateTimeString();
         }
-        $plan->save();
+        $plan->save($data);
 
         if ($isNew) {
             $log_oper_Name = '新增康复计划';

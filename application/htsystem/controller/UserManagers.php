@@ -67,6 +67,7 @@ class UserManagers extends Common
         $this->assign('area1',$sop['p']['a1']);
         $this->assign('area2',$sop['p']['a2']);
         $this->assign('area3',$sop['p']['a3']);
+        $this->assign('powerLevel', $this->getPowerLevel());
         return $this->fetch();
     }
     protected function dosearch(){
@@ -82,9 +83,27 @@ class UserManagers extends Common
             $is_so = true;
         }
 
-        $p['a1'] = input('area1', '');
-        $p['a2'] = input('area2', '');
-        $p['a3'] = input('area3', '');
+        $powerLevel = $this->getPowerLevel();
+        $admin = session('info');
+        if (self::POWER_LEVEL_COUNTY == $powerLevel) {
+            $p['a1'] = $admin['POWER_COUNTY_ID_12'];
+            $p['a2'] = input('area2', '');
+            $p['a3'] = input('area3', '');
+        }
+        elseif (self::POWER_LEVEL_STREET == $powerLevel) {
+            $p['a1'] = $admin['POWER_COUNTY_ID_12'];
+            $p['a2'] = $admin['POWER_STREET_ID'];
+            $p['a3'] = input('area3', '');
+        }
+        elseif (self::POWER_LEVEL_COMMUNITY == $powerLevel) {
+            $p['a1'] = $admin['POWER_COUNTY_ID_12'];
+            $p['a2'] = $admin['POWER_STREET_ID'];
+            $p['a3'] = $admin['POWER_COMMUNITY_ID'];
+        } else {
+            $p['a1'] = input('area1', '');
+            $p['a2'] = input('area2', '');
+            $p['a3'] = input('area3', '');
+        }
 
         if($p['a1'] > 0){
             $query->where('COUNTY_ID_12', $p['a1']);

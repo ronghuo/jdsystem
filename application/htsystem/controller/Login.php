@@ -60,7 +60,7 @@ class Login extends Common
         if(strpos($ref,'.local')===false && !captcha_check($verify)){
             return ['err'=>1,'mesg'=>'验证码不正确'];
         }
-        $user = Admins::field('ID AS USER_ID,LOG,PWD,STAT,ROLE_ID,NAME,GENDER,STATUS,LOGINIP,LGTIME,POWER_COMMUNITY_ID,POWER_STREET_ID,POWER_COUNTY_ID_12,POWER_CITY_ID')
+        $user = Admins::field('ID AS USER_ID,LOG,PWD,STAT,ROLE_ID,NAME,GENDER,STATUS,LOGINIP,LGTIME,POWER_COMMUNITY_ID,POWER_STREET_ID,POWER_COUNTY_ID_12,POWER_CITY_ID,DMMCIDS')
             ->where(['LOG'=>$username,'IS_WORK'=>1,'ISDEL'=>0])
             ->find();
         //$user = $this->admin_model->get_admin_info(['log'=>$username,'is_work'=>1,'isdel'=>0],'id as user_id,cpid,log,pwd,stat,role_id,name,sex,status,depart_id,loginip,lgtime');
