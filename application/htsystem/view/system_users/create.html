@@ -17,22 +17,12 @@
             {/notempty}
             <input type="hidden" name="ref" value=""/>
 
-            {empty name="info"}
-
-            <div class="control-group">
-                <label class="control-label"><span class="error">*</span> 帐号</label>
-                <div class="controls">
-                    <input type="text" name="LOG" value="" class="input" placeholder="登录账号"/>
-                </div>
-            </div>
-            {else/}
             <div class="control-group">
                 <label class="control-label"><span class="error">*</span> 帐号</label>
                 <div class="controls">
                     <input type="text" name="LOG" value="{if $info}{$info.LOG}{/if}" class="input" placeholder="登录账号"/>
                 </div>
             </div>
-            {/empty}
             {empty name="info"}
             <div class="control-group">
                 <label class="control-label"><span class="error">*</span> 密码</label>
@@ -55,22 +45,12 @@
                     <label class="radio radio-inline"><input type="radio" name="GENDER" value="2" {if $info && $info['GENDER']==2}checked{/if}>女</label>
                 </div>
             </div>
-            {empty name="info"}
-            <div class="control-group">
-                <label class="control-label"><span class="error">*</span> 手机号码</label>
-                <div class="controls">
-                    <input type="text" name="MOBILE" value="" class="input" placeholder="手机号码"/>
-                </div>
-            </div>
-            {else/}
             <div class="control-group">
                 <label class="control-label"><span class="error">*</span> 手机号码</label>
                 <div class="controls">
                     <input type="text" name="MOBILE" value="{if $info}{$info.MOBILE}{/if}" class="input" placeholder="手机号码"/>
                 </div>
             </div>
-
-            {/empty}
             <div class="control-group">
                 <label class="control-label"><span class="error">*</span> 后台权限角色</label>
                 <div class="controls">
@@ -95,16 +75,16 @@
             <div class="control-group">
                 <label class="control-label"><span class="error">*</span> 单位</label>
                 <div class="controls" id="dmmcsbox">
-                    <select name="dmmc[]" class="lv1" data-value="{if $info}{$info.DMMCIDS[0]}{/if}"></select>
+                    <select name="dmmc[]" class="lv1" data-value="{$lv1Value}" style="display: none;"></select>
                     <select name="dmmc[]" class="lv2" data-value="{if $info}{$info.DMMCIDS[1]}{/if}"></select>
                     <select name="dmmc[]" class="lv3" data-value="{if $info&&isset($info.DMMCIDS[2])}{$info.DMMCIDS[2]}{/if}"></select>
                     <select name="dmmc[]" class="lv4" data-value="{if $info&&isset($info.DMMCIDS[3])}{$info.DMMCIDS[3]}{/if}"></select>
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label"><span class="error">*</span> 部门岗位</label>
+                <label class="control-label"> 部门岗位</label>
                 <div class="controls">
-                    <input type="text" name="POST"  value="{if $info}{$info.POST}{/if}" class="input" placeholder="职位"/>
+                    <input type="text" name="POST" value="{if $info}{$info.POST}{/if}" class="input" placeholder="职位"/>
 
                 </div>
             </div>
@@ -132,7 +112,7 @@
 
 
             <div class="control-group">
-                <label class="control-label"><span class="error">*</span> 头像</label>
+                <label class="control-label"> 头像</label>
                 <div class="controls">
 
                     <div class="mcdoc_upload_box" style="width: 300px;">

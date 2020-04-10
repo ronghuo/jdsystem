@@ -888,6 +888,10 @@ class UserUsers extends Common
         $this->jsalert($actName.'成功',3);
     }
 
+    private function resetManagePoliceArea($user) {
+
+    }
+
     /**
      * 保存康复协议
      * @param Request $request

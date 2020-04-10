@@ -129,7 +129,8 @@ class SystemUsers extends Common
             $powerids = explode(',',$info->POWER_IDS);
             $info->POWER_IDS = fillArrayToLen($powerids,3);
         }
-
+        $admin = session('info');
+        $lv1Value = explode(',', $admin['DMMCIDS'])[0];
 
         $admin_model = new mSystable();
 
@@ -140,6 +141,7 @@ class SystemUsers extends Common
         $this->assign('footjs', $js);
         $this->assign('roles',$roles);
         $this->assign('info',$info);
+        $this->assign('lv1Value', $lv1Value);
         return $this->fetch('create');
     }
 
