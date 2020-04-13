@@ -99,7 +99,8 @@ class UserManagers extends Common
             $p['a1'] = $admin['POWER_COUNTY_ID_12'];
             $p['a2'] = $admin['POWER_STREET_ID'];
             $p['a3'] = $admin['POWER_COMMUNITY_ID'];
-        } else {
+        }
+        else {
             $p['a1'] = input('area1', '');
             $p['a2'] = input('area2', '');
             $p['a3'] = input('area3', '');
@@ -139,7 +140,7 @@ class UserManagers extends Common
 
         $info = [];
         $post_url = Url('UserManagers/create');
-        if($id>0){
+        if ($id > 0) {
             $post_url = Url('UserManagers/edit', ['id'=>$id]);
             $info = UserManagersModel::where('ISDEL','=',0)->find($id);
             if(!$info){
@@ -159,10 +160,13 @@ class UserManagers extends Common
             $info->DMMC_IDS = fillArrayToLen($dmids,4);
 
         }
+        $admin = session('info');
+        $lv1Value = explode(',', $admin['DMMCIDS'])[0];
 
         $js = $this->loadJsCss(array('p:cate/jquery.cate','usermanagers_create'), 'js', 'admin');
         $this->assign('footjs', $js);
         $this->assign('info',$info);
+        $this->assign('lv1Value', $lv1Value);
         $this->assign('genders',BaseSexType::all());
         $this->assign('card_types',BaseCertificateType::all());
         $this->assign('act',$act);
@@ -745,32 +749,34 @@ class UserManagers extends Common
 
 
         $domicileplaceids = $request->param('domicileplace',[]);
-        if(!$domicileplaceids){
-            $this->error('请选择籍贯');
+        if (empty($domicileplaceids) || empty($domicileplaceids[2])) {
+            $this->error('请完整地选择籍贯');
         }
         //$domicileplace = Areas::where('ID','in',$domicileplaceids)->order('ID','asc')->select()->column('NAME');
         $domicileplace = Upareatable::where('UPAREAID','in',$domicileplaceids)->order('UPAREAID','asc')->select()->column('NAME');
         $liveplaceids = $request->param('liveplace',[]);
-        if(!$liveplaceids){
-            $this->error('请选择现住址');
+        if (empty($liveplaceids) || empty($liveplaceids[2])) {
+            $this->error('请完整地选择现住址');
         }
         $liveplace = Upareatable::where('UPAREAID','in',$liveplaceids)->order('UPAREAID','asc')->select()->column('NAME');
         //$liveplace = Areas::where('ID','in',$liveplaceids)->order('ID','asc')->select()->column('NAME');
 
         $levelareaids = $request->param('levelarea',[]);
-        if(!$levelareaids){
-            $this->error('请选择街道社区');
+        if (empty($levelareaids) || empty($levelareaids[2])) {
+            $this->error('请完整地选择现住址社区');
         }
-        //print_r(array_slice($levelareaids,1));
         $levelarea = Subareas::where('CODE12','in',array_slice($levelareaids,1))
             ->order('ID','asc')->select()->column('NAME');
-//        $levelarea = AreasSubs::where('ID','in',array_slice($levelareaids,1))
-//            ->where('ACTIVE',1)->order('ID','asc')->select()->column('NAME');
 
-        $dmmc = $request->param('dmmc',[]);
-        $dmmc = array_filter($dmmc);
-        if(!$dmmc){
+        $dmmcs = $request->param('dmmc',[]);
+        if (empty($dmmcs)) {
             $this->error('请选择所属禁毒办');
+        } else {
+            foreach ($dmmcs as $dmmc) {
+                if (empty($dmmc)) {
+                    $this->error('请选择所属禁毒办');
+                }
+            }
         }
 
         $data = [
@@ -796,8 +802,8 @@ class UserManagers extends Common
             'COMMUNITY_ID'=>isset($levelareaids[2]) ? $levelareaids[2]: 0,
             'LIVE_PLACE'=>implode(' ',array_merge($liveplace,$levelarea)),
 
-            'DMM_ID'=>end($dmmc),
-            'DMMC_IDS'=>implode(',',$dmmc),
+            'DMM_ID'=>end($dmmcs),
+            'DMMC_IDS'=>implode(',',$dmmcs),
 
             'DOMICILE_PLACE'=>implode(' ',$domicileplace),
             'DOMICILE_IDS'=>implode(',',$domicileplaceids)
@@ -876,37 +882,37 @@ class UserManagers extends Common
             if($exist){
                 $this->error('新的手机号已存在，请换一个');
             }
-
-
         }
 
         $domicileplaceids = $request->param('domicileplace',[]);
-        if(!$domicileplaceids){
-            $this->error('请选择籍贯');
+        if (empty($domicileplaceids) || empty($domicileplaceids[2])) {
+            $this->error('请完整地选择籍贯');
         }
         //$domicileplace = Areas::where('ID','in',$domicileplaceids)->order('ID','asc')->select()->column('NAME');
         $domicileplace = Upareatable::where('UPAREAID','in',$domicileplaceids)->order('UPAREAID','asc')->select()->column('NAME');
         $liveplaceids = $request->param('liveplace',[]);
-        if(!$liveplaceids){
-            $this->error('请选择现住址');
+        if (empty($liveplaceids) || empty($liveplaceids[2])) {
+            $this->error('请完整地选择现住址');
         }
         $liveplace = Upareatable::where('UPAREAID','in',$liveplaceids)->order('UPAREAID','asc')->select()->column('NAME');
         //$liveplace = Areas::where('ID','in',$liveplaceids)->order('ID','asc')->select()->column('NAME');
 
         $levelareaids = $request->param('levelarea',[]);
-        if(!$levelareaids){
-            $this->error('请选择街道社区');
+        if (empty($levelareaids) || empty($levelareaids[2])) {
+            $this->error('请完整地选择现住址社区');
         }
-        //print_r(array_slice($levelareaids,1));
         $levelarea = Subareas::where('CODE12','in',array_slice($levelareaids,1))
             ->order('ID','asc')->select()->column('NAME');
-//        $levelarea = AreasSubs::where('ID','in',array_slice($levelareaids,1))
-//            ->where('ACTIVE',1)->order('ID','asc')->select()->column('NAME');
 
-        $dmmc = $request->param('dmmc',[]);
-        $dmmc = array_filter($dmmc);
-        if(!$dmmc){
+        $dmmcs = $request->param('dmmc',[]);
+        if (empty($dmmcs)) {
             $this->error('请选择所属禁毒办');
+        } else {
+            foreach ($dmmcs as $dmmc) {
+                if (empty($dmmc)) {
+                    $this->error('请选择所属禁毒办');
+                }
+            }
         }
 
         $ckeck_result = $request->param('check_result','','trim');
@@ -934,8 +940,8 @@ class UserManagers extends Common
             'COMMUNITY_ID'=>isset($levelareaids[2]) ? $levelareaids[2]: 0,
             'LIVE_PLACE'=>implode(' ',array_merge($liveplace,$levelarea)),
 
-            'DMM_ID'=>end($dmmc),
-            'DMMC_IDS'=>implode(',',$dmmc),
+            'DMM_ID'=>end($dmmcs),
+            'DMMC_IDS'=>implode(',',$dmmcs),
 
             'DOMICILE_PLACE'=>implode(' ',$domicileplace),
             'DOMICILE_IDS'=>implode(',',$domicileplaceids)
@@ -972,7 +978,7 @@ class UserManagers extends Common
 //        print_r($data);
 //        exit;
         $v = new UserManagersVer();
-        if(!$v->scene('edit')->check($data)){
+        if(!$v->scene('htedit')->check($data)){
             $this->error($v->getError());
         }
 

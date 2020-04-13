@@ -38,11 +38,9 @@ $(function () {
         var name = $('#name'),
             idnumbertype = $('#idnumbertype'),
             idnumber = $('#idnumber'),
-            gender = $('input[name="GENDER"]'),
+            gender = $('#gender'),
             mobile = $('#mobile'),
             pwsd = $('#pwsd'),
-            qq = $('#qq'),
-            wechat = $('#wechat'),
             address = $('#address');
 
         if(!checkInputEmpty(name)){
@@ -51,12 +49,14 @@ $(function () {
         }else{
             formValid.showSuccess(name);
         }
+
         if(!checkSelectEmpty(idnumbertype)){
             formValid.showErr(idnumbertype,'缺少证件类型');
             return false;
         }else{
             formValid.showSuccess(idnumbertype);
         }
+
         if(!checkInputEmpty(idnumber)){
             formValid.showErr(idnumber,'缺少证件号码');
             return false;
@@ -77,6 +77,7 @@ $(function () {
         }else{
             formValid.showSuccess(mobile);
         }
+
         if(pwsd.length>0){
             if(!checkInputEmpty(pwsd)){
                 formValid.showErr(pwsd,'缺少登录密码');
@@ -85,23 +86,10 @@ $(function () {
                 formValid.showSuccess(pwsd);
             }
         }
-        /*if(!checkInputEmpty(qq)){
-            formValid.showErr(qq,'缺少QQ');
-            return false;
-        }else{
-            formValid.showSuccess(qq);
-        }
-
-        if(!checkInputEmpty(wechat)){
-            formValid.showErr(wechat,'缺少微信号');
-            return false;
-        }else{
-            formValid.showSuccess(wechat);
-        }*/
 
         var areas1 = $('#areas1'),
             lv3 = areas1.children('select.lv3').val();
-        if(!lv3){
+        if (!lv3){
             formValid.showErr(areas1,'缺少籍贯');
             return false;
         }else{
@@ -135,13 +123,14 @@ $(function () {
         }
 
         var areas4 = $('#areas4'),
-            lv3 = areas4.children('select.lv3').val();
-        if(!lv3){
-            formValid.showErr(areas4,'缺少所属禁毒办');
-            return false;
-        }else{
-            formValid.showSuccess(areas4);
+            dmmcs = $('select[name^=dmmc]');
+        for (var i = 0; i < dmmcs.length; i++) {
+            if ($(dmmcs[i]).val() == '') {
+                formValid.showErr(areas4,'缺少所属禁毒办');
+                return false;
+            }
         }
+        formValid.showSuccess(areas4);
 
         return true;
     });
