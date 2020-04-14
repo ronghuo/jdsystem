@@ -15,7 +15,7 @@ use app\common\model\Agreement;
 use app\common\model\SystemMessages,
     app\common\model\SystemMessageRead;
 
-class AppPages extends Controller{
+class AppPages extends Controller {
 
 
     public function info(Request $request){
@@ -23,13 +23,6 @@ class AppPages extends Controller{
         $tag = $request->route('tag',0,'int');
         $type = $request->route('type',0,'int');
         $id = $request->route('id',0,'int');
-
-//        print_r([
-//            $uid,
-//            $tag,
-//            $type,
-//            $id
-//        ]);
 
         $info = [];
         $images = [];
@@ -76,12 +69,9 @@ class AppPages extends Controller{
                 break;
             //康复协议
             case 4:
-
                 $info = Agreement::where('UUID',$id)->find();
                 break;
         }
-
-
 
         $this->assign('info',$info);
         $this->assign('images',$images);

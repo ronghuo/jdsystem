@@ -516,9 +516,9 @@
             <div class="control-group">
                 <label class="control-label"><span class="error">*</span> 居住地 </label>
                 <div class="controls" id="areas2">
-                    <select name="liveplace[]" class="lv1" data-value="{if $info}{$info.LIVE_IDS[0]}{else/}{$sessionSelects['jd_liveplace'][0]}{/if}"></select>
-                    <select name="liveplace[]" class="lv2" data-value="{if $info}{$info.LIVE_IDS[1]}{else/}{$sessionSelects['jd_liveplace'][1]}{/if}"></select>
-                    <select name="liveplace[]" class="lv3" data-value="{if $info}{$info.LIVE_IDS[2]}{else/}{$sessionSelects['jd_liveplace'][2]}{/if}"></select>
+                    <select name="liveplace[]" class="lv1" data-value="{if $info}{$info.LIVE_IDS[0]}{/if}"></select>
+                    <select name="liveplace[]" class="lv2" data-value="{if $info}{$info.LIVE_IDS[1]}{/if}"></select>
+                    <select name="liveplace[]" class="lv3" data-value="{if $info}{$info.LIVE_IDS[2]}{/if}"></select>
                 </div>
             </div>
             <div class="control-group">
@@ -580,18 +580,18 @@
             <div class="control-group">
                 <label class="control-label"><span class="error">*</span> 所在社区 </label>
                 <div class="controls" id="areas3">
-                    <select name="levelarea[]" class="lv1" data-value="{if $info}{$info.COUNTY_ID_12}{else/}{$sessionSelects['jd_levelarea'][0]}{/if}"></select>
-                    <select name="levelarea[]" class="lv2" data-value="{if $info}{$info.STREET_ID}{else/}{$sessionSelects['jd_levelarea'][1]}{/if}"></select>
-                    <select name="levelarea[]" class="lv3" data-value="{if $info}{$info.COMMUNITY_ID}{else/}{$sessionSelects['jd_levelarea'][2]}{/if}"></select>
+                    <select name="levelarea[]" class="lv1" data-value="{if $info}{$info.COUNTY_ID_12}{/if}"></select>
+                    <select name="levelarea[]" class="lv2" data-value="{if $info}{$info.STREET_ID}{/if}"></select>
+                    <select name="levelarea[]" class="lv3" data-value="{if $info}{$info.COMMUNITY_ID}{/if}"></select>
                 </div>
             </div>
             <div class="control-group">
                 <label class="control-label"><span class="error">*</span> 所属禁毒办</label>
                 <div class="controls" id="areas4">
-                    <select name="dmmc[]" class="lv1" data-value="{if $info}{$info.DMMC_IDS[0]}{else/}{$sessionSelects['jd_dmmids'][0]}{/if}"></select>
-                    <select name="dmmc[]" class="lv2" data-value="{if $info}{$info.DMMC_IDS[1]}{else/}{$sessionSelects['jd_dmmids'][1]}{/if}"></select>
-                    <select name="dmmc[]" class="lv3" data-value="{if $info}{$info.DMMC_IDS[2]}{else/}{php}$sessionSelects['jd_dmmids'][2] ?? 0{/php}{/if}"></select>
-                    <select name="dmmc[]" class="lv4" data-value="{if $info}{$info.DMMC_IDS[3]}{else/}{php}$sessionSelects['jd_dmmids'][3] ?? 0{/php}{/if}"></select>
+                    <select name="dmmc[]" class="lv1" data-value="{if $info}{$info.DMMC_IDS[0]}{/if}" style="display: none;"></select>
+                    <select name="dmmc[]" class="lv2" data-value="{if $info}{$info.DMMC_IDS[1]}{/if}"></select>
+                    <select name="dmmc[]" class="lv3" data-value="{if $info}{$info.DMMC_IDS[2]}{/if}"></select>
+                    <select name="dmmc[]" class="lv4" data-value="{if $info}{$info.DMMC_IDS[3]}{/if}"></select>
                 </div>
             </div>
 

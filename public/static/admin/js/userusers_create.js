@@ -332,8 +332,8 @@ $(function () {
 
         // 所在社区 areas3
         var areas3 = $('#areas3'),
-            lv3 = areas3.children('select.lv3').val();
-        if(!lv3){
+            lv1 = areas3.children('select.lv1').val();
+        if(!lv1){
             formValid.showErr(areas3,'缺少所在社区');
             return false;
         }else{
@@ -344,8 +344,8 @@ $(function () {
         // 所属警务 areas4
 
         var areas4 = $('#areas4'),
-        lv3 = areas4.children('select.lv3').val();
-        if(!lv3){
+            dmmcs = areas4.find('select:not(:first)');
+        if (!$(dmmcs[0]).val()) {
             formValid.showErr(areas4,'缺少所属禁毒办');
             return false;
         }else{

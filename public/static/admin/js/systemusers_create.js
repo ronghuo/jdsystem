@@ -23,11 +23,13 @@ $(function(){
         formValid.showSuccess($log);
 
         var $pwd = $(':password[name=PWD]');
-        if (!checkInputEmpty($pwd)) {
-            formValid.showErr($pwd, '密码不能为空');
-            return false;
+        if ($pwd.length > 0) {
+            if (!checkInputEmpty($pwd)) {
+                formValid.showErr($pwd, '密码不能为空');
+                return false;
+            }
+            formValid.showSuccess($pwd);
         }
-        formValid.showSuccess($pwd);
 
         var $name = $(':text[name=NAME]');
         if (!checkInputEmpty($name)) {

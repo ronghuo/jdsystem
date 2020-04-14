@@ -106,8 +106,8 @@ $(function () {
         }
 
         var areas3 = $('#areas3'),
-            lv3 = areas3.children('select.lv3').val();
-        if(!lv3){
+            lv1 = areas3.children('select.lv1').val();
+        if (!lv1) {
             formValid.showErr(areas3,'缺少所在社区');
             return false;
         }else{
@@ -123,12 +123,10 @@ $(function () {
         }
 
         var areas4 = $('#areas4'),
-            dmmcs = $('select[name^=dmmc]');
-        for (var i = 0; i < dmmcs.length; i++) {
-            if ($(dmmcs[i]).val() == '') {
-                formValid.showErr(areas4,'缺少所属禁毒办');
-                return false;
-            }
+            dmmcs = areas4.find('select:not(:first)');
+        if (!$(dmmcs[0]).val()) {
+            formValid.showErr(areas4,'缺少所属禁毒办');
+            return false;
         }
         formValid.showSuccess(areas4);
 

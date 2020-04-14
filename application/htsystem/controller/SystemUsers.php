@@ -226,12 +226,14 @@ class SystemUsers extends Common
         $power = $request->param('power','','trim');
         $power = array_filter($power);
 
-        $dmmc = $request->param('dmmc','','trim');
-        $dmmc = array_filter($dmmc);
-
-        $dmm = NbAuthDept::find(end($dmmc));
-        if (!$dmm) {
+        $dmmcids = $request->param('dmmc', [], 'trim');
+        $dmmcids = array_filter($dmmcids);
+        if (empty($dmmcids) || empty($dmmcids[1])) {
             $this->error('请选择单位');
+        }
+        $dmmc = NbAuthDept::find(end($dmmcids));
+        if (!$dmmc) {
+            $this->error('缺少所属禁毒办信息');
         }
 
         $data = [
@@ -239,8 +241,8 @@ class SystemUsers extends Common
             'ROLE'=>$role[1],
             'NAME'=>$request->param('NAME','','trim'),
             'GENDER'=>$request->param('GENDER','','trim'),
-            'DMMC_ID'=>$dmm->ID,
-            'DMMC_NAME'=>$dmm->DEPTDESC,
+            'DMMC_ID'=> $dmmc->ID,
+            'DMMC_NAME'=> $dmmc->DEPTDESC,
             'POST'=>$request->param('POST','','trim'),
             'CONTACT'=>$request->param('CONTACT','','trim'),
             'REMARK'=>$request->param('REMARK','','trim'),
@@ -250,7 +252,7 @@ class SystemUsers extends Common
             'POWER_STREET_ID'=>$power[1] ??   0,
             'POWER_COMMUNITY_ID'=>$power[2] ??   0,
             'POWER_IDS'=>implode(',',$power),
-            'DMMCIDS'=>implode(',',$dmmc)
+            'DMMCIDS'=>implode(',', $dmmcids)
         ];
         if ($request->has('MOBILE')) {
             $data['MOBILE'] = $request->param('MOBILE','','trim');

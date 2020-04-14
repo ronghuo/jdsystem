@@ -341,13 +341,6 @@ class UserUsers extends Common
 
         $info = [];
 
-        $sessionSelects = [
-            'jd_levelarea'=>session('jd_levelarea') ? : [0, 0, 0],
-            'jd_dmmids'=>session('jd_dmmids') ? : [0, 0, 0, 0],
-            'jd_domicileplace'=>session('jd_domicileplace') ? : [0, 0, 0],
-            'jd_liveplace'=>session('jd_liveplace') ? : [0, 0, 0],
-        ];
-
         if ($id > 0) {
             $info = UserUsersModel::find($id);
             if(!$info){
@@ -387,6 +380,8 @@ class UserUsers extends Common
                 }
             }
         }
+        $admin = session('info');
+        $lv1Value = explode(',', $admin['DMMCIDS'])[0];
 
         $opts = Opts::getTreeAll();
 
@@ -395,7 +390,6 @@ class UserUsers extends Common
         $css = $this->loadJsCss(array('userusers_create'), 'css', 'admin');
         $this->assign('headercss', $css);
         $this->assign('info',$info);
-        $this->assign('sessionSelects',$sessionSelects);
         $this->assign('nations',BaseNationType::all());
         $this->assign('nationality',BaseNationalityType::all());
         $this->assign('card_types',$opts['card_types']);
@@ -410,6 +404,7 @@ class UserUsers extends Common
         $this->assign('danger_level',$opts['danger_level']);
         $this->assign('utypes', UserUsersModel::$utypes);
         $this->assign('utype218', UserUsersModel::$utype218);
+        $this->assign('lvlValue', $lv1Value);
 
         return $this->fetch('create');
     }
@@ -812,10 +807,19 @@ class UserUsers extends Common
                 $this->error('将人员指派回退到上级区域时，需填写指派理由');
             }
 
+            // 设置区域管辖范围
             $user->COUNTY_ID = substr($county_id_12, 0, 6);
             $user->COUNTY_ID_12 = $county_id_12;
             $user->STREET_ID = $street_id;
             $user->COMMUNITY_ID = $community_id;
+
+            // 设置管辖社区
+            if (!empty($community_id)) {
+                $user->MANAGE_COMMUNITY = $new_area_names[2];
+            }
+
+            // 设置警务管辖单位
+            $this->setManagePoliceArea($user);
 
             if ($isArchive) {
                 $user->JD_ZHI_PAI_ID = 1;
@@ -888,8 +892,13 @@ class UserUsers extends Common
         $this->jsalert($actName.'成功',3);
     }
 
-    private function resetManagePoliceArea($user) {
-
+    private function setManagePoliceArea(&$user) {
+        $dmmcs = NbAuthDept::where('AREACODE', 'in', [$user->COUNTY_ID_12, $user->STREET_ID, $user->COMMUNITY_ID])->order('DEPTCODE desc')->select();
+        if (!empty($dmmcs)) {
+            $dmmc = $dmmcs[0];
+            $user->MANAGE_POLICE_AREA_CODE = $dmmc->DEPTCODE;
+            $user->MANAGE_POLICE_AREA_NAME = $dmmc->DEPTNAME;
+        }
     }
 
     /**
@@ -996,6 +1005,7 @@ class UserUsers extends Common
         }
 
         $levelarea = $request->param('levelarea',[]);
+        $levelarea = array_filter($levelarea);
         $county_id = $levelarea[0];
         $street_id = isset($levelarea[1]) ? $levelarea[1]: 0;
         $community_id = isset($levelarea[2]) ? $levelarea[2]: 0;
@@ -1004,18 +1014,14 @@ class UserUsers extends Common
             $this->error('缺少管辖社区信息');
         }
 
-        if($levelarea){
-            session('jd_levelarea', $levelarea);
-        }
-        $dmmid = $request->param('dmmc',[]);
-        $dmmid = array_filter($dmmid);
-        $dmmc = NbAuthDept::find(end($dmmid));
-
-        if(!$dmmc){
+        $dmmcids = $request->param('dmmc', [], 'trim');
+        $dmmcids = array_filter($dmmcids);
+        if (empty($dmmcids) || empty($dmmcids[1])) {
             $this->error('缺少所属禁毒办信息');
         }
-        if($dmmid){
-            session('jd_dmmids', $dmmid);
+        $dmmc = NbAuthDept::find(end($dmmcids));
+        if (!$dmmc) {
+            $this->error('缺少所属禁毒办信息');
         }
 
         $user_status_id = $request->param('USER_STATUS_ID',0,'trim');
@@ -1036,16 +1042,10 @@ class UserUsers extends Common
         }
 
         $domicileplaceids = $request->param('domicileplace');
-        if($domicileplaceids){
-            session('jd_domicileplace', $domicileplaceids);
-        }
 
         $domicileplace = Upareatable::where('UPAREAID','in',$domicileplaceids)->order('UPAREAID','asc')->select()->column('NAME');
 
         $liveplaceids = $request->param('liveplace');
-        if($liveplaceids){
-            session('jd_liveplace', $liveplaceids);
-        }
         $liveplace = Upareatable::where('UPAREAID','in',$liveplaceids)->order('UPAREAID','asc')->select()->column('NAME');
 
         $nationality = BaseNationalityType::find($request->param('NATIONALITY_ID','','trim'));
@@ -1134,7 +1134,7 @@ class UserUsers extends Common
             'MANAGE_POLICE_AREA_CODE'=>$dmmc->DEPTCODE,
             'MANAGE_POLICE_AREA_NAME'=>$dmmc->DEPTNAME,
             'MANAGE_COMMUNITY'=>$area_info->NAME,
-            'DMMC_IDS'=>implode(',',$dmmid),//new
+            'DMMC_IDS'=>implode(',', $dmmcids),//new
 
             //'POLICE_LIABLE_UID'=>$usermanager->ID,//new
             'POLICE_LIABLE_CODE'=>$request->param('POLICE_LIABLE_CODE','','trim'),
@@ -1216,10 +1216,6 @@ class UserUsers extends Common
             //UserUsersModel::where('ID','=',$id)->update(['HEAD_IMG'=>$img['images'][0]]);
         }
 
-        session('jd_levelarea', null);
-        session('jd_dmmids', null);
-        session('jd_domicileplace', null);
-        session('jd_liveplace', null);
         //页面点击“保存”或“确认”键后提示成功或失败，自动停留在当前编辑界面
         $ref = url('UserUsers/edit',array('id'=>$user->ID));
 

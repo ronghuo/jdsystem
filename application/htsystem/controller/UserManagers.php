@@ -762,21 +762,17 @@ class UserManagers extends Common
         //$liveplace = Areas::where('ID','in',$liveplaceids)->order('ID','asc')->select()->column('NAME');
 
         $levelareaids = $request->param('levelarea',[]);
-        if (empty($levelareaids) || empty($levelareaids[2])) {
-            $this->error('请完整地选择现住址社区');
+        $levelareaids = array_filter($levelareaids);
+        if (empty($levelareaids)) {
+            $this->error('请选择现住址社区');
         }
         $levelarea = Subareas::where('CODE12','in',array_slice($levelareaids,1))
             ->order('ID','asc')->select()->column('NAME');
 
-        $dmmcs = $request->param('dmmc',[]);
-        if (empty($dmmcs)) {
+        $dmmcs = $request->param('dmmc', []);
+        $dmmcs = array_filter($dmmcs);
+        if (empty($dmmcs) || empty($dmmcs[1])) {
             $this->error('请选择所属禁毒办');
-        } else {
-            foreach ($dmmcs as $dmmc) {
-                if (empty($dmmc)) {
-                    $this->error('请选择所属禁毒办');
-                }
-            }
         }
 
         $data = [
@@ -898,21 +894,17 @@ class UserManagers extends Common
         //$liveplace = Areas::where('ID','in',$liveplaceids)->order('ID','asc')->select()->column('NAME');
 
         $levelareaids = $request->param('levelarea',[]);
-        if (empty($levelareaids) || empty($levelareaids[2])) {
-            $this->error('请完整地选择现住址社区');
+        $levelareaids = array_filter($levelareaids);
+        if (empty($levelareaids)) {
+            $this->error('请选择现住址社区');
         }
         $levelarea = Subareas::where('CODE12','in',array_slice($levelareaids,1))
             ->order('ID','asc')->select()->column('NAME');
 
-        $dmmcs = $request->param('dmmc',[]);
-        if (empty($dmmcs)) {
+        $dmmcs = $request->param('dmmc', []);
+        $dmmcs = array_filter($dmmcs);
+        if (empty($dmmcs) || empty($dmmcs[1])) {
             $this->error('请选择所属禁毒办');
-        } else {
-            foreach ($dmmcs as $dmmc) {
-                if (empty($dmmc)) {
-                    $this->error('请选择所属禁毒办');
-                }
-            }
         }
 
         $ckeck_result = $request->param('check_result','','trim');
