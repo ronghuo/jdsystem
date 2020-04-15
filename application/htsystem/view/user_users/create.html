@@ -489,9 +489,9 @@
             <div class="control-group">
                 <label class="control-label"><span class="error">*</span> 户籍地 </label>
                 <div class="controls" id="areas1">
-                    <select name="domicileplace[]" class="lv1" data-value="{if $info}{$info.DOMICILE_IDS[0]}{else/}{$sessionSelects['jd_domicileplace'][0]}{/if}"></select>
-                    <select name="domicileplace[]" class="lv2" data-value="{if $info}{$info.DOMICILE_IDS[1]}{else/}{$sessionSelects['jd_domicileplace'][1]}{/if}"></select>
-                    <select name="domicileplace[]" class="lv3" data-value="{if $info}{$info.DOMICILE_IDS[2]}{else/}{$sessionSelects['jd_domicileplace'][2]}{/if}"></select>
+                    <select name="domicileplace[]" class="lv1" data-value="{if $info}{$info.DOMICILE_IDS[0]}{/if}"></select>
+                    <select name="domicileplace[]" class="lv2" data-value="{if $info}{$info.DOMICILE_IDS[1]}{/if}"></select>
+                    <select name="domicileplace[]" class="lv3" data-value="{if $info}{$info.DOMICILE_IDS[2]}{/if}"></select>
                 </div>
             </div>
             <div class="control-group">
@@ -588,7 +588,7 @@
             <div class="control-group">
                 <label class="control-label"><span class="error">*</span> 所属禁毒办</label>
                 <div class="controls" id="areas4">
-                    <select name="dmmc[]" class="lv1" data-value="{if $info}{$info.DMMC_IDS[0]}{/if}" style="display: none;"></select>
+                    <select name="dmmc[]" class="lv1" data-value="{$lvlValue}" style="display: none;"></select>
                     <select name="dmmc[]" class="lv2" data-value="{if $info}{$info.DMMC_IDS[1]}{/if}"></select>
                     <select name="dmmc[]" class="lv3" data-value="{if $info}{$info.DMMC_IDS[2]}{/if}"></select>
                     <select name="dmmc[]" class="lv4" data-value="{if $info}{$info.DMMC_IDS[3]}{/if}"></select>

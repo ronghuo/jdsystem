@@ -40,8 +40,7 @@ $(function () {
             idnumber = $('#idnumber'),
             gender = $('#gender'),
             mobile = $('#mobile'),
-            pwsd = $('#pwsd'),
-            address = $('#address');
+            pwsd = $('#pwsd');
 
         if(!checkInputEmpty(name)){
             formValid.showErr(name,'缺少姓名');
@@ -87,24 +86,6 @@ $(function () {
             }
         }
 
-        var areas1 = $('#areas1'),
-            lv3 = areas1.children('select.lv3').val();
-        if (!lv3){
-            formValid.showErr(areas1,'缺少籍贯');
-            return false;
-        }else{
-            formValid.showSuccess(areas1);
-        }
-
-        var areas2 = $('#areas2'),
-            lv3 = areas2.children('select.lv3').val();
-        if(!lv3){
-            formValid.showErr(areas2,'缺少现住址');
-            return false;
-        }else{
-            formValid.showSuccess(areas2);
-        }
-
         var areas3 = $('#areas3'),
             lv1 = areas3.children('select.lv1').val();
         if (!lv1) {
@@ -112,14 +93,6 @@ $(function () {
             return false;
         }else{
             formValid.showSuccess(areas3);
-        }
-
-
-        if(!checkInputEmpty(address)){
-            formValid.showErr(address,'缺少现住详细地址');
-            return false;
-        }else{
-            formValid.showSuccess(address);
         }
 
         var areas4 = $('#areas4'),

@@ -195,24 +195,20 @@ class UserUsers extends BaseModel
         $unclassified = '未归类';
         $totalTitle = '合计';
         $subSql = 'select ';
-        $groupBy = [
-            'COUNTY_ID_12',
-            'STREET_ID',
-            'COMMUNITY_ID'
-        ];
-        $orderBy = [
-            'COUNTY_ID_12',
-            'STREET_ID',
-            'COMMUNITY_ID'
-        ];
         $subSql .= 'COUNTY_ID_12,(select `NAME` from subareas where CODE12 = A.COUNTY_ID_12) COUNTY_NAME,';
-        $subSql .= 'STREET_ID,(select `NAME` from subareas where CODE12 = A.STREET_ID) STREET_NAME,';
-        $subSql .= 'COMMUNITY_ID,(select `NAME` from subareas where CODE12 = A.COMMUNITY_ID) COMMUNITY_NAME,';
+        $groupBy = ['COUNTY_ID_12'];
+        $orderBy = ['COUNTY_ID_12'];
         if (!empty($condition['area1'])) {
+            $subSql .= 'STREET_ID,(select `NAME` from subareas where CODE12 = A.STREET_ID) STREET_NAME,';
             $where['COUNTY_ID_12'] = $condition['area1'];
+            array_push($groupBy, 'STREET_ID');
+            array_push($orderBy, 'STREET_ID');
         }
         if (!empty($condition['area2'])) {
+            $subSql .= 'COMMUNITY_ID,(select `NAME` from subareas where CODE12 = A.COMMUNITY_ID) COMMUNITY_NAME,';
             $where['STREET_ID'] = $condition['area2'];
+            array_push($groupBy, 'COMMUNITY_ID');
+            array_push($orderBy, 'COMMUNITY_ID');
         }
         if (!empty($condition['area3'])) {
             $where['COMMUNITY_ID'] = $condition['area3'];
@@ -307,24 +303,20 @@ class UserUsers extends BaseModel
         $totalTitle = '合计';
         $unknown = '未评估';
         $subSql = 'select ';
-        $groupBy = [
-            'COUNTY_ID_12',
-            'STREET_ID',
-            'COMMUNITY_ID'
-        ];
-        $orderBy = [
-            'COUNTY_ID_12',
-            'STREET_ID',
-            'COMMUNITY_ID'
-        ];
         $subSql .= 'COUNTY_ID_12,(select `NAME` from subareas where CODE12 = A.COUNTY_ID_12) COUNTY_NAME,';
-        $subSql .= 'STREET_ID,(select `NAME` from subareas where CODE12 = A.STREET_ID) STREET_NAME,';
-        $subSql .= 'COMMUNITY_ID,(select `NAME` from subareas where CODE12 = A.COMMUNITY_ID) COMMUNITY_NAME,';
+        $groupBy = ['COUNTY_ID_12'];
+        $orderBy = ['COUNTY_ID_12'];
         if (!empty($condition['area1'])) {
+            $subSql .= 'STREET_ID,(select `NAME` from subareas where CODE12 = A.STREET_ID) STREET_NAME,';
             $where['COUNTY_ID_12'] = $condition['area1'];
+            array_push($groupBy, 'STREET_ID');
+            array_push($orderBy, 'STREET_ID');
         }
         if (!empty($condition['area2'])) {
+            $subSql .= 'COMMUNITY_ID,(select `NAME` from subareas where CODE12 = A.COMMUNITY_ID) COMMUNITY_NAME,';
             $where['STREET_ID'] = $condition['area2'];
+            array_push($groupBy, 'COMMUNITY_ID');
+            array_push($orderBy, 'COMMUNITY_ID');
         }
         if (!empty($condition['area3'])) {
             $where['COMMUNITY_ID'] = $condition['area3'];
@@ -421,24 +413,20 @@ class UserUsers extends BaseModel
     public static function statisticsAssignment($pageNO = 1, $pageSize = 20, $condition = []) {
         $totalTitle = '合计';
         $subSql = 'select ';
-        $groupBy = [
-            'COUNTY_ID_12',
-            'STREET_ID',
-            'COMMUNITY_ID'
-        ];
-        $orderBy = [
-            'COUNTY_ID_12',
-            'STREET_ID',
-            'COMMUNITY_ID'
-        ];
         $subSql .= 'COUNTY_ID_12,(select `NAME` from subareas where CODE12 = A.COUNTY_ID_12) COUNTY_NAME,';
-        $subSql .= 'STREET_ID,(select `NAME` from subareas where CODE12 = A.STREET_ID) STREET_NAME,';
-        $subSql .= 'COMMUNITY_ID,(select `NAME` from subareas where CODE12 = A.COMMUNITY_ID) COMMUNITY_NAME,';
+        $groupBy = ['COUNTY_ID_12'];
+        $orderBy = ['COUNTY_ID_12'];
         if (!empty($condition['area1'])) {
+            $subSql .= 'STREET_ID,(select `NAME` from subareas where CODE12 = A.STREET_ID) STREET_NAME,';
             $where['COUNTY_ID_12'] = $condition['area1'];
+            array_push($groupBy, 'STREET_ID');
+            array_push($orderBy, 'STREET_ID');
         }
         if (!empty($condition['area2'])) {
+            $subSql .= 'COMMUNITY_ID,(select `NAME` from subareas where CODE12 = A.COMMUNITY_ID) COMMUNITY_NAME,';
             $where['STREET_ID'] = $condition['area2'];
+            array_push($groupBy, 'COMMUNITY_ID');
+            array_push($orderBy, 'COMMUNITY_ID');
         }
         if (!empty($condition['area3'])) {
             $where['COMMUNITY_ID'] = $condition['area3'];

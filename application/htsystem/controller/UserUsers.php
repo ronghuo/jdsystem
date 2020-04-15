@@ -238,6 +238,8 @@ class UserUsers extends Common
         // 只有市级及县市区级有删除吸毒人员的权限
         $this->assign('remove_allowed', in_array($powerLevel, [self::POWER_LEVEL_CITY, self::POWER_LEVEL_COUNTY]));
         $this->assign('powerLevel', $powerLevel);
+        $this->assign('userStatus', $sop['p']['userStatus']);
+        $this->assign('user_status_list', BaseUserStatus::all());
 
         $this->addAdminLog(self::OPER_TYPE_QUERY, '康复人员列表');
 
@@ -256,9 +258,18 @@ class UserUsers extends Common
 
         $fields = ['ID', 'UUCODE', 'NAME', 'MOBILE', 'ID_NUMBER', 'LIVE_PLACE', 'LIVE_ADDRESS', 'DOMICILE_PLACE', 'DOMICILE_ADDRESS'];
         $p['keywords'] = input('get.keywords','');
-
         if (!empty($p['keywords'])) {
             $query->where(implode('|', $fields), 'like', '%' . $p['keywords'] . '%');
+            $is_so = true;
+        }
+
+        $p['userStatus'] = input('get.userStatus', '');
+        if ($p['userStatus'] != '') {
+            if ($p['userStatus'] == 0) {
+                $query->whereNotIn('USER_STATUS_ID', array_column(BaseUserStatus::all()->toArray(), 'ID'));
+            } else {
+                $query->where('USER_STATUS_ID', $p['userStatus']);
+            }
             $is_so = true;
         }
 
@@ -296,8 +307,6 @@ class UserUsers extends Common
             $query->where('COMMUNITY_ID', $p['a3']);
             $is_so = true;
         }
-
-
 
         $title = '康复人员';
 

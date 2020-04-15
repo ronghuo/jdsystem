@@ -26,6 +26,20 @@
                         <select name="area3" class="lv3" {if $powerLevel egt 4}disabled{/if} data-value="{$area3}"></select>
                     </div>
                 </div>
+                {notempty name="user_status_list"}
+                    <div class="control-group">
+                        <label class="control-label"> 人员状态 </label>
+                        <div class="controls">
+                            <select name="userStatus">
+                                <option value="">请选择</option>
+                                {foreach name="user_status_list" item="status"}
+                                    <option {if $userStatus == $status.ID}selected{/if} value="{$status.ID}">{$status.NAME}</option>
+                                {/foreach}
+                                <option {if $userStatus == '0'}selected{/if} value="0">未归类</option>
+                            </select>
+                        </div>
+                    </div>
+                {/notempty}
                 <div class="control-group">
                     <div class="controls">
                         <input type="text" name="keywords" style="width: 300px;" class="input" value="{$keywords}" placeholder="手机 / 身份证号 / 姓名 / 地区 / 人员编号 / ID序号"/>

@@ -2,6 +2,7 @@
 
 namespace app\common\model;
 
+use think\helper\Str;
 use think\Model;
 
 class UserManagers extends BaseModel
@@ -27,9 +28,9 @@ class UserManagers extends BaseModel
     // rewrite this 20190822
     public function createNewUCode($DMM_ID){
 
-        $code = \think\helper\Str::substr(str_shuffle(str_repeat('1234567890', 6)), 0, 6);
+        $code = Str::substr(str_shuffle(str_repeat('1234567890', 6)), 0, 6);
 
-        $ucode = $this->COUNTY_ID.$code;
+        $ucode = Str::substr($this->COUNTY_ID_12, 0, 6).$code;
 
         if($this->where('UCODE', $ucode)->count()){
             return $this->createNewUCode($DMM_ID);
