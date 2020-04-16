@@ -19,9 +19,9 @@ class UserUsers extends BaseModel
         2=>'3年'
     ];
     const DANGER_LEVEL_LIST = [
-        '高风险' => 1,
+        '低风险' => 1,
         '中风险' => 2,
-        '低风险' => 3
+        '高风险' => 3
     ];
     const ASSIGNMENT_STATUS_UNASSIGNED = '未指派';
     const ASSIGNMENT_STATUS_NOT_ALL_ASSIGNED = '未完全指派';

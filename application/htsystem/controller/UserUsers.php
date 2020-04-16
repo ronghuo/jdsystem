@@ -86,6 +86,16 @@ class UserUsers extends Common
     ];
 
     /**
+     * 风险评估级别清单
+     */
+    const ESTIMATE_DANGER_LEVEL_LIST = [
+        0 => '未评估',
+        1 => '低风险',
+        2 => '中风险',
+        3 => '高风险'
+    ];
+
+    /**
      * 人员相关信息变化日志类型
      */
     const CHANGE_LOG_TYPE_STATUS = 1;   // 状态
@@ -199,54 +209,42 @@ class UserUsers extends Common
      *
      * @return \think\Response
      */
-    public function index(Request $request, $zhipai='')
+    public function index($zhipai = '')
     {
-        $sop = $this->dosearch($zhipai);
+        $result = $this->doSearch($zhipai);
+        $is_so = $result['is_so'];
+        $title = $result['title'];
+        $rows = $result['rows'];
+        $params = $result['params'];
 
-        $userStatus = create_kv(BaseUserStatus::all()->toArray(), 'ID', 'NAME');
-
-        $list = $sop['query']->where(function ($query){
-            $where = $this->getManageWhere();
-            if(!empty($where)){
-                foreach($where as $fd => $wh) {
-                    $query->where($fd, $wh);
-                }
-            }
-        })->paginate(self::PAGE_SIZE, false, [
-            'query'=>request()->param()
-        ])->each(function($item,$key) use($userStatus){
-            $item->user_status = $userStatus[$item->USER_STATUS_ID] ?? '';
-            $item->HEAD_IMG_URL= build_http_img_url($item->HEAD_IMG);
-            $areas = Upareatable::where('UPAREAID','in',$item->LIVE_IDS)->order('UPAREAID','ASC')->column('NAME');
-            $item->LIVE_ADDRESS = implode(' ',$areas).' '.$item->LIVE_ADDRESS;
-            return $item;
-        });
         $js = $this->loadJsCss(array('p:cate/jquery.cate', 'userusers_index'), 'js', 'admin');
         $css = $this->loadJsCss(array('userusers_index'), 'css', 'admin');
         $this->assign('footjs', $js);
         $this->assign('headercss', $css);
-        $this->assign('list',$list);
-        $this->assign('page', $list->render());
-        $this->assign('total', $list->total());
-        $this->assign('keywords',$sop['p']['keywords']);
-        $this->assign('is_so',$sop['is_so']);
-        $this->assign('title',$sop['title']);
-        $this->assign('area1',$sop['p']['a1']);
-        $this->assign('area2',$sop['p']['a2']);
-        $this->assign('area3',$sop['p']['a3']);
+        $this->assign('list', $rows);
+        $this->assign('page', $rows->render());
+        $this->assign('total', $rows->total());
+        $this->assign('keywords', $params['keywords']);
+        $this->assign('is_so', $is_so);
+        $this->assign('title', $title);
+        $this->assign('area1', $params['area1']);
+        $this->assign('area2', $params['area2']);
+        $this->assign('area3', $params['area3']);
         $powerLevel = $this->getPowerLevel();
         // 只有市级及县市区级有删除吸毒人员的权限
         $this->assign('remove_allowed', in_array($powerLevel, [self::POWER_LEVEL_CITY, self::POWER_LEVEL_COUNTY]));
         $this->assign('powerLevel', $powerLevel);
-        $this->assign('userStatus', $sop['p']['userStatus']);
+        $this->assign('userStatus', $params['userStatus']);
         $this->assign('user_status_list', BaseUserStatus::all());
+        $this->assign('estimate', $params['estimate']);
+        $this->assign('estimate_list', self::ESTIMATE_DANGER_LEVEL_LIST);
 
         $this->addAdminLog(self::OPER_TYPE_QUERY, '康复人员列表');
 
         return $this->fetch('index');
     }
 
-    protected function dosearch($zhipai=''){
+    protected function doSearch($zhipai='') {
 
         $is_so = false;
 
@@ -254,21 +252,21 @@ class UserUsers extends Common
             $query->where('COUNTY_ID_12', 0)->whereOr('COUNTY_ID_12', 'in', function($query) {
                 $query->table('subareas')->field('CODE12');
             });
-        });
+        })->alias('A');
 
         $fields = ['ID', 'UUCODE', 'NAME', 'MOBILE', 'ID_NUMBER', 'LIVE_PLACE', 'LIVE_ADDRESS', 'DOMICILE_PLACE', 'DOMICILE_ADDRESS'];
-        $p['keywords'] = input('get.keywords','');
-        if (!empty($p['keywords'])) {
-            $query->where(implode('|', $fields), 'like', '%' . $p['keywords'] . '%');
+        $keywords = input('get.keywords','');
+        if (!empty($keywords)) {
+            $query->where(implode('|', $fields), 'like', "%$keywords%");
             $is_so = true;
         }
 
-        $p['userStatus'] = input('get.userStatus', '');
-        if ($p['userStatus'] != '') {
-            if ($p['userStatus'] == 0) {
+        $userStatus = input('get.userStatus', '');
+        if ($userStatus != '') {
+            if ($userStatus == 0) {
                 $query->whereNotIn('USER_STATUS_ID', array_column(BaseUserStatus::all()->toArray(), 'ID'));
             } else {
-                $query->where('USER_STATUS_ID', $p['userStatus']);
+                $query->where('USER_STATUS_ID', $userStatus);
             }
             $is_so = true;
         }
@@ -276,41 +274,41 @@ class UserUsers extends Common
         $powerLevel = $this->getPowerLevel();
         $admin = session('info');
         if (self::POWER_LEVEL_COUNTY == $powerLevel) {
-            $p['a1'] = $admin['POWER_COUNTY_ID_12'];
-            $p['a2'] = input('area2', '');
-            $p['a3'] = input('area3', '');
+            $area1 = $admin['POWER_COUNTY_ID_12'];
+            $area2 = input('area2', '');
+            $area3 = input('area3', '');
         }
         elseif (self::POWER_LEVEL_STREET == $powerLevel) {
-            $p['a1'] = $admin['POWER_COUNTY_ID_12'];
-            $p['a2'] = $admin['POWER_STREET_ID'];
-            $p['a3'] = input('area3', '');
+            $area1 = $admin['POWER_COUNTY_ID_12'];
+            $area2 = $admin['POWER_STREET_ID'];
+            $area3 = input('area3', '');
         }
         elseif (self::POWER_LEVEL_COMMUNITY == $powerLevel) {
-            $p['a1'] = $admin['POWER_COUNTY_ID_12'];
-            $p['a2'] = $admin['POWER_STREET_ID'];
-            $p['a3'] = $admin['POWER_COMMUNITY_ID'];
+            $area1 = $admin['POWER_COUNTY_ID_12'];
+            $area2 = $admin['POWER_STREET_ID'];
+            $area3 = $admin['POWER_COMMUNITY_ID'];
         } else {
-            $p['a1'] = input('area1', '');
-            $p['a2'] = input('area2', '');
-            $p['a3'] = input('area3', '');
+            $area1 = input('area1', '');
+            $area2 = input('area2', '');
+            $area3 = input('area3', '');
         }
 
-        if ($p['a1'] > 0) {
-            $query->where('COUNTY_ID_12', $p['a1']);
+        if ($area1 > 0) {
+            $query->where('COUNTY_ID_12', $area1);
             $is_so = true;
         }
-        if ($p['a2'] > 0) {
-            $query->where('STREET_ID', $p['a2']);
+        if ($area2 > 0) {
+            $query->where('STREET_ID', $area2);
             $is_so = true;
         }
-        if ($p['a3'] > 0) {
-            $query->where('COMMUNITY_ID', $p['a3']);
+        if ($area3 > 0) {
+            $query->where('COMMUNITY_ID', $area3);
             $is_so = true;
         }
 
         $title = '康复人员';
 
-        switch($zhipai){
+        switch($zhipai) {
             //未指派的社戒社康⼈人员
             case 'unzhipai':
                 $query->where('COMMUNITY_ID', 0);
@@ -333,7 +331,57 @@ class UserUsers extends Common
                 break;
         }
 
-        return ['query'=>$query,'p'=>$p,'is_so'=>$is_so, 'title'=>$title];
+        $estimate = input('estimate', '');
+        if ($estimate != '') {
+            $subQuery = db()->table('user_estimates')->order('add_time desc')->buildSql();
+            $subQuery = db()->table("$subQuery C")->group('UUID')->buildSql();
+            $query->leftJoin("$subQuery B", 'A.ID = B.UUID');
+            if ($estimate == 0) {
+                $query->where(function ($query) {
+                    $dangerLevelIds = array_keys(self::ESTIMATE_DANGER_LEVEL_LIST);
+                    array_shift($dangerLevelIds);
+                    $query->whereNotIn('B.DANGER_LEVEL_ID', $dangerLevelIds);
+                    $query->whereNull('B.DANGER_LEVEL_ID', 'or');
+                });
+            }
+            else {
+                $query->where('B.DANGER_LEVEL_ID', $estimate);
+            }
+            $is_so = true;
+        }
+
+        $userStatusList = create_kv(BaseUserStatus::all()->toArray(), 'ID', 'NAME');
+
+        $rows = $query->where(function ($query) {
+            $where = $this->getManageWhere();
+            if (!empty($where)) {
+                foreach ($where as $fd => $wh) {
+                    $query->where($fd, $wh);
+                }
+            }
+        })->paginate(self::PAGE_SIZE, false, [
+            'query' => request()->param()
+        ])->each(function($item) use($userStatusList) {
+            $item->user_status = isset($userStatusList[$item->USER_STATUS_ID]) ? $userStatusList[$item->USER_STATUS_ID] : '';
+            $item->HEAD_IMG_URL= build_http_img_url($item->HEAD_IMG);
+            $areas = Upareatable::where('UPAREAID','in',$item->LIVE_IDS)->order('UPAREAID','ASC')->column('NAME');
+            $item->LIVE_ADDRESS = implode(' ',$areas).' '.$item->LIVE_ADDRESS;
+            return $item;
+        });
+
+        return [
+            'rows' => $rows,
+            'params' => [
+                'keywords' => $keywords,
+                'userStatus' => $userStatus,
+                'estimate' => $estimate,
+                'area1' => $area1,
+                'area2' => $area2,
+                'area3' => $area3
+            ],
+            'is_so' => $is_so,
+            'title' => $title
+        ];
     }
 
     /**
@@ -1561,6 +1609,7 @@ class UserUsers extends Common
 
     public function statisticsStatus(Request $request) {
         return $this->statistic($request, function ($pageNO, $pageSize, $condition) {
+            $this->assign('statusList', BaseUserStatus::all());
             return UserUsersModel::statisticsStatus($pageNO, $pageSize, $condition);
         }, 'statistics_status');
     }
@@ -1573,6 +1622,7 @@ class UserUsers extends Common
 
     public function statisticsEstimates(Request $request) {
         return $this->statistic($request, function ($pageNO, $pageSize, $condition) {
+            $this->assign('estimateList', self::ESTIMATE_DANGER_LEVEL_LIST);
             return UserUsersModel::statisticsEstimates($pageNO, $pageSize, $condition);
         }, 'statistics_estimates');
     }
@@ -1637,7 +1687,6 @@ class UserUsers extends Common
         $this->assign('area1', $condition['area1']);
         $this->assign('area2', $condition['area2']);
         $this->assign('area3', $condition['area3']);
-        $this->assign('statusList', BaseUserStatus::all());
         $this->assign('allList', $allList);
         $this->assign('list', $pageList);
         $this->assign('total', $pageTotal);

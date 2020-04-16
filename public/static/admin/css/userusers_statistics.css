@@ -1,3 +1,6 @@
 .total-row td {
     background-color: #ECCB5D !important;
 }
+.table td,.table th {
+    text-align: center;
+}

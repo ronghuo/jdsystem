@@ -57,14 +57,14 @@
                 <td>全部</td>
                 {foreach name="allList" item="all"}
                     {foreach name="statusList" item="status"}
-                        <td style="text-align: center;">
+                        <td>
                             {if $all[$status.NAME] gt 0}
                                 <a href="./index?userStatus={$status.ID}{if isset($area1)}&area1={$area1}{/if}{if isset($area2)}&area2={$area2}{/if}{if isset($area3)}&area3={$area3}{/if}">{$all[$status.NAME]}</a>
                             {else/}{$all[$status.NAME]}
                             {/if}
                         </td>
                     {/foreach}
-                    <td style="text-align: center;">
+                    <td>
                         {if $all['未归类'] gt 0}
                             <a href="./index?userStatus=0{if isset($area1)}&area1={$area1}{/if}{if isset($area2)}&area2={$area2}{/if}{if isset($area3)}&area3={$area3}{/if}">{$all['未归类']}</a>
                         {else/}{$all['未归类']}
@@ -84,14 +84,14 @@
                     <td>{if isset($da.STREET_NAME)}{$da.STREET_NAME}{/if}</td>
                     <td>{if isset($da.COMMUNITY_NAME)}{$da.COMMUNITY_NAME}{/if}</td>
                     {foreach name="statusList" item="status"}
-                        <td style="text-align: center;">
+                        <td>
                             {if $da[$status.NAME] gt 0}
                             <a href="./index?userStatus={$status.ID}{if isset($da.COUNTY_ID_12)}&area1={$da.COUNTY_ID_12}{/if}{if isset($da.STREET_ID)}&area2={$da.STREET_ID}{/if}{if isset($da.COMMUNITY_ID)}&area3={$da.COMMUNITY_ID}{/if}">{$da[$status.NAME]}</a>
                             {else/}{$da[$status.NAME]}
                             {/if}
                         </td>
                     {/foreach}
-                    <td style="text-align: center;">
+                    <td>
                         {if $da['未归类'] gt 0}
                         <a href="./index?userStatus=0{if isset($da.COUNTY_ID_12)}&area1={$da.COUNTY_ID_12}{/if}{if isset($da.STREET_ID)}&area2={$da.STREET_ID}{/if}{if isset($da.COMMUNITY_ID)}&area3={$da.COMMUNITY_ID}{/if}">{$da['未归类']}</a>
                         {else/}{$da['未归类']}
