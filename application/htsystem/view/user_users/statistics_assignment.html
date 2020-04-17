@@ -41,10 +41,9 @@
                 <th>县市区</th>
                 <th>乡镇街道</th>
                 <th>村级社区</th>
-                <th>未指派</th>
-                <th>未完全指派</th>
-                <th>已完全指派</th>
-                <th>已解除社戒社康</th>
+                {foreach name="assignmentList" item="name"}
+                    <th>{$name}</th>
+                {/foreach}
                 <th>合计</th>
             </tr>
             {empty name="list"}
@@ -55,11 +54,20 @@
                 <td>全部</td>
                 <td>全部</td>
                 {foreach name="allList" item="all"}
-                    <td style="text-align: center;">{$all['未指派']}</td>
-                    <td style="text-align: center;">{$all['未完全指派']}</td>
-                    <td style="text-align: center;">{$all['已完全指派']}</td>
-                    <td style="text-align: center;">{$all['已解除社戒社康']}</td>
-                    <td>{if isset($all['合计'])}{$all['合计']}{/if}</td>
+                    {foreach name="assignmentList" item="name" key="id"}
+                        <td>
+                            {if $all[$name] gt 0}
+                            <a href="./{$id}?{if isset($area1)}area1={$area1}{/if}{if isset($area2)}&area2={$area2}{/if}{if isset($area3)}&area3={$area3}{/if}">{$all[$name]}</a>
+                            {else/}{$all[$name]}
+                            {/if}
+                        </td>
+                    {/foreach}
+                    <td>
+                        {if $all['合计'] gt 0}
+                        <a href="./index?{if isset($area1)}area1={$area1}{/if}{if isset($area2)}&area2={$area2}{/if}{if isset($area3)}&area3={$area3}{/if}">{$all['合计']}</a>
+                        {else/}{$all['合计']}
+                        {/if}
+                    </td>
                 {/foreach}
             </tr>
             {foreach name="list" item="da"}
@@ -67,11 +75,20 @@
                     <td>{$da.COUNTY_NAME}</td>
                     <td>{if isset($da.STREET_NAME)}{$da.STREET_NAME}{/if}</td>
                     <td>{if isset($da.COMMUNITY_NAME)}{$da.COMMUNITY_NAME}{/if}</td>
-                    <td style="text-align: center;">{$da['未指派']}</td>
-                    <td style="text-align: center;">{$da['未完全指派']}</td>
-                    <td style="text-align: center;">{$da['已完全指派']}</td>
-                    <td style="text-align: center;">{$da['已解除社戒社康']}</td>
-                    <td>{if isset($da['合计'])}{$da['合计']}{/if}</td>
+                    {foreach name="assignmentList" item="name" key="id"}
+                        <td>
+                            {if $da[$name] gt 0}
+                            <a href="./{$id}?{if isset($da.COUNTY_ID_12)}area1={$da.COUNTY_ID_12}{/if}{if isset($da.STREET_ID)}&area2={$da.STREET_ID}{/if}{if isset($da.COMMUNITY_ID)}&area3={$da.COMMUNITY_ID}{/if}">{$da[$name]}</a>
+                            {else/}{$da[$name]}
+                            {/if}
+                        </td>
+                    {/foreach}
+                    <td>
+                        {if $da['合计'] gt 0}
+                        <a href="./index?{if isset($da.COUNTY_ID_12)}area1={$da.COUNTY_ID_12}{/if}{if isset($da.STREET_ID)}&area2={$da.STREET_ID}{/if}{if isset($da.COMMUNITY_ID)}&area3={$da.COMMUNITY_ID}{/if}">{$da['合计']}</a>
+                        {else/}{$da['合计']}
+                        {/if}
+                    </td>
                 </tr>
             {/foreach}
             {/empty}

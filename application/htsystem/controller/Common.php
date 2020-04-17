@@ -3,6 +3,7 @@
 namespace app\htsystem\controller;
 
 use app\htsystem\model\AdminLogs;
+use app\htsystem\model\Admins;
 use think\Controller;
 use think\Request;
 use app\common\library\Mylog;

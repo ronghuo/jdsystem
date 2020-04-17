@@ -18,15 +18,24 @@ class UserUsers extends BaseModel
         1=>'2年',
         2=>'3年'
     ];
-    const DANGER_LEVEL_LIST = [
-        '低风险' => 1,
-        '中风险' => 2,
-        '高风险' => 3
+    const ESTIMATE_DANGER_LEVEL_LIST = [
+        1 => '低风险',
+        2 => '中风险',
+        3 => '高风险'
     ];
     const ASSIGNMENT_STATUS_UNASSIGNED = '未指派';
     const ASSIGNMENT_STATUS_NOT_ALL_ASSIGNED = '未完全指派';
     const ASSIGNMENT_STATUS_ASSIGNED = '已完全指派';
     const ASSIGNMENT_STATUS_RELIVED = '已解除社戒社康';
+    const ASSIGNMENT_STATUS_LIST = [
+        'zhipai0' => self::ASSIGNMENT_STATUS_UNASSIGNED,
+        'zhipai1' => self::ASSIGNMENT_STATUS_NOT_ALL_ASSIGNED,
+        'zhipai2' => self::ASSIGNMENT_STATUS_ASSIGNED,
+        'zhipai3' => self::ASSIGNMENT_STATUS_RELIVED
+    ];
+
+    const STATISTICS_TOTAL_TITLE = '合计';
+    const STATISTICS_OTHER_TITLE = '其它';
 
     protected $pk = 'ID';
     public $table = 'USER_USERS';
@@ -192,226 +201,88 @@ class UserUsers extends BaseModel
     }
 
     public static function statisticsStatus($pageNO = 1, $pageSize = 20, $condition = []) {
-        $unclassified = '未归类';
-        $totalTitle = '合计';
-        $subSql = 'select ';
-        $subSql .= 'COUNTY_ID_12,(select `NAME` from subareas where CODE12 = A.COUNTY_ID_12) COUNTY_NAME,';
-        $groupBy = ['COUNTY_ID_12'];
-        $orderBy = ['COUNTY_ID_12'];
-        if (!empty($condition['area1'])) {
-            $subSql .= 'STREET_ID,(select `NAME` from subareas where CODE12 = A.STREET_ID) STREET_NAME,';
-            $where['COUNTY_ID_12'] = $condition['area1'];
-            array_push($groupBy, 'STREET_ID');
-            array_push($orderBy, 'STREET_ID');
-        }
-        if (!empty($condition['area2'])) {
-            $subSql .= 'COMMUNITY_ID,(select `NAME` from subareas where CODE12 = A.COMMUNITY_ID) COMMUNITY_NAME,';
-            $where['STREET_ID'] = $condition['area2'];
-            array_push($groupBy, 'COMMUNITY_ID');
-            array_push($orderBy, 'COMMUNITY_ID');
-        }
-        if (!empty($condition['area3'])) {
-            $where['COMMUNITY_ID'] = $condition['area3'];
-        }
-
         $userStatus = create_kv(BaseUserStatus::all()->toArray(), 'ID', 'NAME');
-        $userStatusId = array_keys($userStatus);
-        foreach ($userStatus as $id => $name) {
-            $subSql .= "sum(case USER_STATUS_ID when $id then 1 else 0 end) '$name',";
-        }
-        $subSql .= "sum(case when USER_STATUS_ID not in (" . implode(',', $userStatusId) . ") then 1 else 0 end) '$unclassified'";
-        $subSql .= " from user_users A where ISDEL = 0 group by " . implode(',', $groupBy);
-
-        // 统计符合条件的数据总数
-        $sql = 'select ';
-        foreach ($userStatus as $id => $name) {
-            $sql .= "sum($name) '$name',";
-        }
-        $sql .= "sum($unclassified) '$unclassified'";
-        $sql .= " from ($subSql) B where (COUNTY_ID_12 = 0 or COUNTY_NAME is not null)";
-        if (!empty($where)) {
-            $sql .= ' and (';
-            $and = ' and ';
-            foreach ($where as $name => $value) {
-                $sql .= "$name='$value' $and";
+        return self::statistics(function ($subSql, $groupBy) use ($userStatus) {
+            $userStatusId = array_keys($userStatus);
+            foreach ($userStatus as $id => $name) {
+                $subSql .= "sum(case USER_STATUS_ID when $id then 1 else 0 end) '$name',";
             }
-            $sql = substr($sql, 0, strlen($sql) - strlen($and));
-            $sql .= ')';
-        }
-        $allList = db()->query($sql);
-        if (!empty($allList)) {
-            foreach ($allList as &$item) {
-                $total = $item[$unclassified];
-                foreach ($userStatus as $id => $name) {
-                    $total += $item[$name];
-                }
-                $item[$totalTitle] = $total;
+            $subSql .= "sum(case when USER_STATUS_ID not in (" . implode(',', $userStatusId) . ") then 1 else 0 end) '" . self::STATISTICS_OTHER_TITLE . "'";
+            $subSql .= " from user_users A where ISDEL = 0 group by " . implode(',', $groupBy);
+            return $subSql;
+        }, function ($sql) use ($userStatus) {
+            foreach ($userStatus as $id => $name) {
+                $sql .= "sum($name) '$name',";
             }
-        }
-
-        // 获取分页数据
-        $sql = "select * from ($subSql) B where (COUNTY_ID_12 = 0 or COUNTY_NAME is not null)";
-        if (!empty($where)) {
-            $sql .= ' and (';
-            $and = ' and ';
-            foreach ($where as $name => $value) {
-                $sql .= "$name='$value' $and";
+            $sql .= "sum(" . self::STATISTICS_OTHER_TITLE . ") '" . self::STATISTICS_OTHER_TITLE . "'";
+            return $sql;
+        }, function (&$item) use ($userStatus) {
+            $total = $item[self::STATISTICS_OTHER_TITLE];
+            foreach ($userStatus as $id => $name) {
+                $total += $item[$name];
             }
-            $sql = substr($sql, 0, strlen($sql) - strlen($and));
-            $sql .= ')';
-        }
-        $sql .= " order by " . implode(',', $orderBy);
-        $limit = $pageSize;
-        $offset = ($pageNO - 1) * $limit;
-        $sql .= ' limit ?,?';
-        $pageList = db()->query($sql, [$offset,$limit]);
-        if (!empty($pageList)) {
-            foreach ($pageList as &$item) {
-                $total = $item[$unclassified];
-                foreach ($userStatus as $id => $name) {
-                    $total += $item[$name];
-                }
-                $item[$totalTitle] = $total;
-            }
-        }
-
-        // 获取统计总记录数
-        $sql = "select count(*) from ($subSql) B where (COUNTY_ID_12 = 0 or COUNTY_NAME is not null)";
-        if (!empty($where)) {
-            $sql .= ' and (';
-            $and = ' and ';
-            foreach ($where as $name => $value) {
-                $sql .= "$name='$value' $and";
-            }
-            $sql = substr($sql, 0, strlen($sql) - strlen($and));
-            $sql .= ')';
-        }
-        $pageTotals = db()->query($sql);
-        foreach ($pageTotals as $pageTotal) {
-            foreach ($pageTotal as $key => $value) {
-                $pageTotal = $value;
-            }
-        }
-        return [
-            'allList' => $allList,
-            'pageTotal' => $pageTotal,
-            'pageList' => $pageList
-        ];
+            $item[self::STATISTICS_TOTAL_TITLE] = $total;
+        }, $pageSize, $pageNO, $condition);
     }
 
     public static function statisticsEstimates($pageNO = 1, $pageSize = 20, $condition = []) {
-        $totalTitle = '合计';
-        $unknown = '未评估';
-        $subSql = 'select ';
-        $subSql .= 'COUNTY_ID_12,(select `NAME` from subareas where CODE12 = A.COUNTY_ID_12) COUNTY_NAME,';
-        $groupBy = ['COUNTY_ID_12'];
-        $orderBy = ['COUNTY_ID_12'];
-        if (!empty($condition['area1'])) {
-            $subSql .= 'STREET_ID,(select `NAME` from subareas where CODE12 = A.STREET_ID) STREET_NAME,';
-            $where['COUNTY_ID_12'] = $condition['area1'];
-            array_push($groupBy, 'STREET_ID');
-            array_push($orderBy, 'STREET_ID');
-        }
-        if (!empty($condition['area2'])) {
-            $subSql .= 'COMMUNITY_ID,(select `NAME` from subareas where CODE12 = A.COMMUNITY_ID) COMMUNITY_NAME,';
-            $where['STREET_ID'] = $condition['area2'];
-            array_push($groupBy, 'COMMUNITY_ID');
-            array_push($orderBy, 'COMMUNITY_ID');
-        }
-        if (!empty($condition['area3'])) {
-            $where['COMMUNITY_ID'] = $condition['area3'];
-        }
-
-        $dangerLevels = self::DANGER_LEVEL_LIST;
-        $dangerLevelId = array_values($dangerLevels);
-        foreach ($dangerLevels as $name => $value) {
-            $subSql .= "sum(case when B.DANGER_LEVEL_ID = $value then 1 else 0 end) '$name',";
-        }
-        $subSql .= "sum(case when B.DANGER_LEVEL_ID is null or B.DANGER_LEVEL_ID not in (" . implode(',', $dangerLevelId) . ") then 1 else 0 end) '$unknown'";
-        $subSql .= " from user_users A";
-        $subSql .= " left join (select * from (select * from user_estimates order by add_time desc) C group by UUID) B";
-        $subSql .= " on A.ID = B.UUID where ISDEL = 0";
-        $subSql .= " group by " . implode(',', $groupBy);
-
-        // 统计符合条件的数据总数
-        $sql = 'select ';
-        foreach ($dangerLevels as $name => $value) {
-            $sql .= "sum($name) '$name',";
-        }
-        $sql .= "sum($unknown) '$unknown'";
-        $sql .= " from ($subSql) D where (COUNTY_ID_12 = 0 or COUNTY_NAME is not null)";
-        if (!empty($where)) {
-            $sql .= ' and (';
-            $and = ' and ';
-            foreach ($where as $name => $value) {
-                $sql .= "$name='$value' $and";
+        return self::statistics(function ($subSql, $groupBy) {
+            $dangerLevelId = array_keys(self::ESTIMATE_DANGER_LEVEL_LIST);
+            foreach (self::ESTIMATE_DANGER_LEVEL_LIST as $id => $name) {
+                $subSql .= "sum(case when B.DANGER_LEVEL_ID = $id then 1 else 0 end) '$name',";
             }
-            $sql = substr($sql, 0, strlen($sql) - strlen($and));
-            $sql .= ')';
-        }
-        $allList = db()->query($sql);
-        if (!empty($allList)) {
-            foreach ($allList as &$item) {
-                $total = $item[$unknown];
-                foreach ($dangerLevels as $name => $value) {
-                    $total += $item[$name];
-                }
-                $item[$totalTitle] = $total;
+            $subSql .= "sum(case when B.DANGER_LEVEL_ID is null or B.DANGER_LEVEL_ID not in (" . implode(',', $dangerLevelId) . ") then 1 else 0 end) '" . self::STATISTICS_OTHER_TITLE . "'";
+            $subSql .= " from user_users A";
+            $subSql .= " left join (select * from (select * from user_estimates order by add_time desc) C group by UUID) B";
+            $subSql .= " on A.ID = B.UUID where ISDEL = 0";
+            $subSql .= " group by " . implode(',', $groupBy);
+            return $subSql;
+        }, function ($sql) {
+            foreach (self::ESTIMATE_DANGER_LEVEL_LIST as $id => $name) {
+                $sql .= "sum($name) '$name',";
             }
-        }
-
-        // 获取分页数据
-        $sql = "select * from ($subSql) D where (COUNTY_ID_12 = 0 or COUNTY_NAME is not null)";
-        if (!empty($where)) {
-            $sql .= ' and (';
-            $and = ' and ';
-            foreach ($where as $name => $value) {
-                $sql .= "$name='$value' $and";
+            $sql .= "sum(" . self::STATISTICS_OTHER_TITLE . ") '" . self::STATISTICS_OTHER_TITLE . "'";
+            return $sql;
+        }, function (&$item) {
+            $total = $item[self::STATISTICS_OTHER_TITLE];
+            foreach (self::ESTIMATE_DANGER_LEVEL_LIST as $id => $name) {
+                $total += $item[$name];
             }
-            $sql = substr($sql, 0, strlen($sql) - strlen($and));
-            $sql .= ')';
-        }
-        $sql .= " order by " . implode(',', $orderBy);
-        $limit = $pageSize;
-        $offset = ($pageNO - 1) * $limit;
-        $sql .= ' limit ?,?';
-        $pageList = db()->query($sql, [$offset,$limit]);
-        if (!empty($pageList)) {
-            foreach ($pageList as &$item) {
-                $total = $item[$unknown];
-                foreach ($dangerLevels as $name => $value) {
-                    $total += $item[$name];
-                }
-                $item[$totalTitle] = $total;
-            }
-        }
-
-        // 获取统计总记录数
-        $sql = "select count(*) from ($subSql) D where (COUNTY_ID_12 = 0 or COUNTY_NAME is not null)";
-        if (!empty($where)) {
-            $sql .= ' and (';
-            $and = ' and ';
-            foreach ($where as $name => $value) {
-                $sql .= "$name='$value' $and";
-            }
-            $sql = substr($sql, 0, strlen($sql) - strlen($and));
-            $sql .= ')';
-        }
-        $pageTotals = db()->query($sql);
-        foreach ($pageTotals as $pageTotal) {
-            foreach ($pageTotal as $key => $value) {
-                $pageTotal = $value;
-            }
-        }
-        return [
-            'allList' => $allList,
-            'pageTotal' => $pageTotal,
-            'pageList' => $pageList
-        ];
+            $item[self::STATISTICS_TOTAL_TITLE] = $total;
+        }, $pageSize, $pageNO, $condition);
     }
 
     public static function statisticsAssignment($pageNO = 1, $pageSize = 20, $condition = []) {
-        $totalTitle = '合计';
+        return self::statistics(function ($subSql, $groupBy) {
+            $unassigned = self::ASSIGNMENT_STATUS_UNASSIGNED;
+            $subSql .= "sum(case when COMMUNITY_ID = 0 then 1 else 0 end) '$unassigned',";
+            $notAllAssigned = self::ASSIGNMENT_STATUS_NOT_ALL_ASSIGNED;
+            $subSql .= "sum(case when COMMUNITY_ID > 0 and JD_ZHI_PAI_ID = 0 then 1 else 0 end) '$notAllAssigned',";
+            $assigned = self::ASSIGNMENT_STATUS_ASSIGNED;
+            $subSql .= "sum(case when COMMUNITY_ID > 0 and JD_ZHI_PAI_ID = 1 then 1 else 0 end) '$assigned',";
+            $relived = self::ASSIGNMENT_STATUS_RELIVED;
+            $subSql .= "sum(case when JD_ZHI_PAI_ID = 2 then 1 else 0 end) '$relived'";
+            $subSql .= " from user_users A where ISDEL = 0 group by " . implode(',', $groupBy);
+            return $subSql;
+        }, function ($sql) {
+            $statusList = array_values(self::ASSIGNMENT_STATUS_LIST);
+            foreach ($statusList as $name) {
+                $sql .= "sum($name) '$name',";
+            }
+            $sql = substr($sql, 0, strlen($sql) - 1);
+            return $sql;
+        }, function (&$item) {
+            $total = 0;
+            $statusList = array_values(self::ASSIGNMENT_STATUS_LIST);
+            foreach ($statusList as $name) {
+                $total += $item[$name];
+            }
+            $item[self::STATISTICS_TOTAL_TITLE] = $total;
+        }, $pageSize, $pageNO, $condition);
+
+    }
+
+    private static function statistics($buildSubSql, $buildSql, $calcTotal, $pageSize, $pageNO, $condition) {
         $subSql = 'select ';
         $subSql .= 'COUNTY_ID_12,(select `NAME` from subareas where CODE12 = A.COUNTY_ID_12) COUNTY_NAME,';
         $groupBy = ['COUNTY_ID_12'];
@@ -431,23 +302,11 @@ class UserUsers extends BaseModel
         if (!empty($condition['area3'])) {
             $where['COMMUNITY_ID'] = $condition['area3'];
         }
-
-        $unassigned = self::ASSIGNMENT_STATUS_UNASSIGNED;
-        $subSql .= "sum(case when COMMUNITY_ID = 0 then 1 else 0 end) '$unassigned',";
-        $notAllAssigned = self::ASSIGNMENT_STATUS_NOT_ALL_ASSIGNED;
-        $subSql .= "sum(case when COMMUNITY_ID > 0 and JD_ZHI_PAI_ID = 0 then 1 else 0 end) '$notAllAssigned',";
-        $assigned = self::ASSIGNMENT_STATUS_ASSIGNED;
-        $subSql .= "sum(case when COMMUNITY_ID > 0 and JD_ZHI_PAI_ID = 1 then 1 else 0 end) '$assigned',";
-        $relived = self::ASSIGNMENT_STATUS_RELIVED;
-        $subSql .= "sum(case when JD_ZHI_PAI_ID = 2 then 1 else 0 end) '$relived'";
-        $subSql .= " from user_users A where ISDEL = 0 group by " . implode(',', $groupBy);
+        $subSql = $buildSubSql($subSql, $groupBy);
 
         // 统计符合条件的数据总数
         $sql = 'select ';
-        foreach ([$unassigned, $notAllAssigned, $assigned, $relived] as $name) {
-            $sql .= "sum($name) '$name',";
-        }
-        $sql = substr($sql, 0, strlen($sql) - 1);
+        $sql = $buildSql($sql);
         $sql .= " from ($subSql) B where (COUNTY_ID_12 = 0 or COUNTY_NAME is not null)";
         if (!empty($where)) {
             $sql .= ' and (';
@@ -461,11 +320,7 @@ class UserUsers extends BaseModel
         $allList = db()->query($sql);
         if (!empty($allList)) {
             foreach ($allList as &$item) {
-                $total = 0;
-                foreach ([$unassigned, $notAllAssigned, $assigned, $relived] as $name) {
-                    $total += $item[$name];
-                }
-                $item[$totalTitle] = $total;
+                $calcTotal($item);
             }
         }
 
@@ -487,11 +342,7 @@ class UserUsers extends BaseModel
         $pageList = db()->query($sql, [$offset,$limit]);
         if (!empty($pageList)) {
             foreach ($pageList as &$item) {
-                $total = 0;
-                foreach ([$unassigned, $notAllAssigned, $assigned, $relived] as $name) {
-                    $total += $item[$name];
-                }
-                $item[$totalTitle] = $total;
+                $calcTotal($item);
             }
         }
 

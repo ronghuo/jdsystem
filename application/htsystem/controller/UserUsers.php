@@ -2,6 +2,7 @@
 
 namespace app\htsystem\controller;
 
+use app\api1\controller\uuser\User;
 use app\common\model\BaseSexType;
 use app\common\model\UserDecisions;
 use app\common\model\UserRecoveryPlan;
@@ -83,16 +84,6 @@ class UserUsers extends Common
         'terminateZZCXSM',
         'SXGKH',
         'JCS'
-    ];
-
-    /**
-     * 风险评估级别清单
-     */
-    const ESTIMATE_DANGER_LEVEL_LIST = [
-        0 => '未评估',
-        1 => '低风险',
-        2 => '中风险',
-        3 => '高风险'
     ];
 
     /**
@@ -209,7 +200,7 @@ class UserUsers extends Common
      *
      * @return \think\Response
      */
-    public function index($zhipai = '')
+    public function index(Request $request, $zhipai = '')
     {
         $result = $this->doSearch($zhipai);
         $is_so = $result['is_so'];
@@ -237,14 +228,14 @@ class UserUsers extends Common
         $this->assign('userStatus', $params['userStatus']);
         $this->assign('user_status_list', BaseUserStatus::all());
         $this->assign('estimate', $params['estimate']);
-        $this->assign('estimate_list', self::ESTIMATE_DANGER_LEVEL_LIST);
+        $this->assign('estimate_list', UserUsersModel::ESTIMATE_DANGER_LEVEL_LIST);
 
         $this->addAdminLog(self::OPER_TYPE_QUERY, '康复人员列表');
 
         return $this->fetch('index');
     }
 
-    protected function doSearch($zhipai='') {
+    protected function doSearch($zhipai = '') {
 
         $is_so = false;
 
@@ -338,7 +329,7 @@ class UserUsers extends Common
             $query->leftJoin("$subQuery B", 'A.ID = B.UUID');
             if ($estimate == 0) {
                 $query->where(function ($query) {
-                    $dangerLevelIds = array_keys(self::ESTIMATE_DANGER_LEVEL_LIST);
+                    $dangerLevelIds = array_keys(UserUsersModel::ESTIMATE_DANGER_LEVEL_LIST);
                     array_shift($dangerLevelIds);
                     $query->whereNotIn('B.DANGER_LEVEL_ID', $dangerLevelIds);
                     $query->whereNull('B.DANGER_LEVEL_ID', 'or');
@@ -1622,7 +1613,7 @@ class UserUsers extends Common
 
     public function statisticsEstimates(Request $request) {
         return $this->statistic($request, function ($pageNO, $pageSize, $condition) {
-            $this->assign('estimateList', self::ESTIMATE_DANGER_LEVEL_LIST);
+            $this->assign('estimateList', UserUsersModel::ESTIMATE_DANGER_LEVEL_LIST);
             return UserUsersModel::statisticsEstimates($pageNO, $pageSize, $condition);
         }, 'statistics_estimates');
     }
@@ -1635,6 +1626,7 @@ class UserUsers extends Common
 
     public function statisticsAssignment(Request $request) {
         return $this->statistic($request, function ($pageNO, $pageSize, $condition) {
+            $this->assign('assignmentList', UserUsersModel::ASSIGNMENT_STATUS_LIST);
             return UserUsersModel::statisticsAssignment($pageNO, $pageSize, $condition);
         }, 'statistics_assignment');
     }

@@ -44,6 +44,7 @@
                 {foreach name="estimateList" item="name"}
                     <th>{$name}</th>
                 {/foreach}
+                <th>其它</th>
                 <th>合计</th>
             </tr>
             {empty name="list"}
@@ -62,6 +63,12 @@
                             {/if}
                         </td>
                     {/foreach}
+                    <td>
+                        {if $all['其它'] gt 0}
+                        <a href="./index?estimate=0{if isset($area1)}&area1={$area1}{/if}{if isset($area2)}&area2={$area2}{/if}{if isset($area3)}&area3={$area3}{/if}">{$all['其它']}</a>
+                        {else/}{$all['其它']}
+                        {/if}
+                    </td>
                     <td>
                         {if $all['合计'] gt 0}
                         <a href="./index?{if isset($area1)}area1={$area1}{/if}{if isset($area2)}&area2={$area2}{/if}{if isset($area3)}&area3={$area3}{/if}">{$all['合计']}</a>
@@ -83,6 +90,12 @@
                             {/if}
                         </td>
                     {/foreach}
+                    <td>
+                        {if $da['其它'] gt 0}
+                        <a href="./index?estimate=0{if isset($da.COUNTY_ID_12)}&area1={$da.COUNTY_ID_12}{/if}{if isset($da.STREET_ID)}&area2={$da.STREET_ID}{/if}{if isset($da.COMMUNITY_ID)}&area3={$da.COMMUNITY_ID}{/if}">{$da['其它']}</a>
+                        {else/}{$da['其它']}
+                        {/if}
+                    </td>
                     <td>
                         {if $da['合计'] gt 0}
                         <a href="./index?{if isset($da.COUNTY_ID_12)}area1={$da.COUNTY_ID_12}{/if}{if isset($da.STREET_ID)}&area2={$da.STREET_ID}{/if}{if isset($da.COMMUNITY_ID)}&area3={$da.COMMUNITY_ID}{/if}">{$da['合计']}</a>

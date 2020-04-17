@@ -35,7 +35,7 @@
                                 {foreach name="user_status_list" item="status"}
                                     <option {if isset($userStatus) && $userStatus eq $status.ID}selected{/if} value="{$status.ID}">{$status.NAME}</option>
                                 {/foreach}
-                                <option {if isset($userStatus) && $userStatus eq strval(0)}selected{/if} value="0">未归类</option>
+                                <option {if isset($userStatus) && $userStatus eq strval(0)}selected{/if} value="0">其它</option>
                             {/notempty}
                         </select>
                     </div>
@@ -49,6 +49,7 @@
                             {foreach name="estimate_list" item="item" key="ID"}
                             <option {if isset($estimate) && $estimate eq strval($ID)}selected{/if} value="{$ID}">{$item}</option>
                             {/foreach}
+                            <option {if isset($estimate) && $estimate eq strval(0)}selected{/if} value="0">其它</option>
                             {/notempty}
                         </select>
                     </div>

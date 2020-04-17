@@ -45,7 +45,7 @@
                 {foreach name="statusList" item="status"}
                     <th width="{if strlen($status.NAME) egt 5}45px{else/}30px{/if}">{$status.NAME}</th>
                 {/foreach}
-                <th width="30px">未归类</th>
+                <th width="30px">其它</th>
                 <th width="30px">合计</th>
             </tr>
             {empty name="list"}
@@ -65,9 +65,9 @@
                         </td>
                     {/foreach}
                     <td>
-                        {if $all['未归类'] gt 0}
-                            <a href="./index?userStatus=0{if isset($area1)}&area1={$area1}{/if}{if isset($area2)}&area2={$area2}{/if}{if isset($area3)}&area3={$area3}{/if}">{$all['未归类']}</a>
-                        {else/}{$all['未归类']}
+                        {if $all['其它'] gt 0}
+                            <a href="./index?userStatus=0{if isset($area1)}&area1={$area1}{/if}{if isset($area2)}&area2={$area2}{/if}{if isset($area3)}&area3={$area3}{/if}">{$all['其它']}</a>
+                        {else/}{$all['其它']}
                         {/if}
                     </td>
                     <td>
@@ -92,9 +92,9 @@
                         </td>
                     {/foreach}
                     <td>
-                        {if $da['未归类'] gt 0}
-                        <a href="./index?userStatus=0{if isset($da.COUNTY_ID_12)}&area1={$da.COUNTY_ID_12}{/if}{if isset($da.STREET_ID)}&area2={$da.STREET_ID}{/if}{if isset($da.COMMUNITY_ID)}&area3={$da.COMMUNITY_ID}{/if}">{$da['未归类']}</a>
-                        {else/}{$da['未归类']}
+                        {if $da['其它'] gt 0}
+                        <a href="./index?userStatus=0{if isset($da.COUNTY_ID_12)}&area1={$da.COUNTY_ID_12}{/if}{if isset($da.STREET_ID)}&area2={$da.STREET_ID}{/if}{if isset($da.COMMUNITY_ID)}&area3={$da.COMMUNITY_ID}{/if}">{$da['其它']}</a>
+                        {else/}{$da['其它']}
                         {/if}
                     </td>
                     <td>
