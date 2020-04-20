@@ -11,7 +11,7 @@ namespace app\htsystem\controller;
 use app\common\library\JqueryCateData;
 
 
-class Helper extends Common{
+class Helper extends Common {
 
     public function refreshCache(){
         $file_path = config('cache_version_file');

@@ -398,21 +398,21 @@ class Data
                         'area_code'=>'431271001000',
                         'pid'=>0,
                         'name'=>'河滨路街道禁毒工作领导小组',
-                        'desc'=>'湖南省怀化市洪江市河滨路街道禁毒工作领导小组',
+                        'desc'=>'湖南省怀化市洪江区河滨路街道禁毒工作领导小组',
                     ],
                     [
                         'dept_code'=>'02431271002000',
                         'area_code'=>'431271002000',
                         'pid'=>0,
                         'name'=>'沅江路街道禁毒工作领导小组',
-                        'desc'=>'湖南省怀化市洪江市沅江路街道禁毒工作领导小组',
+                        'desc'=>'湖南省怀化市洪江区沅江路街道禁毒工作领导小组',
                     ],
                     [
                         'dept_code'=>'02431271003000',
                         'area_code'=>'431271003000',
                         'pid'=>0,
                         'name'=>'新街街道禁毒工作领导小组',
-                        'desc'=>'湖南省怀化市洪江市新街街道禁毒工作领导小组',
+                        'desc'=>'湖南省怀化市洪江区新街街道禁毒工作领导小组',
                     ],
                     [
                         'dept_code'=>'02431271004000',
@@ -426,23 +426,23 @@ class Data
                         'area_code'=>'431271218000',
                         'pid'=>0,
                         'name'=>'横岩乡禁毒工作领导小组',
-                        'desc'=>'湖南省怀化市洪江市横岩乡禁毒工作领导小组',
+                        'desc'=>'湖南省怀化市洪江区横岩乡禁毒工作领导小组',
                     ],
                     [
                         'dept_code'=>'02431271220000',
                         'area_code'=>'431271220000',
                         'pid'=>0,
                         'name'=>'桂花园乡禁毒工作领导小组',
-                        'desc'=>'湖南省怀化市洪江市桂花园乡禁毒工作领导小组',
+                        'desc'=>'湖南省怀化市洪江区桂花园乡禁毒工作领导小组',
                     ],
                 ];
 
 
-        $count = \app\common\model\NbAuthDept::where('FLAG', 0)->count();
+        $count = NbAuthDept::where('FLAG', 0)->count();
 
-        $main = \app\common\model\NbAuthDept::where('DEPTCODE', $maindata['dept_code'])->find();
+        $main = NbAuthDept::where('DEPTCODE', $maindata['dept_code'])->find();
         if(!$main){
-            $main = (new \app\common\model\NbAuthDept())->create([
+            $main = (new NbAuthDept())->create([
                 'PARENTDEPTID'=>$maindata['pid'],
                 'DEPTCODE'=>$maindata['dept_code'],
                 'DEPTNAME'=>$maindata['name'],
@@ -457,12 +457,7 @@ class Data
             ]);
         }
 
-//        return $main->ID;
-
         $main_id = $main->ID;
-
-//        echo $main_id;
-//        exit;
 
         $insert = [];
         foreach($subdata as $k=>$da){
@@ -785,6 +780,70 @@ class Data
         $trees = create_level_tree($all,10040);
 
         return json_encode($trees);
+    }
+
+    public function fixNbAuthDept($countyName) {
+        $parentDept = NbAuthDept::where('PARENTDEPTID', 10074)->whereLike('DEPTNAME', "$countyName%")->find();
+        $parentDeptId = $parentDept->ID;
+        $parentAreaCode = $parentDept->AREACODE;
+        $subQuery = NbAuthDept::where('PARENTDEPTID', $parentDeptId)->buildSql();
+        $unhandledDepts = db()->table('subareas')->alias('A')
+            ->leftJoin("$subQuery B", 'A.CODE12 = B.AREACODE')
+            ->where('A.PID|A.CODE12', $parentAreaCode)
+            ->whereNull('B.ID')
+            ->field('A.NAME,A.CODE12')
+            ->select();
+        if (!empty($unhandledDepts)) {
+            $newSort = NbAuthDept::where('PARENTDEPTID', $parentDeptId)->max('SORTORDER');
+            foreach ($unhandledDepts as $dept) {
+                $newDept = new NbAuthDept();
+                $newDept->PARENTDEPTID = $parentDeptId;
+                $newDept->DEPTCODE = '02' . $dept['CODE12'];
+                $newDept->DEPTNAME = $dept['NAME'] . '禁毒工作领导小组';
+                $newDept->DEPTDESC = '湖南省怀化市' . $dept['NAME'] . '禁毒工作领导小组';
+                $newDept->FLAG = 0;
+                $newDept->CREATOR = 0;
+                $newDept->SERVICEPARENTDEPTID = 0;
+                $newDept->AREACODE = $dept['CODE12'];
+                $newDept->DEPTGROUPID = 10030;
+                $newDept->AUTHDEPTID = 0;
+                $newDept->SORTORDER = ++$newSort;
+                $newDept->save();
+
+                $id = $newDept->ID;
+                $newDept = new NbAuthDept();
+                $newDept->PARENTDEPTID = $id;
+                $newDept->DEPTCODE = '02' . ($dept['CODE12'] + 1);
+                $newDept->DEPTNAME = $dept['NAME'] . '禁毒工作领导小组办公室';
+                $newDept->DEPTDESC = '湖南省怀化市' . $dept['NAME'] . '禁毒工作领导小组办公室';
+                $newDept->FLAG = 0;
+                $newDept->CREATOR = 0;
+                $newDept->SERVICEPARENTDEPTID = 0;
+                $newDept->AREACODE = $dept['CODE12'];
+                $newDept->DEPTGROUPID = 10030;
+                $newDept->AUTHDEPTID = 0;
+                $newDept->SORTORDER = 1;
+                $newDept->save();
+            }
+        }
+        $abandonedDepts = NbAuthDept::where('PARENTDEPTID', $parentDeptId)
+            ->where('AREACODE', 'NOT IN', function ($query) use ($parentAreaCode) {
+                $query->table('subareas')->where('PID|CODE12', $parentAreaCode)->field('CODE12');
+            })->select();
+        if (!empty($abandonedDepts)) {
+            foreach ($abandonedDepts as &$dept) {
+                $dept->FLAG = 1;
+                $dept->save();
+                $children = NbAuthDept::where('PARENTDEPTID', $dept->ID)->select();
+                if (!empty($children)) {
+                    foreach ($children as $child) {
+                        $child->FLAG = 1;
+                        $child->save();
+                    }
+                }
+            }
+        }
+        echo 'Done.';
     }
 
 }

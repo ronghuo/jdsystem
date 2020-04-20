@@ -1307,8 +1307,9 @@ class UserUsers extends Common
                 }
             }
         }
+        $subStatusId = $request->param('USER_SUB_STATUS_ID', 0);
         $subStatusName = $request->param('USER_SUB_STATUS_NAME');
-        if (empty($subStatusName)) {
+        if (empty($subStatusId) || empty($subStatusName)) {
             return;
         }
         $relations = self::SUB_STATUS_RELATIONS[$subStatusName];
