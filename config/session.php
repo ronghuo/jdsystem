@@ -24,5 +24,5 @@ return [
     // 是否自动开启 SESSION
     'auto_start'     => true,
 
-    'expire'=>3600
+    'expire' => 3600
 ];

@@ -193,6 +193,11 @@ class UserUsers extends Common
         '村级社区'
     ];
 
+    /**
+     * 默认县市区（市辖区），市辖区代表市级，且非“怀化市”区域均归为“市辖区”
+     */
+    const DEFAULT_COUNTY_ID = '431201000000';
+
     protected $admin_log_target_type = 'UserUser';
 
     /**
@@ -817,7 +822,10 @@ class UserUsers extends Common
         $isArchive = $zpact == self::ASSIGN_TYPE_ARCHIVE;
         if ($zpact == self::ASSIGN_TYPE_ASSIGN || $isArchive) {
 
-            $county_id_12 = $request->post('COUNTY_ID_12', 0);
+            $county_id_12 = $request->post('COUNTY_ID_12');
+            if (empty($county_id_12)) {
+                $county_id_12 = self::DEFAULT_COUNTY_ID;
+            }
             $street_id = $request->post('STREET_ID', 0);
             $community_id = $request->post('COMMUNITY_ID', 0);
 
@@ -941,11 +949,12 @@ class UserUsers extends Common
     }
 
     private function setManagePoliceArea(&$user) {
-        $dmmcs = NbAuthDept::where('AREACODE', 'in', [$user->COUNTY_ID_12, $user->STREET_ID, $user->COMMUNITY_ID])->order('DEPTCODE desc')->select();
+        $dmmcs = NbAuthDept::where('AREACODE', 'in', [$user->COUNTY_ID_12, $user->STREET_ID, $user->COMMUNITY_ID])->order('DEPTCODE desc')
+            ->select()->toArray();
         if (!empty($dmmcs)) {
             $dmmc = $dmmcs[0];
-            $user->MANAGE_POLICE_AREA_CODE = $dmmc->DEPTCODE;
-            $user->MANAGE_POLICE_AREA_NAME = $dmmc->DEPTNAME;
+            $user->MANAGE_POLICE_AREA_CODE = $dmmc['DEPTCODE'];
+            $user->MANAGE_POLICE_AREA_NAME = $dmmc['DEPTNAME'];
         }
     }
 
@@ -1054,9 +1063,9 @@ class UserUsers extends Common
 
         $levelarea = $request->param('levelarea',[]);
         $levelarea = array_filter($levelarea);
-        $county_id = $levelarea[0];
-        $street_id = isset($levelarea[1]) ? $levelarea[1]: 0;
-        $community_id = isset($levelarea[2]) ? $levelarea[2]: 0;
+        $county_id = isset($levelarea[0]) ? $levelarea[0] : 0;
+        $street_id = isset($levelarea[1]) ? $levelarea[1] : 0;
+        $community_id = isset($levelarea[2]) ? $levelarea[2] : 0;
         $area_info = Subareas::where('CODE12', end($levelarea))->find();
         if(!$area_info){
             $this->error('缺少管辖社区信息');

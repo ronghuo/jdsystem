@@ -782,8 +782,16 @@ class Data
         return json_encode($trees);
     }
 
+    /**
+     * 修复县市区下属单位（禁毒办）信息，保证县市区下各乡镇社区都有一个对应的”禁毒办”，其余非县市区下属乡镇社区都将其隐藏
+     * @param $countyName 县市区名称（如：鹤城区、芷江侗族自治县等）
+     */
     public function fixNbAuthDept($countyName) {
         $parentDept = NbAuthDept::where('PARENTDEPTID', 10074)->whereLike('DEPTNAME', "$countyName%")->find();
+        if (empty($parentDept)) {
+            echo "Could not find a department specified by name \"$countyName\"";
+            exit;
+        }
         $parentDeptId = $parentDept->ID;
         $parentAreaCode = $parentDept->AREACODE;
         $subQuery = NbAuthDept::where('PARENTDEPTID', $parentDeptId)->buildSql();
@@ -842,6 +850,33 @@ class Data
                     }
                 }
             }
+        }
+        echo 'Done.';
+    }
+
+    /**
+     * 将“非法”区域所属人员分派到“市辖区”
+     */
+    public function assignUsersToDefaultArea() {
+        $defaultArea = Subareas::where('NAME', '市辖区')->find();
+        $users = UserUsers::where('ISDEL', 0)->where(function($query) {
+            $query->where('COUNTY_ID_12', 'NOT IN', function ($query) {
+                $query->table('subareas')->field('CODE12');
+            });
+            $query->whereOr('COUNTY_ID_12', '431200000000');
+        })->select();
+        if (empty($users)) {
+            echo 'No users need to be fixed.';
+            exit;
+        }
+        foreach ($users as &$user) {
+            $user->PROVINCE_ID = $defaultArea->PROVICEID;
+            $user->CITY_ID = $defaultArea->CITYID;
+            $user->COUNTY_ID = $defaultArea->COUNTYID;
+            $user->COUNTY_ID_12 = $defaultArea->CODE12;
+            $user->STREET_ID = 0;
+            $user->COMMUNITY_ID = 0;
+            $user->save();
         }
         echo 'Done.';
     }
