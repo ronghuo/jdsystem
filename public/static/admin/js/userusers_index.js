@@ -29,6 +29,6 @@ $(function(){
         if(!url){
             return false;
         }
-        layeriframe(url, '人员指派', 700, 520);
+        layeriframe(url, '人员指派', 720, 560);
     });
 });

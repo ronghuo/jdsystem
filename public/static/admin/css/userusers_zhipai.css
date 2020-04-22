@@ -4,3 +4,7 @@
 fieldset.default {
     margin: 0 20px;
 }
+.idnumber {
+    font-size: 14px;
+    color: darkgray;
+}

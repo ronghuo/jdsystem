@@ -3,6 +3,7 @@ namespace app\index\controller;
 
 use app\common\model\BXdry;
 use app\common\library\Mylog;
+use app\common\model\UserChangeLog;
 use think\image\Exception;
 use app\common\model\UserUsers;
 use app\common\model\BaseNationType,
@@ -877,6 +878,26 @@ class Data
             $user->STREET_ID = 0;
             $user->COMMUNITY_ID = 0;
             $user->save();
+        }
+        echo 'Done.';
+    }
+
+    /**
+     * 修复康复人员变化日志中“指派”退回到“市级”的数据
+     */
+    public function fixUserChangeLog() {
+        $logs = UserChangeLog::whereLike('CONTENT', '%"new":{"countyId":""%')->select();
+        if (empty($logs->toArray())) {
+            echo 'No logs need to be fixed.';
+            exit;
+        }
+        $defaultArea = Subareas::where('NAME', '市辖区')->find();
+        foreach ($logs as &$log) {
+            $content = json_decode($log->CONTENT);
+            $content->new->countyId = $defaultArea->CODE12;
+            $content->new->countyName = $defaultArea->NAME;
+            $log->CONTENT = json_encode($content);
+            $log->save();
         }
         echo 'Done.';
     }

@@ -1,10 +1,55 @@
 
 $(function () {
-    $('#areas3').levelSelect({
-        url:'/static/plugin/cate/levelareas.json?vv='+JD_VERSION
-    });
 
-    $('select[powerLevel]').change(function () {
+    // 确保levelSelect中获取json数据为同步请求
+    $.ajaxSettings.async = false;
+    $('#areas3').levelSelect({
+        url:'/static/plugin/cate/levelareas.json?vv='+JD_VERSION,
+        nodatahtml: '<option value=""></option>'
+    });
+    // 恢复全局ajax为异步请求
+    $.ajaxSettings.async = true;
+
+    // 默认“市辖区”为“市级”区域
+    var CITY_ID = 431201000000,
+        CITY_NAME = '市辖区';
+    // 移除默认选项
+    $('#lv1 option:first').remove();
+
+    /*
+    // 新增“上级”选项
+    var addUpLevelOption = function ($target, $next) {
+        var curOpt = $target.children('option:selected');
+        $children = $next.children();
+        if ($children.length > 0) {
+            upLevelOption = '<option value="' + curOpt.val() + '">' + curOpt.text() + '（上级）</option>';
+            $($children[0]).after(upLevelOption);
+        }
+    };
+    $('#lv1').on('change', function () {
+        addUpLevelOption($(this), $('#lv2'));
+    });
+    if (lv1value.length > 0) {
+        addUpLevelOption($('#lv1'), $('#lv2'));
+    }
+
+    $('#lv2').on('change', function () {
+        addUpLevelOption($(this), $('#lv3'));
+    });
+    if (lv2value.length > 0) {
+        addUpLevelOption($('#lv2'), $('#lv3'));
+    }
+    */
+    // 根据权限级别，过滤掉非自己管辖范围内的地区
+    $('select[powerLevel]').each(function () {
+        var self = $(this);
+        if (self.attr('powerLevel') == POWER_LEVEL) {
+            var myArea = self.attr('data-value');
+            self.children().not(':first').not('[value=' + myArea + ']').remove();
+        }
+    });
+    /*
+    $('select[powerLevel]').on('change', function () {
         var powerLevel = $(this).attr('powerLevel');
         if (powerLevel > POWER_LEVEL) {
             return;
@@ -12,16 +57,17 @@ $(function () {
         var curVal = $(this).val();
         var oriVal = $(this).attr('data-value');
         if (POWER_LEVEL == powerLevel) {
-            if (curVal == '') {
+            if (curVal == CITY_ID || curVal == '') {
                 return;
             }
             if (curVal == oriVal) {
                 return;
             }
-            layeralert('不能指派给与自己管辖区域同级别的区域', 5, '警告');
+            layeralert('同级别区域不能跨域指派', 5, '警告');
         }
         $(this).val(oriVal);
     });
+    */
 
     $('#zhipaiok').on('click', function () {
         var lv1 = $('#lv1'),
@@ -30,23 +76,49 @@ $(function () {
 
         $('#zpact').val('1');
 
-        var isArea1Empty = lv1.val() == '';
-        var isArea2Empty = lv2.val() == '';
-        var isArea3Empty = lv3.val() == '';
-        var confirmMsg = '确定要将该人员指派到【'
-            + (isArea1Empty ? '市' : lv1.find('option:selected').text())
-            + (isArea2Empty ? '' : lv2.find('option:selected').text())
-            + (isArea3Empty ? '' : lv3.find('option:selected').text())
-            + '】吗？';
+        /*if (!checkSelectEmpty(lv1)) {
+            pageMesg.show('请选择县市区', 0);
+            lv1.focus();
+            return false;
+        }
+        if (lv2.children().length > 0 && !checkSelectEmpty(lv2)) {
+            pageMesg.show('请选择乡镇（街道）', 0);
+            lv2.focus();
+            return false;
+        }
+        if (lv3.children().length > 0 && !checkSelectEmpty(lv3)) {
+            pageMesg.show('请选择村（社区）', 0);
+            lv3.focus();
+            return false;
+        }*/
+        pageMesg.hide();
 
-        if (POWER_LEVEL == 2 && isArea1Empty) {
-            openReasonLayer();
+        var returnToCity = POWER_LEVEL == 2 && lv1.val() == CITY_ID;
+        var returnToCounty = POWER_LEVEL == 3 && lv2.val() == '';
+        var returnToStreet = POWER_LEVEL == 4 && lv3.val() == '';
+        var action = (returnToCity || returnToCounty || returnToStreet) ? '退回' : '指派';
+        var lv1text = lv1.find('option:selected').text(),
+            lv2text = lv2.find('option:selected').text(),
+            lv3text = lv3.find('option:selected').text();
+        var area;
+        if (returnToCity) {
+            area = CITY_NAME;
         }
-        else if (POWER_LEVEL == 3 && isArea2Empty) {
-            openReasonLayer();
+        else if (returnToCounty) {
+            area = lv1text;
         }
-        else if (POWER_LEVEL == 4 && isArea3Empty) {
-            openReasonLayer();
+        else if (returnToStreet) {
+            area = lv1text + ' ' + lv2text;
+        }
+        else {
+            area = lv1text + ' ' + lv2text + ' ' + lv3text;
+        }
+        var confirmMsg = '确定要将该人员' + action + '到【' + area + '】吗？';
+
+        if (returnToCity || returnToCounty || returnToStreet) {
+            confirmAction(confirmMsg, function () {
+                openReasonLayer();
+            });
         }
         else {
             confirmAction(confirmMsg, function () {
@@ -116,7 +188,7 @@ $(function () {
             $('#cancelAssignReason').trigger('click');
         });
         $('#cancelAssignReason').click(function () {
-            layer.close(reasonLayer);
+            layer.closeAll();
         });
     };
 

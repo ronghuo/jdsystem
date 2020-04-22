@@ -3,6 +3,7 @@
 <div class="container">
     <div class="row-fluid">
         <div class="align-c mt5"><span class="font-18">{$info.NAME}</span> {$info.zhi_pai_text|raw}</div>
+        <div class="align-c mt5"><span class="idnumber">{$info.ID_NUMBER}</span></div>
         <div style="padding: 0 20px;"><span class="badge badge-important">参考</span><br/>
             户藉地：{$info.DOMICILE_ADDRESS}<br/>
             现住地：{$info.LIVE_ADDRESS}
@@ -83,6 +84,9 @@
 </div>
 <script type="text/javascript">
     POWER_LEVEL = '{$powerLevel}';
+    lv1value = '{if $info&&$info.COUNTY_ID_12>431200000000}{$info.COUNTY_ID_12}{/if}';
+    lv2value = '{if $info&&$info.STREET_ID>0}{$info.STREET_ID}{/if}';
+    lv3value = '{if $info&&$info.COMMUNITY_ID>0}{$info.COMMUNITY_ID}{/if}';
 </script>
 {include file="common/layerfooter"/}
 

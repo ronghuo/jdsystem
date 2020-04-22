@@ -204,5 +204,6 @@
             jsondata=settings.url;
             init();
         };
+
     }
 })(jQuery);
