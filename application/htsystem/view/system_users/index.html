@@ -24,7 +24,7 @@
                         <select name="area1" class="lv1" data-value="{$param['a1']}" style="display: none;"></select>
                         <select name="area2" class="lv2" {if $powerLevel egt 2}disabled{/if} data-value="{$param['a2']}"></select>
                         <select name="area3" class="lv3" {if $powerLevel egt 3}disabled{/if} data-value="{$param['a3']}"></select>
-                        <select name="area4" class="lv4" {if $powerLevel egt 4}disabled{/if} data-value="{$param['a4']}"></select>
+                        <select name="area4" class="lv4" {if $powerLevel egt 4 && !empty($param['a4'])}disabled{/if} data-value="{$param['a4']}"></select>
                     </div>
                     </div>
                     <div class="control-group">

@@ -478,6 +478,9 @@ var initImageViewer = function() {
     jcs.init();
 };
 
+var START_TIME = 'JD_START_TIME';
+var END_TIME = 'JD_END_TIME';
+
 var switchVisibility4StatusRelations = function(status, subStatus, trigger) {
     if (trigger == 'primary') {
         $('.status-relation,.sub-status-relation').hide();
@@ -499,60 +502,59 @@ var switchVisibility4StatusRelations = function(status, subStatus, trigger) {
         $('.status-relation,.sub-status-relation').hide();
     }
     if ('社区戒毒中' == status) {
-        showRelations(['JD_START_TIME', 'USER_SUB_STATUS_ID']);
+        showRelations(status, [START_TIME, END_TIME, 'USER_SUB_STATUS_ID']);
     }
     else if ('社区康复中' == status) {
-        showRelations(['JD_START_TIME', 'USER_SUB_STATUS_ID']);
+        showRelations(status, [START_TIME, END_TIME, 'USER_SUB_STATUS_ID']);
     }
     else if ('强制戒毒中' == status) {
-        showRelations(['qzjdBeginTime', 'executePlace']);
+        showRelations(status, [START_TIME, END_TIME, 'executePlace']);
     }
     else if ('自愿戒毒中' == status) {
-        showRelations(['zyjdBeginTime', 'executePlace']);
+        showRelations(status, [START_TIME, 'executePlace']);
     }
     else if ('服刑中' == status) {
-        showRelations(['serveBeginTime', 'servePlace']);
+        showRelations(status, [START_TIME, END_TIME, 'servePlace']);
     }
     else if ('拘留中' == status) {
-        showRelations(['detainBeginTime', 'detainPlace']);
+        showRelations(status, [START_TIME, END_TIME, 'detainPlace']);
     }
     else if ('已死亡' == status) {
-        showRelations(['deathTime']);
+        showRelations(status, [START_TIME]);
     }
     else if ('出国中' == status) {
-        showRelations(['abroadTime', 'country']);
+        showRelations(status, [START_TIME, 'country']);
     }
     else if ('未报到已移交' == status) {
-        showRelations(['transferTime', 'wbdyyjGJS']);
+        showRelations(status, [START_TIME, 'wbdyyjGJS']);
     }
     else if ('违反协议已移交' == status) {
-        showRelations(['transferTime', 'wfxyyyjGJS']);
+        showRelations(status, [START_TIME, 'wfxyyyjGJS']);
     }
     if (subStatus) {
         if ('请假中' == subStatus) {
-            showRelations(['leaveBeginTime']);
+            showRelations(status, ['leaveBeginTime']);
         }
         else if ('中止' == subStatus) {
-            showRelations(['suspendBeginTime', 'suspendZZCXSM', 'suspendReason']);
+            showRelations(status, ['suspendBeginTime', 'suspendZZCXSM', 'suspendReason']);
         }
         else if ('终止' == subStatus) {
-            showRelations(['terminateTime', 'terminateZZCXSM', 'terminateReason']);
+            showRelations(status, ['terminateTime', 'terminateZZCXSM', 'terminateReason']);
         }
         else if ('双向管控中' == subStatus) {
-            showRelations(['sxgkBeginTime', 'SXGKH', 'sxgkReason']);
+            showRelations(status, ['sxgkBeginTime', 'SXGKH', 'sxgkReason']);
         }
         else if ('已解除社区戒毒' == subStatus) {
-            showRelations(['relieveTime', 'JCS']);
+            showRelations(status, ['relieveTime', 'JCS']);
         }
         else if ('已解除社区康复' == subStatus) {
-            showRelations(['relieveTime', 'JCS']);
+            showRelations(status, ['relieveTime', 'JCS']);
         }
     }
 };
 
 var validStatusRelations = function () {
     var status = $('#ustatus').children('option:selected').text();
-    var obj;
     if ('社区戒毒中' == status) {
         if (!nonNullValid('JD_START_TIME', '缺少起始时间')) {
             return false;
@@ -750,21 +752,47 @@ var isUriEmpty = function (inputName) {
         return true;
     }
     return !checkInputEmpty(obj);
-}
+};
 
-var showRelations = function(selectors) {
+var showRelations = function(status, selectors) {
     if (!selectors) {
         return;
     }
+    resetDateElements();
     if (selectors instanceof Array) {
         $(selectors).each(function (i) {
             var obj = getObjByName(selectors[i]);
             formValid.hideErr(obj);
             obj.closest('.control-group').show();
+            if (isDateControl(selectors[i])) {
+                dealWithDate(status, obj);
+            }
         })
     } else {
         var obj = getObjByName(selectors);
         formValid.hideErr(obj);
         obj.closest('.control-group').show();
+        if (isDateControl(selectors[i])) {
+            dealWithDate(status, obj);
+        }
     }
+};
+
+var isDateControl = function (controlName) {
+    if (!controlName) {
+        return false;
+    }
+    return controlName == START_TIME || controlName == END_TIME;
 }
+
+var resetDateElements = function () {
+    $('.date-member').hide();
+    $('.date-label').hide();
+}
+
+var dealWithDate = function (status, obj) {
+    obj.show();
+    $('.date-label[status=' + status + ']').show();
+    if ($('.date-member[type=date]:visible').length == 2)
+        $('#dateConnector').show();
+};

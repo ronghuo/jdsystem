@@ -21,3 +21,9 @@
 .update {
     height: 50px;
 }
+.date-label {
+    display: none;
+}
+.date-member {
+    display: none;
+}

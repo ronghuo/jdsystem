@@ -8,6 +8,7 @@ use app\common\model\UserDecisions;
 use app\common\model\UserRecoveryPlan;
 use app\common\model\WaitDeleteFiles;
 use app\htsystem\model\AdminLogs;
+use think\helper\Str;
 use think\paginator\driver\Bootstrap;
 use think\Request;
 use app\common\model\Agreement;
@@ -38,23 +39,31 @@ class UserUsers extends Common
 {
 
     /**
+     * 人员状态开始时间对应属性名称
+     */
+    const STATUS_START_TIME_NAME = 'JD_START_TIME';
+    /**
+     * 人员状态截止时间对应属性名称
+     */
+    const STATUS_END_TIME_NAME = 'JD_END_TIME';
+    /**
      * 人员状态关联信息
      */
     const STATUS_RELATIONS = [
-        '社区戒毒中' => ['JD_START_TIME' => '戒毒起始时间', 'JD_END_TIME' => '戒毒截止时间'],
-        '社区康复中' => ['JD_START_TIME' => '康复起始时间', 'JD_END_TIME' => '康复截止时间'],
-        '自愿戒毒中' => ['zyjdBeginTime' => '自愿戒毒开始时间', 'executePlace' => '自愿戒毒执行地点'],
-        '强制戒毒中' => ['qzjdBeginTime' => '强制戒毒起始时间', 'qzjdEndTime' => '强制戒毒截止时间', 'executePlace' => '强制戒毒执行地点'],
+        '社区戒毒中' => [self::STATUS_START_TIME_NAME => '戒毒起始时间', self::STATUS_END_TIME_NAME => '戒毒截止时间'],
+        '社区康复中' => [self::STATUS_START_TIME_NAME => '康复起始时间', self::STATUS_END_TIME_NAME => '康复截止时间'],
+        '自愿戒毒中' => [self::STATUS_START_TIME_NAME => '自愿戒毒开始时间', 'executePlace' => '自愿戒毒执行地点'],
+        '强制戒毒中' => [self::STATUS_START_TIME_NAME => '强制戒毒起始时间', self::STATUS_END_TIME_NAME => '强制戒毒截止时间', 'executePlace' => '强制戒毒执行地点'],
         '未报到未移交' => [],
-        '未报到已移交' => ['transferTime' => '移交时间', 'wbdyyjGJS' => '告诫书', 'wbdyyjYQWBDZM' => '逾期未报到证明', 'wbdyyjYJHZ' => '移交回执'],
+        '未报到已移交' => [self::STATUS_START_TIME_NAME => '移交时间', 'wbdyyjGJS' => '告诫书', 'wbdyyjYQWBDZM' => '逾期未报到证明', 'wbdyyjYJHZ' => '移交回执'],
         '违反协议未移交' => [],
-        '违反协议已移交' => ['transferTime' => '移交时间', 'wfxyyyjGJS' => '告诫书', 'wfxyyyjXDJCTZS' => '吸毒检测通知书', 'wfxyyyjYZWFXYZM' => '严重违反协议证明', 'wfxyyyjYJHZ' => '移交回执'],
+        '违反协议已移交' => [self::STATUS_START_TIME_NAME => '移交时间', 'wfxyyyjGJS' => '告诫书', 'wfxyyyjXDJCTZS' => '吸毒检测通知书', 'wfxyyyjYZWFXYZM' => '严重违反协议证明', 'wfxyyyjYJHZ' => '移交回执'],
         '社会面' => [],
         '戒断三年未复吸' => [],
-        '出国中' => ['abroadTime' => '出国时间', 'country' => '国家名称'],
-        '服刑中' => ['serveBeginTime' => '服刑起始时间', 'serveEndTime' => '服刑结束时间', 'servePlace' => '服刑地点'],
-        '拘留中' => ['detainBeginTime' => '拘留起始时间', 'detainEndTime' => '拘留截止时间', 'detainPlace' => '拘留地点'],
-        '已死亡' => ['deathTime' => '死亡时间']
+        '出国中' => [self::STATUS_START_TIME_NAME => '出国时间', 'country' => '国家名称'],
+        '服刑中' => [self::STATUS_START_TIME_NAME => '服刑起始时间', self::STATUS_END_TIME_NAME => '服刑结束时间', 'servePlace' => '服刑地点'],
+        '拘留中' => [self::STATUS_START_TIME_NAME => '拘留起始时间', self::STATUS_END_TIME_NAME => '拘留截止时间', 'detainPlace' => '拘留地点'],
+        '已死亡' => [self::STATUS_START_TIME_NAME => '死亡时间']
     ];
 
     /**
@@ -1114,11 +1123,15 @@ class UserUsers extends Common
         $userStatusRelation = $this->buildStatusRelations($request);
         $userSubStatusRelation = $this->buildSubStatusRelations($request);
 
-        if (in_array('JD_START_TIME', array_keys(self::STATUS_RELATIONS[$user_status_name]))) {
-            $jd_start_time = $request->param('JD_START_TIME','');
-            $jd_end_time = $request->param('JD_END_TIME','');
+        $relationNames = array_keys(self::STATUS_RELATIONS[$user_status_name]);
+        if (in_array(self::STATUS_START_TIME_NAME, $relationNames)) {
+            $jd_start_time = $request->param(self::STATUS_START_TIME_NAME,'');
         } else {
             $jd_start_time = null;
+        }
+        if (in_array(self::STATUS_END_TIME_NAME, $relationNames)) {
+            $jd_end_time = $request->param(self::STATUS_END_TIME_NAME,'');
+        } else {
             $jd_end_time = null;
         }
 
@@ -1162,7 +1175,6 @@ class UserUsers extends Common
             'DRUG_TYPE_ID'=>$request->param('DRUG_TYPE_ID','','trim'),
             'NARCOTICS_TYPE_ID'=>$request->param('NARCOTICS_TYPE_ID','','trim'),
 
-            //'UUCODE'=> $usermodel->createNewUUCode(),
             'NATIONALITY'=>$nationality->NAME,
             'NATION'=>$nation->NAME,
 
@@ -1183,9 +1195,7 @@ class UserUsers extends Common
             'LIVE_PLACE'=>implode(' ',$liveplace),
             'LIVE_IDS'=>implode(',',$liveplaceids),//new
 
-//            'DRUG_TYPE'=>\think\Collection::make($opts->drug_types)->where('ID','=',$request->param('DRUG_TYPE_ID','','trim'))->shift()['NAME'],
             'DRUG_TYPE'=>Opts::getNameById($request->param('DRUG_TYPE_ID','','trim'))['NAME'],
-//            'NARCOTICS_TYPE'=>\think\Collection::make($opts->narcotics_types)->where('ID','=',$request->param('NARCOTICS_TYPE_ID','','trim'))->shift()['NAME'],
             'NARCOTICS_TYPE'=>Opts::getNameById($request->param('NARCOTICS_TYPE_ID','','trim'))['NAME'],
 
             'MANAGE_POLICE_AREA_CODE'=>$dmmc->DEPTCODE,
@@ -1193,7 +1203,6 @@ class UserUsers extends Common
             'MANAGE_COMMUNITY'=>$area_info->NAME,
             'DMMC_IDS'=>implode(',', $dmmcids),//new
 
-            //'POLICE_LIABLE_UID'=>$usermanager->ID,//new
             'POLICE_LIABLE_CODE'=>$request->param('POLICE_LIABLE_CODE','','trim'),
             'POLICE_LIABLE_NAME'=>$request->param('POLICE_LIABLE_NAME','','trim'),
             'POLICE_LIABLE_MOBILE'=>$request->param('POLICE_LIABLE_MOBILE','','trim'),
@@ -1208,7 +1217,7 @@ class UserUsers extends Common
 
         if ($request->has('PWSD')) {
             $pwsd = $request->post('PWSD');
-            $stat = \think\helper\Str::random(6);
+            $stat = Str::random(6);
             $data['PWSD'] = create_pwd($pwsd,$stat);
             $data['SALT'] = $stat;
         }
@@ -1270,7 +1279,6 @@ class UserUsers extends Common
             }
 
             $user->save(['HEAD_IMG'=>$img['images'][0]]);
-            //UserUsersModel::where('ID','=',$id)->update(['HEAD_IMG'=>$img['images'][0]]);
         }
 
         //页面点击“保存”或“确认”键后提示成功或失败，自动停留在当前编辑界面
@@ -1346,10 +1354,16 @@ class UserUsers extends Common
         }
         $statusRelation = [];
         foreach ($relations as $name => $desc) {
+            // 时间相关依赖作额外处理
+            if (in_array($name, [self::STATUS_START_TIME_NAME, self::STATUS_END_TIME_NAME])) {
+                continue;
+            }
+            // 非文件类型依赖
             if (!in_array($name, self::STATUS_FILE_RELATIONS)) {
                 $statusRelation[$name] = $request->param($name);
                 continue;
             }
+            // 文件类型依赖
             if (!empty($_FILES[$name]['tmp_name'])) {
                 $result = $this->uploadImage($request, ['userusers', 'status/'], [$name]);
                 if (empty($result) || empty($result['images'])) {
@@ -1374,10 +1388,12 @@ class UserUsers extends Common
         }
         $subStatusRelation = [];
         foreach ($relations as $name => $desc) {
+            // 非文件类型依赖
             if (!in_array($name, self::STATUS_FILE_RELATIONS)) {
                 $subStatusRelation[$name] = $request->param($name);
                 continue;
             }
+            // 文件类型依赖
             if (!empty($_FILES[$name]['tmp_name'])) {
                 $result = $this->uploadImage($request, ['userusers', 'sub_status/'], [$name]);
                 if (empty($result) || empty($result['images'])) {

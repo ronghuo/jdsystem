@@ -72,23 +72,6 @@
                     </select>
                 </div>
             </div>
-            <!--<div class="control-group">-->
-                <!--<label class="control-label"><span class="error">*</span> 人员类型 </label>-->
-                <!--<div class="controls">-->
-                    <!--<select name="UTYPE_ID" id="utype">-->
-                        <!--<option value="">请选择</option>-->
-                        <!--{foreach name="utypes" item="utype" key="uk"}-->
-                        <!--<option value="{$uk}"{if $info&&$info.UTYPE_ID==$uk} selected{/if}>{$utype}</option>-->
-                        <!--{/foreach}-->
-                    <!--</select>-->
-                    <!--<select name="UTYPE_ID_218" id="utype_id_218" style="display: none;">-->
-                        <!--<option value="">请选择</option>-->
-                        <!--{foreach name="utype218" item="utyp" key="uk2"}-->
-                        <!--<option value="{$uk2}"{if $info&&$info.UTYPE_ID_218==$uk2} selected{/if}>{$utyp}</option>-->
-                        <!--{/foreach}-->
-                    <!--</select>-->
-                <!--</div>-->
-            <!--</div>-->
             <div class="control-group">
                 <label class="control-label"><span class="error">*</span> 人员状态 </label>
                 <div class="controls">
@@ -113,12 +96,23 @@
                 </div>
             </div>
             <div class="control-group status-relation">
-                <label class="control-label"><span class="error">*</span> 起止时间 </label>
+                <label class="control-label date-label" status="社区戒毒中"><span class="error">*</span> 起止时间 </label>
+                <label class="control-label date-label" status="社区康复中"><span class="error">*</span> 起止时间 </label>
+                <label class="control-label date-label" status="强制戒毒中"><span class="error">*</span> 起止时间 </label>
+                <label class="control-label date-label" status="服刑中"><span class="error">*</span> 起止时间 </label>
+                <label class="control-label date-label" status="拘留中"><span class="error">*</span> 起止时间 </label>
+                <label class="control-label date-label" status="未报到已移交"><span class="error">*</span> 移交时间 </label>
+                <label class="control-label date-label" status="违反协议已移交"><span class="error">*</span> 移交时间 </label>
+                <label class="control-label date-label" status="自愿戒毒中"><span class="error">*</span> 开始时间 </label>
+                <label class="control-label date-label" status="出国中"><span class="error">*</span> 出国时间 </label>
+                <label class="control-label date-label" status="已死亡"><span class="error">*</span> 死亡时间 </label>
                 <div class="controls">
-                    <input type="date" name="JD_START_TIME" id="jd_start_time" value="{if $info}{$info.JD_START_TIME}{/if}"/> -
-                    <input type="date" name="JD_END_TIME" id="jd_end_time" value="{if $info}{$info.JD_END_TIME}{/if}"/>
+                    <input type="date" class="date-member" name="JD_START_TIME" id="jd_start_time" value="{if $info}{$info.JD_START_TIME}{/if}"/>
+                    <span id="dateConnector" class="date-member">-</span>
+                    <input type="date" class="date-member" name="JD_END_TIME" id="jd_end_time" value="{if $info}{$info.JD_END_TIME}{/if}"/>
                 </div>
             </div>
+            <!--
             <div class="control-group status-relation">
                 <label class="control-label"><span class="error">*</span> 起止时间 </label>
                 <div class="controls">
@@ -164,6 +158,7 @@
                     <input type="date" name="deathTime" value="{if $info && isset($info.deathTime)}{$info.deathTime}{/if}"/>
                 </div>
             </div>
+            -->
             <div class="control-group status-relation">
                 <label class="control-label"><span class="error">*</span> 执行地点 </label>
                 <div class="controls">

@@ -80,7 +80,7 @@ class SystemUsers extends Common
             $p['a1'] = $dmmcs[0];
             $p['a2'] = $dmmcs[1];
             $p['a3'] = $dmmcs[2];
-            $p['a4'] = $dmmcs[3];
+            $p['a4'] = isset($dmmcs[3]) ? $dmmcs[3] : '';
         } else {
             $p['a1'] = input('area1', $dmmcs[0]);
             $p['a2'] = input('area2', '');
