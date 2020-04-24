@@ -47,10 +47,20 @@ class UserUsers extends Common
      */
     const STATUS_END_TIME_NAME = 'JD_END_TIME';
     /**
+     * 人员二级状态起始时间对应属性名称
+     */
+    const SUB_STATUS_START_TIME_NAME = 'SUB_STATUS_START_TIME';
+    /**
+     * 人员二级状态截止时间对应属性名称
+     */
+    const SUB_STATUS_END_TIME_NAME = 'SUB_STATUS_END_TIME';
+
+    const STATUS_COMMUNITY_DETOXIFICATION = '社区戒毒中';
+    /**
      * 人员状态关联信息
      */
     const STATUS_RELATIONS = [
-        '社区戒毒中' => [self::STATUS_START_TIME_NAME => '戒毒起始时间', self::STATUS_END_TIME_NAME => '戒毒截止时间'],
+        '社区戒毒中' => [self::STATUS_START_TIME_NAME => '戒毒开始时间'],
         '社区康复中' => [self::STATUS_START_TIME_NAME => '康复起始时间', self::STATUS_END_TIME_NAME => '康复截止时间'],
         '自愿戒毒中' => [self::STATUS_START_TIME_NAME => '自愿戒毒开始时间', 'executePlace' => '自愿戒毒执行地点'],
         '强制戒毒中' => [self::STATUS_START_TIME_NAME => '强制戒毒起始时间', self::STATUS_END_TIME_NAME => '强制戒毒截止时间', 'executePlace' => '强制戒毒执行地点'],
@@ -70,12 +80,12 @@ class UserUsers extends Common
      * 人员二级状态关联信息
      */
     const SUB_STATUS_RELATIONS = [
-        '请假中' => ['leaveBeginTime' => '请假起始时间', 'leaveEndTime' => '请假截止时间'],
-        '中止' => ['suspendBeginTime' => '中止起始时间', 'suspendEndTime' => '中止截止时间', 'suspendZZCXSM' => '中止程序说明', 'suspendReason' => '终止原因'],
-        '终止' => ['terminateTime' => '终止时间', 'terminateZZCXSM' => '终止程序说明', 'terminateReason' => '终止原因'],
-        '双向管控中' => ['sxgkBeginTime' => '双向管控开始时间', 'SXGKH' => '双向管控函', 'sxgkReason' => '双向管控原因'],
-        '已解除社区戒毒' => ['relieveTime' => '解除时间', 'JCS' => '解除书'],
-        '已解除社区康复' => ['relieveTime' => '解除时间', 'JCS' => '解除书']
+        '请假中' => [self::SUB_STATUS_START_TIME_NAME => '请假起始时间', self::SUB_STATUS_END_TIME_NAME => '请假截止时间'],
+        '中止' => [self::SUB_STATUS_START_TIME_NAME => '中止起始时间', self::SUB_STATUS_END_TIME_NAME => '中止截止时间', 'suspendZZCXSM' => '中止程序说明', 'suspendReason' => '终止原因'],
+        '终止' => [self::SUB_STATUS_START_TIME_NAME => '终止时间', 'terminateZZCXSM' => '终止程序说明', 'terminateReason' => '终止原因'],
+        '双向管控中' => [self::SUB_STATUS_START_TIME_NAME => '双向管控开始时间', 'SXGKH' => '双向管控函', 'sxgkReason' => '双向管控原因'],
+        '已解除社区戒毒' => [self::SUB_STATUS_START_TIME_NAME => '解除时间', 'JCS' => '解除书'],
+        '已解除社区康复' => [self::SUB_STATUS_START_TIME_NAME => '解除时间', 'JCS' => '解除书']
     ];
 
     /**
@@ -1123,17 +1133,11 @@ class UserUsers extends Common
         $userStatusRelation = $this->buildStatusRelations($request);
         $userSubStatusRelation = $this->buildSubStatusRelations($request);
 
-        $relationNames = array_keys(self::STATUS_RELATIONS[$user_status_name]);
-        if (in_array(self::STATUS_START_TIME_NAME, $relationNames)) {
-            $jd_start_time = $request->param(self::STATUS_START_TIME_NAME,'');
-        } else {
-            $jd_start_time = null;
-        }
-        if (in_array(self::STATUS_END_TIME_NAME, $relationNames)) {
-            $jd_end_time = $request->param(self::STATUS_END_TIME_NAME,'');
-        } else {
-            $jd_end_time = null;
-        }
+        $jd_start_time = $this->getJdStartTime($request, $user_status_name);
+        $jd_end_time = $this->getJdEndTime($request, $user_status_name, $jd_start_time);
+
+        $subStatusStartTime = $this->getSubStatusStartTime($request, $user_sub_status_name);
+        $subStatusEndTime = $this->getSubStatusEndTime($request, $user_sub_status_name);
 
         $data = [
             'STATUS'=>1,
@@ -1146,6 +1150,8 @@ class UserUsers extends Common
 
             'JD_START_TIME'=>$jd_start_time,
             'JD_END_TIME'=>$jd_end_time,
+            'SUB_STATUS_START_TIME' => $subStatusStartTime,
+            'SUB_STATUS_END_TIME' => $subStatusEndTime,
             'USER_STATUS_ID'=>$user_status_id,
             'USER_STATUS_NAME' => $user_status_name,
             'USER_SUB_STATUS_ID' => $user_sub_status_id,
@@ -1302,6 +1308,57 @@ class UserUsers extends Common
         $this->addAdminLog($log_oper_type, $log_oper_Name, $log_content, $user->ID);
 
         $this->success('保存人员资料成功',$ref);
+    }
+
+    private function getJdStartTime(Request $request, $user_status_name) {
+        $relationNames = array_keys(self::STATUS_RELATIONS[$user_status_name]);
+        if (in_array(self::STATUS_START_TIME_NAME, $relationNames)) {
+            $jd_start_time = $request->param(self::STATUS_START_TIME_NAME,'');
+        } else {
+            $jd_start_time = null;
+        }
+        return $jd_start_time;
+    }
+
+    private function getJdEndTime(Request $request, $user_status_name, $jd_start_time = '') {
+        $relationNames = array_keys(self::STATUS_RELATIONS[$user_status_name]);
+        // 社区戒毒起止时间时长为固定3年
+        if ($user_status_name == self::STATUS_COMMUNITY_DETOXIFICATION) {
+            $jd_end_time = date('Y-m-d', strtotime('+3 year', strtotime($jd_start_time)));
+        }
+        else if (in_array(self::STATUS_END_TIME_NAME, $relationNames)) {
+            $jd_end_time = $request->param(self::STATUS_END_TIME_NAME,'');
+        }
+        else {
+            $jd_end_time = null;
+        }
+        return $jd_end_time;
+    }
+
+    private function getSubStatusStartTime(Request $request, $user_sub_status_name) {
+        if (empty($user_sub_status_name)) {
+            return null;
+        }
+        $relationNames = array_keys(self::SUB_STATUS_RELATIONS[$user_sub_status_name]);
+        if (in_array(self::SUB_STATUS_START_TIME_NAME, $relationNames)) {
+            $subStatusStartTime = $request->param(self::SUB_STATUS_START_TIME_NAME,'');
+        } else {
+            $subStatusStartTime = null;
+        }
+        return $subStatusStartTime;
+    }
+
+    private function getSubStatusEndTime(Request $request, $user_sub_status_name) {
+        if (empty($user_sub_status_name)) {
+            return null;
+        }
+        $relationNames = array_keys(self::SUB_STATUS_RELATIONS[$user_sub_status_name]);
+        if (in_array(self::SUB_STATUS_END_TIME_NAME, $relationNames)) {
+            $subStatusEndTime = $request->param(self::SUB_STATUS_END_TIME_NAME,'');
+        } else {
+            $subStatusEndTime = null;
+        }
+        return $subStatusEndTime;
     }
 
     private function validStatusRelations(Request $request) {

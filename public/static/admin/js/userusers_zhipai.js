@@ -1,11 +1,13 @@
 
 $(function () {
 
+    var UP_LEVEL_NAME = '<<上一级';
+
     // 确保levelSelect中获取json数据为同步请求
     $.ajaxSettings.async = false;
     $('#areas3').levelSelect({
         url:'/static/plugin/cate/levelareas.json?vv='+JD_VERSION,
-        nodatahtml: '<option value=""></option>'
+        nodatahtml: '<option value="">' + UP_LEVEL_NAME + '</option>'
     });
     // 恢复全局ajax为异步请求
     $.ajaxSettings.async = true;
@@ -100,6 +102,8 @@ $(function () {
         var lv1text = lv1.find('option:selected').text(),
             lv2text = lv2.find('option:selected').text(),
             lv3text = lv3.find('option:selected').text();
+        lv2text = lv2text == UP_LEVEL_NAME ? '' : lv2text;
+        lv3text = lv3text == UP_LEVEL_NAME ? '' : lv3text;
         var area;
         if (returnToCity) {
             area = CITY_NAME;

@@ -96,7 +96,7 @@
                 </div>
             </div>
             <div class="control-group status-relation">
-                <label class="control-label date-label" status="社区戒毒中"><span class="error">*</span> 起止时间 </label>
+                <label class="control-label date-label" status="社区戒毒中"><span class="error">*</span> 开始时间 </label>
                 <label class="control-label date-label" status="社区康复中"><span class="error">*</span> 起止时间 </label>
                 <label class="control-label date-label" status="强制戒毒中"><span class="error">*</span> 起止时间 </label>
                 <label class="control-label date-label" status="服刑中"><span class="error">*</span> 起止时间 </label>
@@ -108,57 +108,10 @@
                 <label class="control-label date-label" status="已死亡"><span class="error">*</span> 死亡时间 </label>
                 <div class="controls">
                     <input type="date" class="date-member" name="JD_START_TIME" id="jd_start_time" value="{if $info}{$info.JD_START_TIME}{/if}"/>
-                    <span id="dateConnector" class="date-member">-</span>
+                    <span class="date-member">-</span>
                     <input type="date" class="date-member" name="JD_END_TIME" id="jd_end_time" value="{if $info}{$info.JD_END_TIME}{/if}"/>
                 </div>
             </div>
-            <!--
-            <div class="control-group status-relation">
-                <label class="control-label"><span class="error">*</span> 起止时间 </label>
-                <div class="controls">
-                    <input type="date" name="qzjdBeginTime" value="{if $info && isset($info.qzjdBeginTime)}{$info.qzjdBeginTime}{/if}"/> -
-                    <input type="date" name="qzjdEndTime" value="{if $info && isset($info.qzjdEndTime)}{$info.qzjdEndTime}{/if}"/>
-                </div>
-            </div>
-            <div class="control-group status-relation">
-                <label class="control-label"><span class="error">*</span> 起止时间 </label>
-                <div class="controls">
-                    <input type="date" name="serveBeginTime" value="{if $info && isset($info.serveBeginTime)}{$info.serveBeginTime}{/if}"/> -
-                    <input type="date" name="serveEndTime" value="{if $info && isset($info.serveEndTime)}{$info.serveEndTime}{/if}"/>
-                </div>
-            </div>
-            <div class="control-group status-relation">
-                <label class="control-label"><span class="error">*</span> 起止时间 </label>
-                <div class="controls">
-                    <input type="date" name="detainBeginTime" value="{if $info && isset($info.detainBeginTime)}{$info.detainBeginTime}{/if}"/> -
-                    <input type="date" name="detainEndTime" value="{if $info && isset($info.detainEndTime)}{$info.detainEndTime}{/if}"/>
-                </div>
-            </div>
-            <div class="control-group status-relation">
-                <label class="control-label"><span class="error">*</span> 移交时间 </label>
-                <div class="controls">
-                    <input type="date" name="transferTime" value="{if $info && isset($info.transferTime)}{$info.transferTime}{/if}"/>
-                </div>
-            </div>
-            <div class="control-group status-relation">
-                <label class="control-label"><span class="error">*</span> 开始时间 </label>
-                <div class="controls">
-                    <input type="date" name="zyjdBeginTime" value="{if $info && isset($info.zyjdBeginTime)}{$info.zyjdBeginTime}{/if}"/>
-                </div>
-            </div>
-            <div class="control-group status-relation">
-                <label class="control-label"><span class="error">*</span> 出国时间 </label>
-                <div class="controls">
-                    <input type="date" name="abroadTime" value="{if $info && isset($info.abroadTime)}{$info.abroadTime}{/if}"/>
-                </div>
-            </div>
-            <div class="control-group status-relation">
-                <label class="control-label"><span class="error">*</span> 死亡时间 </label>
-                <div class="controls">
-                    <input type="date" name="deathTime" value="{if $info && isset($info.deathTime)}{$info.deathTime}{/if}"/>
-                </div>
-            </div>
-            -->
             <div class="control-group status-relation">
                 <label class="control-label"><span class="error">*</span> 执行地点 </label>
                 <div class="controls">
@@ -282,35 +235,17 @@
                 </div>
             </div>
             <div class="control-group sub-status-relation">
-                <label class="control-label"><span class="error">*</span> 起止时间 </label>
+                <label class="control-label date-label" status="请假中"><span class="error">*</span> 起止时间 </label>
+                <label class="control-label date-label" status="中止"><span class="error">*</span> 起止时间 </label>
+                <label class="control-label date-label" status="终止"><span class="error">*</span> 终止时间 </label>
+                <label class="control-label date-label" status="双向管控中"><span class="error">*</span> 开始时间 </label>
+                <label class="control-label date-label" status="已解除社区戒毒"><span class="error">*</span> 解除时间 </label>
+                <label class="control-label date-label" status="已解除社区康复"><span class="error">*</span> 解除时间 </label>
+                <label class="control-label date-label" status="违反协议已移交"><span class="error">*</span> 移交时间 </label>
                 <div class="controls">
-                    <input type="date" name="leaveBeginTime" value="{if $info && isset($info.leaveBeginTime)}{$info.leaveBeginTime}{/if}"/> -
-                    <input type="date" name="leaveEndTime" value="{if $info && isset($info.leaveEndTime)}{$info.leaveEndTime}{/if}"/>
-                </div>
-            </div>
-            <div class="control-group sub-status-relation">
-                <label class="control-label"><span class="error">*</span> 起止时间 </label>
-                <div class="controls">
-                    <input type="date" name="suspendBeginTime" value="{if $info && isset($info.suspendBeginTime)}{$info.suspendBeginTime}{/if}"/> -
-                    <input type="date" name="suspendEndTime" value="{if $info && isset($info.suspendEndTime)}{$info.suspendEndTime}{/if}"/>
-                </div>
-            </div>
-            <div class="control-group sub-status-relation">
-                <label class="control-label"><span class="error">*</span> 开始时间 </label>
-                <div class="controls">
-                    <input type="date" name="sxgkBeginTime" value="{if $info && isset($info.sxgkBeginTime)}{$info.sxgkBeginTime}{/if}"/>
-                </div>
-            </div>
-            <div class="control-group sub-status-relation">
-                <label class="control-label"><span class="error">*</span> 终止时间 </label>
-                <div class="controls">
-                    <input type="date" name="terminateTime" value="{if $info && isset($info.terminateTime)}{$info.terminateTime}{/if}"/>
-                </div>
-            </div>
-            <div class="control-group sub-status-relation">
-                <label class="control-label"><span class="error">*</span> 解除时间 </label>
-                <div class="controls">
-                    <input type="date" name="relieveTime" value="{if $info && isset($info.relieveTime)}{$info.relieveTime}{/if}"/>
+                    <input type="date" class="date-member" name="SUB_STATUS_START_TIME" value="{if $info}{$info.SUB_STATUS_START_TIME}{/if}"/>
+                    <span class="date-member">-</span>
+                    <input type="date" class="date-member" name="SUB_STATUS_END_TIME" value="{if $info}{$info.SUB_STATUS_END_TIME}{/if}"/>
                 </div>
             </div>
             <div class="control-group sub-status-relation">
