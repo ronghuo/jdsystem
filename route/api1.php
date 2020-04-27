@@ -131,6 +131,6 @@ Route::post('/manage/tongji','api1/manage.Statistics/index')->middleware('Api1Ma
 //Route::post('/manage/tongji/mhelper','api1/manage.Statistics/mhelper')->middleware('Api1ManageAuth');
 //风险评估
 Route::get('/manage/estimate/:uuid','api1/manage.Estimates/listByUser')->middleware('Api1ManageAuth');
-
-
-
+// 决定书
+Route::get('/manage/decision','api1/manage.Decision/index')->middleware('Api1ManageAuth');
+Route::post('/manage/decision/save','api1/manage.Decision/save')->middleware('Api1ManageAuth');

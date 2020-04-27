@@ -7,6 +7,7 @@
 namespace app\api1\controller\manage;
 
 use app\api1\controller\Common;
+use app\common\validate\UransVer;
 use Carbon\Carbon;
 use think\Request;
 use app\common\model\Urans,
@@ -15,18 +16,18 @@ use app\common\model\Urans,
     app\common\model\NbAuthDept,
     app\common\model\UserUsers;
 
-class Uran extends Common{
+class Uran extends Common {
 
 
     public function index(Request $request){
 
         $page = $request->param('page',1,'int');
         $user_id = $request->param('userid',0,'int');
+        $uran_id = $request->param('id', 0, 'int');
 
 
         // 加上当前人员的管辖范围条件
         $list = Urans::
-        //where('UUID','in',$request->UUserids)
             with([
                 'dmmc'=>function($query){
                     $query->field('ID,DEPTCODE as DM,DEPTNAME as DMMC');
@@ -39,14 +40,15 @@ class Uran extends Common{
                 }
             ])
             ->where('ISDEL','=',0)
-            ->where(function($st) use($user_id,$request){
-                if($user_id>0){
-                    $st->where('UUID','=',$user_id);
-                }else{
-                    if($request->User->isXCPower){
-                        $st->whereIn('UUID',$this->getManageUserIds($request->MUID));
-                    }
-                    //$st->whereIn('UUID',$this->getManageUserIds($request->MUID));
+            ->where(function($st) use($user_id, $uran_id, $request) {
+                if (!$request->User->isTopPower) {
+                    $st->whereIn('UUID', $this->getManageUserIds($request->MUID));
+                }
+                if ($user_id > 0) {
+                    $st->where('UUID', '=', $user_id);
+                }
+                if ($uran_id > 0) {
+                    $st->where('ID', '=', $uran_id);
                 }
             })
             ->order('CHECK_TIME','DESC')
@@ -71,7 +73,7 @@ class Uran extends Common{
     }
 
     // 尿检提醒列表
-    public function notify(Request $request){
+    public function notify(Request $request) {
         $datetime = $request->param('datetime','');
 
         if(!$datetime){
@@ -181,10 +183,10 @@ class Uran extends Common{
             'UNIT_NAME'=>$dmm->DEPTNAME,
             'RESULT'=>$request->param('RESULT','','trim'),
             'REMARK'=>$request->param('REMARK','','trim'),
+            'CHECK_TYPE' => $request->param('CHECK_TYPE', 0, 'int')
         ];
-        //return $data;
-        $v = new \app\common\validate\UransVer();
-        if(!$v->check($data)){
+        $v = new UransVer();
+        if (!$v->check($data)) {
             return $this->fail($v->getError());
         }
 

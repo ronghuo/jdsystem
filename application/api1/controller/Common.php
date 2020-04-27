@@ -92,11 +92,11 @@ class Common extends Controller
     }
 
 
-    protected function uploadImages(Request $request,$dir=[]){
+    protected function uploadImages(Request $request, $dir=[]){
 
         $save_path = './uploads/'.implode('/',$dir);
 
-        $res = (new Uploads())->images($request,$save_path);
+        $res = (new Uploads())->images($request, $save_path);
 
         if(empty($res['save_files'])){
             return false;
