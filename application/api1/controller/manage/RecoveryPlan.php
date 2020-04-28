@@ -7,10 +7,9 @@
 namespace app\api1\controller\manage;
 
 use app\api1\controller\Common;
-use app\common\model\DecisionImgs;
 use app\common\model\NbAuthDept;
-use app\common\model\UserDecisions;
-use app\common\validate\UserDecisionsVer;
+use app\common\model\UserRecoveryPlan;
+use app\common\validate\UserRecoveryPlanVer;
 use think\Request;
 
 class RecoveryPlan extends Common {
@@ -22,8 +21,7 @@ class RecoveryPlan extends Common {
         $user_id = $request->param('userid',0,'int');
         $plan_id = $request->param('id', 0, 'int');
 
-        $list = UserDecisions::where('ISDEL','=',0)
-            ->where(function($st) use($user_id, $plan_id, $request) {
+        $list = UserRecoveryPlan::where(function($st) use($user_id, $plan_id, $request) {
                 if (!$request->User->isTopPower) {
                     $st->whereIn('UUID', $this->getManageUserIds($request->MUID));
                 }
@@ -34,7 +32,7 @@ class RecoveryPlan extends Common {
                     $st->where('ID', '=', $plan_id);
                 }
             })
-            ->order('ADD_TIME','DESC')
+            ->order('CREATE_TIME','DESC')
             ->page($page,self::PAGE_SIZE)
             ->select()->map(function($t) {
                 $t->imgs->map(function($tt) {
@@ -57,6 +55,9 @@ class RecoveryPlan extends Common {
             return $this->fail('登记单位信息有误');
         }
 
+        $beginDate = $request->param('BEGIN_DATE');
+        $endDate = $request->param('END_DATE');
+        $signDate = $request->param('SIGN_DATE');
         $data = [
             'UUID' => $request->param('UUID','','int'),
             'NAME' => $request->param('NAME','','trim'),
@@ -65,8 +66,8 @@ class RecoveryPlan extends Common {
             'MOBILE' => $request->param('MOBILE','','trim'),
             'DOMICILE_PLACE' => $request->param('DOMICILE_PLACE','','trim'),
             'LIVE_PLACE' => $request->param('LIVE_PLACE','','trim'),
-            'BEGIN_DATE' => $request->param('BEGIN_DATE','','trim'),
-            'END_DATE' => $request->param('END_DATE','','trim'),
+            'BEGIN_DATE' => empty($beginDate) ? null : $beginDate,
+            'END_DATE' => empty($endDate) ? null : $endDate,
             'FAMILY_MEMBERS' => $request->param('FAMILY_MEMBERS','','trim'),
             'DRUG_HISTORY_AND_TREATMENT' => $request->param('DRUG_HISTORY_AND_TREATMENT','','trim'),
             'CURRENT_STATUS' => $request->param('CURRENT_STATUS','','trim'),
@@ -76,21 +77,22 @@ class RecoveryPlan extends Common {
             'PSYCHOLOGICAL_CONSULTING_PLAN' => $request->param('PSYCHOLOGICAL_CONSULTING_PLAN','','trim'),
             'ASSISTANCE_MEASURES' => $request->param('ASSISTANCE_MEASURES','','trim'),
             'COMMUNITY_NAME' => $request->param('COMMUNITY_NAME','','trim'),
-            'SIGN_DATE' => $request->param('SIGN_DATE','','trim'),
-            'CREATE_USER_ID' => $request->MUID,
+            'SIGN_DATE' => empty($signDate) ? null : $signDate,
+            'CREATE_USER_MOBILE' => $request->User->MOBILE,
             'CREATE_USER_NAME' => $request->User->NAME,
             'CREATE_DEPT_CODE' => $dmm->DEPTCODE,
             'CREATE_DEPT_NAME' => $dmm->DEPTNAME,
+            'CREATE_TERMINAL' => TERMINAL_APP,
             'CREATE_TIME' => date('Y-m-d H:i:s'),
             'UPDATE_TIME' => date('Y-m-d H:i:s')
         ];
-        $v = new UserDecisionsVer();
+        $v = new UserRecoveryPlanVer();
         if (!$v->check($data)) {
             return $this->fail($v->getError());
         }
 
-        $decision_id = (new UserDecisions())->insertGetId($data);
-        if (!$decision_id) {
+        $plan_id = (new UserRecoveryPlan())->insertGetId($data);
+        if (!$plan_id) {
             return $this->fail('康复计划信息保存失败');
         }
 

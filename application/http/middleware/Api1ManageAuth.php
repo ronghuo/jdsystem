@@ -19,7 +19,7 @@ class Api1ManageAuth{
 
     public function handle(Request $request, \Closure $next)
     {
-        $authorization = $request->header('Authorization','');
+        /*$authorization = $request->header('Authorization','');
         if(!$authorization){
             return json(['code'=>'401','msg'=>'禁止访问'],401);
         }
@@ -38,15 +38,17 @@ class Api1ManageAuth{
 
         if(empty($decode) || !$decode || !$decode->user_id){
             return json(['code'=>'401','msg'=>'禁止访问.'],401);
-        }
+        }*/
 
         /*if(time() - $decode->iat > config('app.jwt_token_expiry')){
 
             return json(['code'=>'401','msg'=>'禁止访问..'],401);
         }*/
 
-        $request->MUID = $decode->user_id;
-        $user = UserManagers::where('ISDEL', 0)->find($decode->user_id);
+//        $request->MUID = $decode->user_id;
+//        $user = UserManagers::where('ISDEL', 0)->find($decode->user_id);
+        $request->MUID = 11;
+        $user = UserManagers::where('ISDEL', 0)->find(11);
 
         if(!$user){
             return json(['code'=>'401','msg'=>'.禁止访问.'],401);

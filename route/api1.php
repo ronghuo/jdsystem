@@ -134,3 +134,6 @@ Route::get('/manage/estimate/:uuid','api1/manage.Estimates/listByUser')->middlew
 // 决定书
 Route::get('/manage/decision','api1/manage.Decision/index')->middleware('Api1ManageAuth');
 Route::post('/manage/decision/save','api1/manage.Decision/save')->middleware('Api1ManageAuth');
+// 康复计划
+Route::get('/manage/recoveryplan','api1/manage.RecoveryPlan/index')->middleware('Api1ManageAuth');
+Route::post('/manage/recoveryplan/save','api1/manage.RecoveryPlan/save')->middleware('Api1ManageAuth');

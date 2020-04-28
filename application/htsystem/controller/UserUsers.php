@@ -1069,14 +1069,14 @@ class UserUsers extends Common
 
         $mobile = $request->param('MOBILE','','trim');
 
-        $mobile_exist = $usermodel->where(function($t) use ($id,$mobile){
-            $t->where('MOBILE','=',$mobile);
-            if($id>0){
+        $mobile_exist = $usermodel->where(function($t) use ($id,$mobile) {
+            $t->where('MOBILE', '=', $mobile);
+            if ($id > 0) {
                 $t->whereRaw('ID!='.$id);
             }
         })->where('ISDEL','=',0)->count();
 
-        if($mobile_exist){
+        if ($mobile_exist) {
             $this->error('该手机号已经存在');
         }
 
@@ -1260,7 +1260,7 @@ class UserUsers extends Common
             $userStatus = create_kv(BaseUserStatus::all()->toArray(), 'ID', 'NAME');
             $content = '人员状态：'.($userStatus[$user_status_id] ?? 'error');
 
-            if(!empty($jd_start_time) && !empty($jd_end_time)){
+            if (!empty($jd_start_time) && !empty($jd_end_time)) {
                 $content .= "，起止时间:{$jd_start_time}到{$jd_end_time}";
             }
 

@@ -28,8 +28,6 @@ class Report extends Common{
             ->page($page,self::PAGE_SIZE)
             ->select();
 
-
-
         $this->ok('',[
 //            'userids'=>$request->UUserids,
             'list'=>!$list ? [] : $list->toArray()
