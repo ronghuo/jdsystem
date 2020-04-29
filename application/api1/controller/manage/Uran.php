@@ -85,7 +85,7 @@ class Uran extends Common {
         $users = UserUsers::field('ID,NAME,HEAD_IMG,UTYPE_ID,UTYPE_ID_218')
             ->where('JD_ZHI_PAI_ID', '<', 2)//排除解除社区康复/戒毒
             ->where(function($query)use($request){
-                if($request->User->isXCPower){
+                if (!$request->User->isTopPower) {
                     $query->whereIn('ID',$this->getManageUserIds($request->MUID));
                 }
             })

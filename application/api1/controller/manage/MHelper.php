@@ -124,7 +124,7 @@ class MHelper extends Common{
             })
             ->where('ISDEL',0)
             ->where(function($query)use($request, $ha){
-                if($request->User->isXCPower){
+                if (!$request->User->isTopPower) {
                     $query->whereIn('ID',$ha->getUserIdsInAreas($request->MUID));
                 }
             })

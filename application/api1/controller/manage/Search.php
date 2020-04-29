@@ -30,8 +30,8 @@ class Search extends Common{
             ->where('STATUS','=',1)
             ->where('ISDEL','=',0)
             ->where(function($query)use($request){
-                if($request->User->isXCPower){
-                    $query->whereIn('ID',$this->getManageUserIds($request->MUID));
+                if (!$request->User->isTopPower) {
+                    $query->whereIn('ID', $this->getManageUserIds($request->MUID));
                 }
             })
             //->whereIn('ID',$this->getManageUserIds($request->MUID))
@@ -56,7 +56,7 @@ class Search extends Common{
             ->where('NAME','like','%'.$name.'%')
             ->where('ISDEL','=',0)
             ->where(function($query)use($request){
-                if($request->User->isXCPower){
+                if (!$request->User->isTopPower) {
                     $query->whereIn('ID',$this->getManageUserIds($request->MUID));
                 }
             })

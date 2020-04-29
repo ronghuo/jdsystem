@@ -26,7 +26,7 @@ class Apply extends Common{
             return $st;
         })->where('ISDEL','=',0)
             ->where(function($query)use($request){
-                if($request->User->isXCPower){
+                if (!$request->User->isTopPower) {
                     $query->whereIn('UUID',$this->getManageUserIds($request->MUID));
                 }
             })
@@ -50,7 +50,7 @@ class Apply extends Common{
         // 加上当前人员的管辖范围条件
         $info = UserApplies::where(['ID'=>$request->param('id',0)])->where('ISDEL','=',0)
             ->where(function($query)use($request){
-                if($request->User->isXCPower){
+                if (!$request->User->isTopPower) {
                     $query->whereIn('UUID',$this->getManageUserIds($request->MUID));
                 }
             })

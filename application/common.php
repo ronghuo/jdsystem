@@ -18,6 +18,20 @@ define('TERMINAL_APP', 'APP');  // 手机
 define('TERMINAL_WEB', 'WEB');  // 后台
 
 /**
+ * 地区代码
+ */
+define('DEFAULT_PROVINCE_ID', '430000');    // 湖南省
+define('DEFAULT_CITY_ID', '431200');        // 怀化市
+
+/**
+ * 权限级别
+ */
+define('POWER_LEVEL_CITY', 1);         // 市级
+define('POWER_LEVEL_COUNTY', 2);       // 县(区)级
+define('POWER_LEVEL_STREET', 3);       // 乡镇(街道)级
+define('POWER_LEVEL_COMMUNITY', 4);    // 村(社区)级
+
+/**
  * 创建无限分类树
  * @staticvar array $tree 保存树结构的数组
  * @param type $data 节点数组

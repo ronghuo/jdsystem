@@ -15,7 +15,6 @@ class UserManagerPower extends BaseModel
 
     public function savePowerSettings($data){
 
-
         if(!$data['AREA_IDS']){
             $this->where('UMID','=',$data['UMID'])->where('LEVEL','=',$data['LEVEL'])->delete();
         }else{
@@ -29,22 +28,21 @@ class UserManagerPower extends BaseModel
 
     }
 
-    public function getPowerSettings($umid){
-
+    public function getPowerSettings($umid) {
 
         $list = $this->where('UMID',$umid)->select();
         $areas = [];
         foreach($list as $v){
-            if($v['LEVEL']==1){
+            if ($v['LEVEL'] == 1) {
                 $areas['CITY_IDS'] = $v['AREA_IDS'];
             }
-            if($v['LEVEL']==2){
+            else if ($v['LEVEL'] == 2) {
                 $areas['COUNTY_IDS'] = $v['AREA_IDS'];
             }
-            if($v['LEVEL']==3){
+            else if ($v['LEVEL'] == 3) {
                 $areas['STREET_IDS'] = $v['AREA_IDS'];
             }
-            if($v['LEVEL']==4){
+            else if ($v['LEVEL'] == 4) {
                 $areas['COMMUNITY_IDS'] = $v['AREA_IDS'];
             }
         }

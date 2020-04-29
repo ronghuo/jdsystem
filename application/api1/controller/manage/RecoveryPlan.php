@@ -34,13 +34,7 @@ class RecoveryPlan extends Common {
             })
             ->order('CREATE_TIME','DESC')
             ->page($page,self::PAGE_SIZE)
-            ->select()->map(function($t) {
-                $t->imgs->map(function($tt) {
-                    $tt->IMG_URL = build_http_img_url($tt->SRC_PATH);
-                    return $tt;
-                });
-                return $t;
-            });
+            ->select();
 
         return $this->ok('',[
             'list' => !empty($list) ? $list->toArray() : []

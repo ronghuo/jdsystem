@@ -32,7 +32,7 @@ class Holiday extends Common{
         $ids = UserHolidayApplies::where('STATUS','in',$status_maps[$status])
             ->where('ISDEL','=',0)
             ->where(function($query)use($request){
-                if($request->User->isXCPower){
+                if (!$request->User->isTopPower) {
                     $query->whereIn('UUID',$this->getManageUserIds($request->MUID));
                 }
             })

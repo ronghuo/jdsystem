@@ -598,137 +598,92 @@ class UserManagers extends Common
     }
 
     protected function saveAccess(Request $request){
-//        $post = $request->post();
-        //print_r($post);
-        //exit;
         $uuid = $request->param('id',0,'int');
         $lv1 = $request->param('lv1',[]);
         $lv2 = $request->param('lv2',[]);
         $lv3 = $request->param('lv3',[]);
         $lv4 = $request->param('lv4',[]);
 
-        if(!$this->checkMUid($uuid)){
+        if (!$this->checkMUid($uuid)) {
             $this->error('权限不足');
         }
-
         $umpower = new UserManagerPower();
+        // 先移除所有该管理员的管辖设置
+        $umpower->where('UMID',$uuid)->delete();
 
         $PROVINCE_ID = $request->param('PROVINCE_ID');
         $CITY_ID = $request->param('CITY_ID');
 
-        $lv4_datas = $lv3_datas = $lv2_datas = $lv1_datas = [
-            'UMID'=>$uuid,
-            'PROVINCE_ID'=>$PROVINCE_ID,
-            'CITY_ID'=>$CITY_ID,
-            'COUNTY_ID'=>0,
-            'STREET_ID'=>0,
-        ];
-
-        if(!empty($lv4)){
+        if (!empty($lv4)) {
             $lv4_datas = [
-                'UMID'=>$uuid,
-                'PROVINCE_ID'=>$PROVINCE_ID,
-                'CITY_ID'=>$CITY_ID,
-                'COUNTY_ID'=>0,
-                'STREET_ID'=>0,
+                'UMID' => $uuid,
+                'PROVINCE_ID' => $PROVINCE_ID,
+                'CITY_ID' => $CITY_ID,
+                'COUNTY_ID' => 0,
+                'STREET_ID' => 0,
+                'COMMUNITY_ID' => 0,
+                'LEVEL' => self::POWER_LEVEL_COMMUNITY
             ];
-
             $coids = Collection::make($lv4)->map(function($t) use (&$lv4_datas){
-                list($cid,$sid,$coid) = explode('-',$t);
-                if($lv4_datas['COUNTY_ID']!=$cid){
-                    $lv4_datas['COUNTY_ID'] = $cid;
-                }
-                if($lv4_datas['STREET_ID']!=$sid){
-                    $lv4_datas['STREET_ID'] = $sid;
-                }
+                list($cid, $sid, $coid) = explode('-', $t);
+                $lv4_datas['COUNTY_ID'] = $cid;
+                $lv4_datas['STREET_ID'] = $sid;
+                $lv4_datas['COMMUNITY_ID'] = $coid;
                 return $coid;
             })->toArray();
-            //var_dump($coids);
-            $lv4_datas['LEVEL'] = 4;
             $lv4_datas['AREA_IDS'] = implode(',',$coids);
 
             $umpower->savePowerSettings($lv4_datas);
-        }else{
-            $umpower->where('UMID',$uuid)->where('LEVEL',4)->delete();
         }
-
-        if(!empty($lv3)){
+        else if (!empty($lv3)) {
             $lv3_datas = [
-                'UMID'=>$uuid,
-                'PROVINCE_ID'=>$PROVINCE_ID,
-                'CITY_ID'=>$CITY_ID,
-                'COUNTY_ID'=>0,
-                'STREET_ID'=>0,
+                'UMID' => $uuid,
+                'PROVINCE_ID' => $PROVINCE_ID,
+                'CITY_ID' => $CITY_ID,
+                'COUNTY_ID' => 0,
+                'STREET_ID' => 0,
+                'LEVEL' => self::POWER_LEVEL_STREET
             ];
             $sids = Collection::make($lv3)->map(function($t) use (&$lv3_datas){
-                list($cid,$sid) = explode('-',$t);
-                if($lv3_datas['COUNTY_ID']!=$cid){
-                    $lv3_datas['COUNTY_ID'] = $cid;
-                }
-
+                list($cid, $sid) = explode('-',$t);
+                $lv3_datas['COUNTY_ID'] = $cid;
+                $lv3_datas['STREET_ID'] = $sid;
                 return $sid;
-            })->filter(function($t) use($lv4_datas){
-                return $t != $lv4_datas['STREET_ID'];
             })->toArray();
-            $lv3_datas['LEVEL'] = 3;
-            $lv3_datas['AREA_IDS'] = implode(',',$sids);
+            $lv3_datas['AREA_IDS'] = implode(',', $sids);
 
             $umpower->savePowerSettings($lv3_datas);
-        }else{
-            $umpower->where('UMID',$uuid)->where('LEVEL',3)->delete();
         }
-
-        if(!empty($lv2)){
-
-            $cids = Collection::make($lv2)->filter(function($t) use ($lv3_datas){
-                return $t != $lv3_datas['COUNTY_ID'];
-            })->toArray();
-
+        else if (!empty($lv2)) {
             $lv2_datas = [
-                'UMID'=>$uuid,
-                'PROVINCE_ID'=>$PROVINCE_ID,
-                'CITY_ID'=>$CITY_ID,
-                'COUNTY_ID'=>0,
-                'STREET_ID'=>0,
-                'LEVEL'=>2,
-                'AREA_IDS'=>implode(',',$cids),
+                'UMID' => $uuid,
+                'PROVINCE_ID' => $PROVINCE_ID,
+                'CITY_ID' => $CITY_ID,
+                'COUNTY_ID' => 0,
+                'STREET_ID' => 0,
+                'LEVEL' => self::POWER_LEVEL_COUNTY
             ];
-
-            $umpower->savePowerSettings($lv2_datas);
-        }else{
-            $umpower->where('UMID',$uuid)->where('LEVEL',2)->delete();
-        }
-
-        if(!empty($lv1)){
-
-            $ids = Collection::make($lv1)->filter(function($t) use ($lv2_datas){
-                return $t != $lv2_datas['CITY_ID'];
+            $cids = Collection::make($lv2)->map(function($t) use (&$lv2_datas) {
+                $lv2_datas['COUNTY_ID'] = $t;
+                return $t;
             })->toArray();
-
-
+            $lv2_datas['AREA_IDS'] = implode(',',$cids);
+            $umpower->savePowerSettings($lv2_datas);
+        }
+        else if(!empty($lv1)) {
             $lv1_datas = [
-                'UMID'=>$uuid,
-                'PROVINCE_ID'=>$PROVINCE_ID,
-                'CITY_ID'=>$CITY_ID,
-                'COUNTY_ID'=>0,
-                'STREET_ID'=>0,
-                'LEVEL'=>1,
-                'AREA_IDS'=>implode(',',$ids),
+                'UMID' => $uuid,
+                'PROVINCE_ID' => $PROVINCE_ID,
+                'CITY_ID' => $CITY_ID,
+                'COUNTY_ID' => 0,
+                'STREET_ID' => 0,
+                'LEVEL' => self::POWER_LEVEL_CITY,
+                'AREA_IDS' => $CITY_ID
             ];
+
             $umpower->savePowerSettings($lv1_datas);
-        }else{
-            $umpower->where('UMID',$uuid)->where('LEVEL',1)->delete();
         }
 
-//        print_r([
-//            $lv4_datas,
-//            $lv3_datas,
-//            $lv2_datas,
-//            $lv1_datas,
-//        ]);
-        //$umpower->save();
-//
-//
         $this->success('配置成功',url('UserManagers/index'));
     }
 

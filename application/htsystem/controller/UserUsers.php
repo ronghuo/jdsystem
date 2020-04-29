@@ -606,7 +606,10 @@ class UserUsers extends Common
         $info->user_status = $userStatus ? $userStatus->NAME : '';
         $info->danger_level = $dangerLevel ? $dangerLevel->NAME : '';
 
-        $info->user_status_logs = UserChangeLog::where('UUID', $info->ID)->order('CREATE_TIME', 'desc')->select();
+        $info->user_status_logs = UserChangeLog::where('UUID', $info->ID)
+            ->where('LOG_TYPE', self::CHANGE_LOG_TYPE_STATUS)
+            ->order('CREATE_TIME', 'desc')
+            ->select();
 
         $this->assign('info',$info);
         $this->assign('cardtype',$cardtype);

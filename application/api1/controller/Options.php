@@ -3,6 +3,7 @@
 namespace app\api1\controller;
 
 
+use app\common\model\UserManagerPower;
 use think\Request;
 use app\common\model\Options as Opts;
 use //app\common\model\Nations,
@@ -84,48 +85,82 @@ class Options extends Common
 
     }
     // 街道-社区信息表
-    public function subAreas(Request $request, $return_array=false){
+    public function subAreas(Request $request, $return_array = false) {
 
-        $prove_id = $request->param('PROVINCE_ID',430000,'int');
-        $city_id = $request->param('CITY_ID',431200,'int');
-        $county_id = $request->param('COUNTY_ID',0,'int');
+//        $province_id = $request->param('PROVINCE_ID',DEFAULT_PROVINCE_ID,'int');
+//        $city_id = $request->param('CITY_ID',DEFAULT_CITY_ID,'int');
+//        $county_id = $request->param('COUNTY_ID',0,'int');
+//
+//        if ($province_id == 43) {
+//            $province_id = DEFAULT_PROVINCE_ID;
+//        }
+//
+//        if ($city_id == 4312) {
+//            $city_id = DEFAULT_CITY_ID;
+//        }
+//
+//        $cache_key = config('app.api_keys.subareas').implode('-',[
+//                $province_id,
+//                $city_id,
+//                $county_id
+//            ]);
 
-        if($prove_id == 43){
-            $prove_id = 430000;
+        $muid = $request->param('muid', '', 'int');
+        if (empty($muid)) {
+            $this->fail('参数不正确');
         }
-
-        if($city_id == 4312){
-            $city_id = 431200;
-        }
-
-        $cache_key = config('app.api_keys.subareas').implode('-',[
-                $prove_id,
-                $city_id,
-                $county_id
+        $powers = UserManagerPower::where('UMID', $muid)->select()->toArray();
+        if (empty($powers)) {
+            $this->ok('ok', [
+                'sub_areas' => []
             ]);
+        }
+        $power = $powers[0];
 
-        $trees = cache($cache_key);
+        $cache_key = config('app.api_keys.subareas') . $power['AREA_IDS'];
 
-        if(!$trees){
-            $list = Subareas::field('CODE12 as ID,NAME,PID')->where('PROVICEID','=',$prove_id)
-                ->where('CITYID','=',$city_id)
+//        $trees = cache($cache_key);
+        $trees = [];
 
-                ->where(function($t) use ($county_id){
-                    if($county_id>0){
-                        return $t->where('COUNTYID','=',$county_id);
+        if (!$trees) {
+            $list = Subareas::field('CODE12 as ID,NAME,PID')
+                ->where(function($query) use ($power) {
+                    $level = $power['LEVEL'];
+                    if ($level == POWER_LEVEL_CITY) {
+                        return;
+                    }
+                    $area = $power['AREA_IDS'];
+                    if ($level == POWER_LEVEL_COUNTY) {
+                        $query->where('COUNTY_ID', substr($area, 0, 6));
+                    }
+                    else if ($level == POWER_LEVEL_STREET) {
+                        $query->where('CODE12', 'in', [$power['COUNTY_ID'], $power['STREET_ID']]);
+                        $query->whereOr('PID', $power['STREET_ID']);
+                    }
+                    else if ($level == POWER_LEVEL_COMMUNITY) {
+                        $query->where('CODE12', 'in', [$power['COUNTY_ID'], $power['STREET_ID'], $power['COMMUNITY_ID']]);
+                        $query->whereOr('PID', $power->COMMUNITY_ID);
                     }
                 })
+                ->order('CODE12 ASC')
                 ->select()->toArray();
-            $trees = create_level_tree($list,0,'ID','PID');
+
+            if (empty($list)) {
+                $pid = 0;
+            } else {
+                $pid = $list[0]['PID'];
+            }
+
+            $trees = create_level_tree($list, $pid,'ID','PID');
 
             cache($cache_key,$trees,3600);
         }
-        if($return_array){
-            return $trees[0]['SUB'];
+        if ($return_array) {
+            return $trees;
         }
 
         return $this->ok('ok', [
-            'sub_areas'=>$trees[0]['SUB']
+            'sub_areas' => $trees
         ]);
     }
 
