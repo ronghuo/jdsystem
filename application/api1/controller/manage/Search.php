@@ -20,21 +20,28 @@ class Search extends Common{
 
     public function uuserByAreas(Request $request){
 
-        $COMMUNITY_ID = $request->param('COMMUNITY_ID',0,'int');
-        if(!$COMMUNITY_ID){
-            $this->fail('缺少社区信息');
-        }
         // 加上当前人员的管辖范围条件
-        $list =UserUsers::field('ID,NAME,HEAD_IMG')
-            ->where('COMMUNITY_ID','=',$COMMUNITY_ID)
+        $list = UserUsers::field('ID,NAME,HEAD_IMG')
             ->where('STATUS','=',1)
             ->where('ISDEL','=',0)
-            ->where(function($query)use($request){
+            ->where(function($query) use ($request){
                 if (!$request->User->isTopPower) {
                     $query->whereIn('ID', $this->getManageUserIds($request->MUID));
                 }
+                $countyId = $request->param('COUNTY_ID',0,'int');
+                $streetId = $request->param('STREET_ID',0,'int');
+                $communityId = $request->param('COMMUNITY_ID',0,'int');
+
+                if (!empty($communityId)) {
+                    $query->where('COMMUNITY_ID', $communityId);
+                }
+                else if (!empty($streetId)) {
+                    $query->where('STREET_ID', $streetId);
+                }
+                else if (!empty($countyId)) {
+                    $query->where('COUNTY_ID_12', $countyId);
+                }
             })
-            //->whereIn('ID',$this->getManageUserIds($request->MUID))
             ->select()->map(function($t){
                 $t->HEAD_IMG_URL = build_http_img_url($t->HEAD_IMG);
                 return $t;

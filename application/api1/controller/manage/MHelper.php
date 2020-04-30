@@ -6,6 +6,7 @@
  */
 namespace app\api1\controller\manage;
 
+use app\common\model\NbAuthDept;
 use Carbon\Carbon;
 use app\api1\controller\Common;
 use app\common\validate\HelperDiarysVer;
@@ -217,14 +218,30 @@ class MHelper extends Common{
             return $this->fail('该人员不在你的管辖区');
         }
 
+        $dmmid = $request->User->DMM_ID;
+        $dmm = NbAuthDept::find($dmmid);
+
+        if (!$dmm) {
+            return $this->fail('登记单位信息有误');
+        }
+
         $data = [
             'UMID'=>$request->MUID,
             'UUID'=>$uuid,
-            'ADD_YEAR'=>date('Y'),
-            'ADD_MONTH'=>date('n'),
-            'ADD_DAY'=>date('j'),
-            'TITLE'=>$request->post('TITLE','','trim'),
-            'CONTENT'=>$request->post('CONTENT','','trim')
+            'ADD_YEAR' => date('Y'),
+            'ADD_MONTH' => date('n'),
+            'ADD_DAY' => date('j'),
+            'TITLE' => $request->param('TITLE','','trim'),
+            'CONTENT' => $request->param('CONTENT','','trim'),
+            'ASSIST_NEXT_PLAN' => $request->param('ASSIST_NEXT_PLAN','','trim'),
+            'ASSIST_TIME' => $request->param('ASSIST_TIME','','trim'),
+            'ASSIST_PLACE' => $request->param('ASSIST_PLACE','','trim'),
+            'INTERVIEW_EVIDENCE' => $request->param('INTERVIEW_EVIDENCE','','trim'),
+            'INTERVIEW_CONTENT' => $request->param('INTERVIEW_CONTENT','','trim'),
+            'INTERVIEW_PERSON' => $request->param('INTERVIEW_PERSON','','trim'),
+            'ADD_DEPT_CODE' => $dmm->DEPTCODE,
+            'ADD_DEPT_NAME' => $dmm->DEPTNAME,
+            'ADD_USER_NAME' => $request->User->NAME
         ];
 
         $v = new HelperDiarysVer();

@@ -59,20 +59,15 @@ class Options extends Common
         ]);
     }
     //省-市-区
-    public function areas(Request $request,$return_array=false){
-        //$hnid = 0;
-        $prove_id = $request->param('PROVINCE_ID',430000,'int');
-        if($prove_id == 43){
-            $prove_id = 430000;
-        }
-        $cache_key = config('app.api_keys.areas').$prove_id;
+    public function areas(Request $request, $return_array = false) {
+        $cache_key = config('app.api_keys.areas') . DEFAULT_CITY_ID;
         $trees = cache($cache_key);
         if(!$trees){
             $list = Upareatable::field('UPAREAID as ID,NAME,PID')
-                ->where('UPAREAID', '<>', '010000')
+                ->where('UPAREAID|CITYID',  DEFAULT_CITY_ID)
                 ->where('FLAG', 0)->all()->toArray();
 
-            $trees = create_level_tree($list,$prove_id,'ID','PID');
+            $trees = create_level_tree($list, DEFAULT_PROVINCE_ID,'ID','PID');
 
             cache($cache_key,$trees,3600);
         }
@@ -87,24 +82,6 @@ class Options extends Common
     // 街道-社区信息表
     public function subAreas(Request $request, $return_array = false) {
 
-//        $province_id = $request->param('PROVINCE_ID',DEFAULT_PROVINCE_ID,'int');
-//        $city_id = $request->param('CITY_ID',DEFAULT_CITY_ID,'int');
-//        $county_id = $request->param('COUNTY_ID',0,'int');
-//
-//        if ($province_id == 43) {
-//            $province_id = DEFAULT_PROVINCE_ID;
-//        }
-//
-//        if ($city_id == 4312) {
-//            $city_id = DEFAULT_CITY_ID;
-//        }
-//
-//        $cache_key = config('app.api_keys.subareas').implode('-',[
-//                $province_id,
-//                $city_id,
-//                $county_id
-//            ]);
-
         $muid = $request->param('muid', '', 'int');
         if (empty($muid)) {
             $this->fail('参数不正确');
@@ -112,26 +89,24 @@ class Options extends Common
         $powers = UserManagerPower::where('UMID', $muid)->select()->toArray();
         if (empty($powers)) {
             $this->ok('ok', [
-                'sub_areas' => []
+                'levelareas' => []
             ]);
         }
         $power = $powers[0];
 
         $cache_key = config('app.api_keys.subareas') . $power['AREA_IDS'];
 
-//        $trees = cache($cache_key);
-        $trees = [];
-
+        $trees = cache($cache_key);
         if (!$trees) {
+            $level = $power['LEVEL'];
             $list = Subareas::field('CODE12 as ID,NAME,PID')
-                ->where(function($query) use ($power) {
-                    $level = $power['LEVEL'];
+                ->where(function($query) use ($power, $level) {
                     if ($level == POWER_LEVEL_CITY) {
                         return;
                     }
                     $area = $power['AREA_IDS'];
                     if ($level == POWER_LEVEL_COUNTY) {
-                        $query->where('COUNTY_ID', substr($area, 0, 6));
+                        $query->where('COUNTYID', substr($area, 0, 6));
                     }
                     else if ($level == POWER_LEVEL_STREET) {
                         $query->where('CODE12', 'in', [$power['COUNTY_ID'], $power['STREET_ID']]);
@@ -139,18 +114,20 @@ class Options extends Common
                     }
                     else if ($level == POWER_LEVEL_COMMUNITY) {
                         $query->where('CODE12', 'in', [$power['COUNTY_ID'], $power['STREET_ID'], $power['COMMUNITY_ID']]);
-                        $query->whereOr('PID', $power->COMMUNITY_ID);
                     }
                 })
                 ->order('CODE12 ASC')
                 ->select()->toArray();
 
-            if (empty($list)) {
+            if ($level == POWER_LEVEL_CITY) {
+                $pid = $list[0]['ID'];
+            }
+            else if (empty($list)) {
                 $pid = 0;
-            } else {
+            }
+            else {
                 $pid = $list[0]['PID'];
             }
-
             $trees = create_level_tree($list, $pid,'ID','PID');
 
             cache($cache_key,$trees,3600);
@@ -162,6 +139,25 @@ class Options extends Common
         return $this->ok('ok', [
             'sub_areas' => $trees
         ]);
+    }
+
+    private function setDefaultOption(&$tree = [], $defaultOption = [
+        'ID' => '',
+        'NAME' => '全部',
+        'PID' => ''
+    ]) {
+        if (empty($tree)) {
+            return;
+        }
+        foreach ($tree as &$branch) {
+            if (empty($branch['SUB'])) {
+                continue;
+            }
+            $this->setDefaultOption($branch['SUB'], $defaultOption);
+        }
+        if (count($tree) > 1) {
+            array_unshift($tree, $defaultOption);
+        }
     }
 
     public function depts($return_array=false){
@@ -185,7 +181,7 @@ class Options extends Common
                 'NAME'=>$last['DEPTNAME']
             ];
 
-//            cache($cache_key,$trees,3600);
+            cache($cache_key,$trees,3600);
         }
 
 
@@ -250,8 +246,9 @@ class Options extends Common
     public function hhlevelareas(Request $request){
 
         $trees = $this->subAreas($request, true);
+        $this->setDefaultOption($trees);
         return $this->ok('ok', [
-            'levelareas'=>$trees
+            'levelareas' => $trees
         ]);
         $cache_key = config('app.api_keys.levelareas').implode('-',['v1']);
 
@@ -269,7 +266,7 @@ class Options extends Common
 
 
         return $this->ok('ok', [
-            'levelareas'=>$trees
+            'levelareas' => $trees
         ]);
     }
 
