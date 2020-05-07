@@ -17,9 +17,7 @@ class HelperDiarysVer extends Validate
 	    'UUID'=>'require',
 	    'ADD_YEAR'=>'require',
         'ADD_MONTH'=>'require',
-        'ADD_DAY'=>'require',
-        'TITLE'=>'require',
-	    'CONTENT'=>'require'
+        'ADD_DAY'=>'require'
     ];
     
     /**
@@ -33,8 +31,6 @@ class HelperDiarysVer extends Validate
         'UUID.require'=>'缺少帮扶人员信息',
         'ADD_YEAR.require'=>'缺少时间信息',
         'ADD_MONTH.require'=>'缺少时间信息',
-        'ADD_DAY.require'=>'缺少时间信息',
-        'TITLE.require'=>'缺少标题',
-        'CONTENT.require'=>'缺少内容',
+        'ADD_DAY.require'=>'缺少时间信息'
     ];
 }

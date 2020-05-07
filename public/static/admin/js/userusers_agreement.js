@@ -19,7 +19,10 @@ $(function(){
 
     //编辑器
     if($('#content').length>0){
-        ue = UE.getEditor('content', {toolbars: [myueditorconfig],serverUrl:ed_url});
+        ue = UE.getEditor('content', {toolbars: [agreementUeditorConfig],serverUrl:ed_url});
+        ue.ready(function () {
+           ue.setDisabled(['insertimage', 'cleardoc']);
+        });
     }
 
 });

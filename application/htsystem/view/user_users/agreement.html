@@ -1,3 +1,8 @@
+<style>
+    *{ margin:0; padding:0;}
+    #box{ margin:50px auto; width:540px; min-height:400px; background:#FF9}
+    #demo{ margin:50px auto; width:540px; min-height:800px; background:#CF9}
+</style>
 <div class="main-wrapper">
     <div class="container-fluid">
         <div class="row-fluid ">
@@ -28,8 +33,6 @@
                 </div>
             </div>
 
-
-
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary" id="subbtn">保存资料</button>
                 <a href="javascript:history.back();" class="btn"><i class="icon-reply"></i> 取消</a>
@@ -40,4 +43,5 @@
 </div><!-- 主体 end-->
 <script type="text/javascript">
     var ed_url = "{:url('Ueditor/index')}";
+    var agreementUeditorConfig = ['insertimage', 'cleardoc'];
 </script>

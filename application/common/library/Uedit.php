@@ -20,7 +20,6 @@ class Uedit{
     static public function img() {
 
         $action = input('get.action');
-
         switch ($action) {
             case 'config':
                 $result = json_encode(self::getConfig());
@@ -95,6 +94,7 @@ class Uedit{
             }
             //self::savepic($res['url']);
             $res['url'] = self::getSrc($res['url']);
+            cache('Ueditor::images', $res['url']);
         }
 
         /**

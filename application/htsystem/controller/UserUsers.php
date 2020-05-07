@@ -769,27 +769,29 @@ class UserUsers extends Common
 
 
     public function agreement(Request $request, $id = 0) {
-        if(!$id){
+        if (!$id) {
             $this->error('访问错误');
         }
         $user = UserUsersModel::find($id);
 
-        if(!$user || $user->ISDEL==1){
+        if (!$user || $user->ISDEL == 1) {
             $this->error('该用户不存在或已删除');
         }
 
-        if(!$this->checkUUid($user->ID)){
+        if (!$this->checkUUid($user->ID)) {
             $this->error('权限不足');
         }
 
-        if($request->isPost()){
+        if ($request->isPost()) {
             return $this->saveAgreement($request,$user);
         }
 
         $info = Agreement::where('UUID',$user->ID)->find();
 
-        $js = $this->loadJsCss(array('p:ueditor/ueditor','userusers_agreement'), 'js', 'admin');
+        $js = $this->loadJsCss(array('p:ueditor/ueditor', 'p:ueditor/third-party/webuploader/webuploader', 'p:ueditor/dialogs/image/image', 'multi-images-uploader', 'userusers_agreement'), 'js', 'admin');
+        $css = $this->loadJsCss(array('p:ueditor/third-party/webuploader/webuploader', 'p:ueditor/dialogs/image/image'), 'css');
         $this->assign('footjs', $js);
+        $this->assign('headercss', $css);
         $this->assign('user', $user);
         $this->assign('info', $info);
         return $this->fetch();
@@ -1060,7 +1062,7 @@ class UserUsers extends Common
         $id = $request->post('ID',0,'int');
 
         if ($id > 0) {
-            if(!$this->checkUUid($id)){
+            if (!$this->checkUUid($id)) {
                 $this->error('权限不足');
             }
             $isNew = false;
