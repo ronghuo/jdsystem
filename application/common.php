@@ -32,6 +32,13 @@ define('POWER_LEVEL_STREET', 3);       // 乡镇(街道)级
 define('POWER_LEVEL_COMMUNITY', 4);    // 村(社区)级
 
 /**
+ * 康复人员状态
+ */
+define('STATUS_COMMUNITY_DETOXIFICATION', '社区戒毒中');
+define('STATUS_COMMUNITY_RECOVERING', '社区康复中');
+
+
+/**
  * 创建无限分类树
  * @staticvar array $tree 保存树结构的数组
  * @param type $data 节点数组

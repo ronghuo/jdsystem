@@ -18,10 +18,9 @@ use app\common\model\BaseUserDangerLevel,
 class Search extends Common{
 
 
-    public function uuserByAreas(Request $request){
+    public function uuserByAreas(Request $request) {
 
-        // 加上当前人员的管辖范围条件
-        $list = UserUsers::field('ID,NAME,HEAD_IMG')
+        $query = UserUsers::field('ID,NAME,HEAD_IMG')
             ->where('STATUS','=',1)
             ->where('ISDEL','=',0)
             ->where(function($query) use ($request){
@@ -41,8 +40,15 @@ class Search extends Common{
                 else if (!empty($countyId)) {
                     $query->where('COUNTY_ID_12', $countyId);
                 }
-            })
-            ->select()->map(function($t){
+            });
+
+        $keywords = $request->param('KEYWORDS', '', 'trim');
+        if (!empty($keywords)) {
+            $query->whereLike('NAME|ID_NUMBER', "%$keywords%");
+        }
+
+        // 加上当前人员的管辖范围条件
+        $list = $query->select()->map(function($t){
                 $t->HEAD_IMG_URL = build_http_img_url($t->HEAD_IMG);
                 return $t;
             });

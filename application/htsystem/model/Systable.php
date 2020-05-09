@@ -89,8 +89,14 @@ class Systable extends  Base{
      * 获取菜单项
      * @return array
      */
-    public function get_node_pids(){
-        return $this->_get_list($this->node_table,['ISMENU'=>1,'STATUS'=>1],['LEVEL'=>'asc','SORT'=>'asc'],'ID,TITLE,LEVEL,PID',0);
+    public function get_node_pids($isMenu = 1){
+        $where = [
+            'STATUS' => 1
+        ];
+        if ($isMenu) {
+            $where['ISMENU'] = $isMenu;
+        }
+        return $this->_get_list($this->node_table,$where,['LEVEL'=>'asc','SORT'=>'asc'],'ID,TITLE,LEVEL,PID',0);
     }
     public function get_node_list($where,$field='*',$limit=15){
         return $this->_get_list($this->node_table,$where,['LEVEL'=>'asc','SORT'=>'asc'],$field,$limit);

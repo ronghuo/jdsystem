@@ -2,33 +2,30 @@
 
 namespace app\htsystem\controller;
 
-use app\api1\controller\uuser\User;
+use app\common\model\BaseCertificateType;
+use app\common\model\BaseNationalityType;
+use app\common\model\BaseNationType;
 use app\common\model\BaseSexType;
+use app\common\model\BaseUserDangerLevel;
+use app\common\model\BaseUserStatus;
+use app\common\model\NbAuthDept;
+use app\common\model\Options as Opts;
+use app\common\model\Subareas;
+use app\common\model\Upareatable;
+use app\common\model\UserChangeLog;
 use app\common\model\UserDecisions;
+use app\common\model\UserPhoneDataAddress;
+use app\common\model\UserPhoneDataCalls;
+use app\common\model\UserPhoneDataSms;
 use app\common\model\UserRecoveryPlan;
+use app\common\model\UserUsers as UserUsersModel;
 use app\common\model\WaitDeleteFiles;
+use app\common\validate\UserUsersVer;
 use app\htsystem\model\AdminLogs;
+use Carbon\Carbon;
 use think\helper\Str;
 use think\paginator\driver\Bootstrap;
 use think\Request;
-use app\common\model\Agreement;
-use app\common\model\UserChangeLog;
-
-use app\common\model\Options as Opts;
-use app\common\model\UserUsers as UserUsersModel,
-    app\common\validate\UserUsersVer;
-use Carbon\Carbon;
-use app\common\model\UserPhoneDataSms,
-    app\common\model\UserPhoneDataAddress,
-    app\common\model\UserPhoneDataCalls;
-use app\common\model\BaseNationType,
-    app\common\model\BaseNationalityType,
-    app\common\model\BaseCertificateType;
-use app\common\model\Upareatable,
-    app\common\model\Subareas,
-    app\common\model\NbAuthDept;
-use app\common\model\BaseUserDangerLevel,
-    app\common\model\BaseUserStatus;
 
 /**
  * 康复端人员管理
@@ -55,7 +52,6 @@ class UserUsers extends Common
      */
     const SUB_STATUS_END_TIME_NAME = 'SUB_STATUS_END_TIME';
 
-    const STATUS_COMMUNITY_DETOXIFICATION = '社区戒毒中';
     /**
      * 人员状态关联信息
      */
@@ -766,37 +762,6 @@ class UserUsers extends Common
         $this->success('删除成功');
     }
 
-
-
-    public function agreement(Request $request, $id = 0) {
-        if (!$id) {
-            $this->error('访问错误');
-        }
-        $user = UserUsersModel::find($id);
-
-        if (!$user || $user->ISDEL == 1) {
-            $this->error('该用户不存在或已删除');
-        }
-
-        if (!$this->checkUUid($user->ID)) {
-            $this->error('权限不足');
-        }
-
-        if ($request->isPost()) {
-            return $this->saveAgreement($request,$user);
-        }
-
-        $info = Agreement::where('UUID',$user->ID)->find();
-
-        $js = $this->loadJsCss(array('p:ueditor/ueditor', 'p:ueditor/third-party/webuploader/webuploader', 'p:ueditor/dialogs/image/image', 'multi-images-uploader', 'userusers_agreement'), 'js', 'admin');
-        $css = $this->loadJsCss(array('p:ueditor/third-party/webuploader/webuploader', 'p:ueditor/dialogs/image/image'), 'css');
-        $this->assign('footjs', $js);
-        $this->assign('headercss', $css);
-        $this->assign('user', $user);
-        $this->assign('info', $info);
-        return $this->fetch();
-    }
-
     public function decision(Request $request, $id = 0) {
         if (!$id) {
             $this->error('访问错误');
@@ -980,40 +945,6 @@ class UserUsers extends Common
             $user->MANAGE_POLICE_AREA_CODE = $dmmc['DEPTCODE'];
             $user->MANAGE_POLICE_AREA_NAME = $dmmc['DEPTNAME'];
         }
-    }
-
-    /**
-     * 保存康复协议
-     * @param Request $request
-     * @param UserUsersModel $user
-     */
-    protected function saveAgreement(Request $request, UserUsersModel $user){
-
-        if(!$request->post('CONTENT')){
-            $this->error('请填写康复内容');
-        }
-
-        $agreement = Agreement::where('UUID',$user->ID)->find();
-        if (!$agreement) {
-            $isNew = true;
-            $agreement = new Agreement();
-        } else {
-            $isNew = false;
-        }
-
-        $agreement->UUID = $user->ID;
-        $agreement->TITLE = $request->post('TITLE') ? : $user->NAME.'康复协议';
-        $agreement->CONTENT = $request->post('CONTENT');
-        $agreement->UPDATE_TIME = Carbon::now()->toDateTimeString();
-
-        $agreement->save();
-
-        $log_content = '协议标题：' . $agreement->TITLE . '<br/>' . '协议内容：' . $agreement->CONTENT;
-        $this->addAdminLog($isNew ? self::OPER_TYPE_CREATE : self::OPER_TYPE_UPDATE,
-            $isNew ? '新增社戒社康协议' : '修改社戒社康协议',
-            $log_content, $user->ID);
-
-        $this->success('保存成功',url('UserUsers/index'));
     }
 
     /**
@@ -1328,7 +1259,7 @@ class UserUsers extends Common
     private function getJdEndTime(Request $request, $user_status_name, $jd_start_time = '') {
         $relationNames = array_keys(self::STATUS_RELATIONS[$user_status_name]);
         // 社区戒毒起止时间时长为固定3年
-        if ($user_status_name == self::STATUS_COMMUNITY_DETOXIFICATION) {
+        if ($user_status_name == STATUS_COMMUNITY_DETOXIFICATION) {
             $jd_end_time = date('Y-m-d', strtotime('+3 year', strtotime($jd_start_time)));
         }
         else if (in_array(self::STATUS_END_TIME_NAME, $relationNames)) {

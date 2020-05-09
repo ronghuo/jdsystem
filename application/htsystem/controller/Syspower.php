@@ -193,7 +193,7 @@ class Syspower extends Common{
             return $this->save_node_data($request);
         }
         $admin_model = new mSystable();
-        $pids = $admin_model->get_node_pids();
+        $pids = $admin_model->get_node_pids(0);
         $pids = create_tree($pids);
         $groups = $admin_model->get_node_groups();
         $js   = $this->loadJsCss(array( 'syspower_node'), 'js', 'admin');
@@ -220,7 +220,7 @@ class Syspower extends Common{
         if(!$info){
             $this->error('该节点信息不存在');
         }
-        $pids = $admin_model->get_node_pids();
+        $pids = $admin_model->get_node_pids(0);
         $pids = create_tree($pids);
         $groups = $admin_model->get_node_groups();
         $js   = $this->loadJsCss(array( 'syspower_node'), 'js', 'admin');

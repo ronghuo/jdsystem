@@ -16,7 +16,6 @@ class UserEstimates extends Common {
         if(!$id){
             $this->error('访问错误');
         }
-        //todo 加上权限范围条件
         $user = UserUsersModel::where(function ($query){
             $ids = $this->getManageUUids();
             if($ids != 'all'){

@@ -8,6 +8,8 @@
 namespace app\common\library;
 
 
+use think\facade\Cache;
+
 class Uedit{
     //配置文件
     const CONFIG_FILE = './static/plugin/ueditor/php/config.json';
@@ -17,8 +19,10 @@ class Uedit{
     //
     const IMG_DIR = './uploads/ueditor/';
 
-    static public function img() {
+    // UEditor图片路径缓存键
+    const CACHE_UEDITOR_IMAGE = 'UEditor::Images';
 
+    static public function img() {
         $action = input('get.action');
         switch ($action) {
             case 'config':
@@ -94,7 +98,15 @@ class Uedit{
             }
             //self::savepic($res['url']);
             $res['url'] = self::getSrc($res['url']);
-            cache('Ueditor::images', $res['url']);
+
+            // 将UEditor编辑器上传的图片文件路径临时缓存到Redis
+            if (Cache::has(self::CACHE_UEDITOR_IMAGE)) {
+                $value = json_decode(Cache::get(self::CACHE_UEDITOR_IMAGE));
+                array_push($value, $res['url']);
+            } else {
+                $value = [$res['url']];
+            }
+            cache(self::CACHE_UEDITOR_IMAGE, json_encode($value), 1800);
         }
 
         /**

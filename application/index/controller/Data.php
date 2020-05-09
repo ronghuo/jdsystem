@@ -1,6 +1,8 @@
 <?php
 namespace app\index\controller;
 
+use app\common\model\Agreement;
+use app\common\model\AgreementImgs;
 use app\common\model\BXdry;
 use app\common\library\Mylog;
 use app\common\model\UserChangeLog;
@@ -900,6 +902,44 @@ class Data
             $log->save();
         }
         echo 'Done.';
+    }
+
+    public function fixAgreementImages() {
+        $agreements = Agreement::all();
+        foreach ($agreements as $agreement) {
+            $content = $agreement->CONTENT;
+            $images = [];
+            $this->getImageUrl($content, $images);
+            if (!empty($images)) {
+                $filteredImages = [];
+                foreach ($images as $image) {
+                    $count = AgreementImgs::where(['AGREEMENT_ID' => $agreement->ID, 'SRC_PATH' => $image])->count();
+                    if ($count > 0) {
+                        continue;
+                    }
+                    array_push($filteredImages, $image);
+                }
+                (new AgreementImgs())->saveData($agreement->ID, $filteredImages);
+            }
+        }
+        echo 'Done.';
+    }
+
+    private function getImageUrl($content, &$images, $startNeedle = 'src="', $endNeedle = '.jpg') {
+        $start = strpos($content, $startNeedle, 0);
+        if (!$start) {
+            return $images;
+        }
+        $getStart = $start + strlen($startNeedle);
+        $end = strpos($content, $endNeedle, $getStart);
+        if (!$end) {
+            $end = strpos($content, '.png', $getStart);
+        }
+        $getEnd = $end + strlen($endNeedle);
+        $len = $getEnd - $getStart;
+        array_push($images, substr($content, $getStart, $len));
+        $content = substr($content, $getEnd, strlen($content) - $getEnd);
+        $this->getImageUrl($content, $images);
     }
 
 }

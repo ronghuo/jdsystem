@@ -157,20 +157,28 @@ class MHelper extends Common{
 
         $page = $request->param('page',1,'int');
 
-        $uuid = $request->param('uuid',0,'int');
+        $uuid = $request->param('UUID',0,'int');
 
-        $list = HelperDiarys::field('ID,TITLE,ADD_TIME')
-            ->where(function($t)use($uuid){
-                if($uuid>0){
-                    $t->where('UUID',$uuid);
+        $diaryId = $request->param('ID', 0, 'int');
+
+        $list = HelperDiarys::field('ID,CONTENT,ASSIST_NEXT_PLAN,ASSIST_TIME,ASSIST_PLACE,INTERVIEW_PERSON,RECOVERYUSER_RELATION,INTERVIEW_WSTAFF_NAME,INTERVIEW_WSTAFF_DEPT,ADD_TIME')
+            ->where(function($t) use($uuid, $diaryId) {
+                if ($uuid > 0) {
+                    $t->where('UUID', $uuid);
                 }
-
+                if ($diaryId > 0) {
+                    $t->where('ID', $diaryId);
+                }
             })
             ->where('ISDEL',0)
             ->order('ADD_TIME','desc')
             ->page($page,self::PAGE_SIZE)
-            ->select()->map(function($t){
-                $t->H5_URL =  get_host().url('h5/AppPages/info',['uid'=>0,'tag'=>self::MANAGE_TAG,'type'=>3,'id'=>$t->ID]);
+            ->select()->map(function($t) {
+//                $t->H5_URL =  get_host().url('h5/AppPages/info',['uid'=>0,'tag'=>self::MANAGE_TAG,'type'=>3,'id'=>$t->ID]);
+                $t->imgs->map(function($tt) {
+                    $tt->IMG_URL = build_http_img_url($tt->SRC_PATH);
+                    return $tt;
+                });
                 return $t;
             });
 

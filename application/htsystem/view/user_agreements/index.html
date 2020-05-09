@@ -1,0 +1,55 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span7"><h4 class="page-header">康复人员【{$user.NAME}】社戒社康协议</h4></div>
+                    <div class="span5">
+                        <a href="javascript:history.back();" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                        <a href="{:url('UserAgreements/create', ['id' => $user.ID])}" class="btn btn-primary pull-right"><i class="icon-plus"></i>新增协议</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!---->
+
+        {empty name="list"}
+        <tr><td>没有找到相关的信息</td></tr>
+        {else/}
+        {foreach name="list" item="da"}
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+            <tr>
+                <th style="width:120px;">添加时间</th><td>{$da.ADD_TIME}</td></tr>
+            <tr>
+                <th>协议内容</th>
+                <td>
+                    {notempty name="$da.images"}
+                        {foreach name="$da.images" item="image"}
+                            <img src="{$image.SRC_PATH}" width="100" height="200" />
+                        {/foreach}
+                    {/notempty}
+                </td>
+            </tr>
+            <tr>
+                <th>操　　作</th>
+                <td>
+                    <a href="javascript:;" data-href="{:url('UserAgreements/delete',array('uuid' => $da['UUID'], 'agreementId' => $da['ID']))}" class="btn mini btn-danger" onclick="deldata(this);"><i class="icon-trash"></i>删除</a>
+                </td>
+            </tr>
+            </tbody>
+
+        </table>
+        {/foreach}
+        {/empty}
+
+        <!--<div class="row-fluid">-->
+        <!--<div class="span6"><div class="dataTables_info"></div></div>-->
+        <!--<div class="span6"><div class="dataTables_paginate paging_bootstrap pagination">-->
+        <!--{ $ page| r aw}-->
+        <!--</div></div>-->
+        <!--</div>-->
+    </div>
+</div>
