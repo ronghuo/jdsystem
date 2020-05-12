@@ -31,7 +31,6 @@ class User extends Common{
             ->where('ISREAD',1)
             ->count();
 
-
         return $this->ok('ok',[
             'unread_message_count'=>$messageCount - $readCount,
             'info'=>[

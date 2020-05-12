@@ -1,13 +1,10 @@
 <?php
 namespace app\htsystem\controller;
 
-use app\common\library\Uedit;
 use app\common\model\Agreement;
 use app\common\model\AgreementImgs;
-use app\common\model\UserEstimates as UserEstimatesModel;
 use app\common\model\UserUsers as UserUsersModel;
 use Carbon\Carbon;
-use think\facade\Cache;
 use think\Request;
 
 class UserAgreements extends Common {
@@ -34,7 +31,10 @@ class UserAgreements extends Common {
             });
             return $item;
         });
-
+        $js = $this->loadJsCss(array('p:viewer/viewer.min', 'agreements_index'), 'js', 'admin');
+        $css = $this->loadJsCss(array('p:viewer/viewer.min'), 'css');
+        $this->assign('footjs', $js);
+        $this->assign('headercss', $css);
         $this->assign('user', $user);
         $this->assign('list', $list);
         return $this->fetch();
@@ -68,14 +68,14 @@ class UserAgreements extends Common {
         }
         $info['TITLE'] = $title;
 
-        $js = $this->loadJsCss(array('p:ueditor/ueditor', 'userusers_agreement'), 'js', 'admin');
+        $js = $this->loadJsCss(array('p:ueditor/ueditor', 'agreements_create'), 'js', 'admin');
         $this->assign('footjs', $js);
         $this->assign('user', $user);
         $this->assign('info', $info);
         return $this->fetch();
     }
 
-    protected function saveAgreement(Request $request, UserUsersModel $user){
+    protected function saveAgreement(Request $request, UserUsersModel $user) {
 
         if (!$request->post('CONTENT')) {
             $this->error('请填写康复内容');
@@ -89,23 +89,17 @@ class UserAgreements extends Common {
 
         $agreement->save();
 
-        // 从Redis中取出UEditor编辑器上传的图片路径集合，并过滤出当前协议内容中包含的图片路径信息
-        if (Cache::has(Uedit::CACHE_UEDITOR_IMAGE)) {
-            $images = json_decode(Cache::get(Uedit::CACHE_UEDITOR_IMAGE));
-            $filteredImages = [];
-            foreach ($images as $image) {
-                if (!strpos($agreement->CONTENT, $image)) {
-                    continue;
-                }
-                array_push($filteredImages, $image);
-            }
-            (new AgreementImgs())->saveData($agreement->ID, $filteredImages);
+        // 过滤出当前协议内容中包含的图片路径信息
+        $images = [];
+        getImagesFromUEditor($agreement->CONTENT, $images);
+        if (!empty($images)) {
+            (new AgreementImgs())->saveData($agreement->ID, $images);
         }
 
         $log_content = '协议标题：' . $agreement->TITLE . '<br/>' . '协议内容：' . $agreement->CONTENT;
         $this->addAdminLog(self::OPER_TYPE_CREATE, '新增社戒社康协议', $log_content, $user->ID);
 
-        $this->success('保存成功',url('UserUsers/index'));
+        $this->success('保存成功',url('UserAgreements/index', ['id' => $user->ID]));
     }
 
     public function delete($uuid = 0, $agreementId = 0) {

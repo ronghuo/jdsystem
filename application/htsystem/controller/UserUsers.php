@@ -400,7 +400,7 @@ class UserUsers extends Common
      *
      * @return \think\Response
      */
-    public function create(Request $request,$id=0)
+    public function create(Request $request, $id = 0)
     {
 
         if($request->isPost()){
@@ -762,34 +762,6 @@ class UserUsers extends Common
         $this->success('删除成功');
     }
 
-    public function decision(Request $request, $id = 0) {
-        if (!$id) {
-            $this->error('访问错误');
-        }
-        $user = UserUsersModel::find($id);
-
-        if(!$user || $user->ISDEL==1){
-            $this->error('该用户不存在或已删除');
-        }
-
-        if(!$this->checkUUid($user->ID)){
-            $this->error('权限不足');
-        }
-
-        if($request->isPost()){
-            return $this->saveDecision($request, $user);
-        }
-
-        $info = UserDecisions::where('UUID', $user->ID)->find();
-
-        $js = $this->loadJsCss(array('p:ueditor/ueditor','userusers_decision'), 'js', 'admin');
-        $this->assign('footjs', $js);
-        $this->assign('user', $user);
-        $this->assign('info', $info);
-        return $this->fetch();
-    }
-
-
     protected function saveZhiPai(Request $request){
 
         $zpact = $request->post('zpact', 0, 'int');
@@ -945,40 +917,6 @@ class UserUsers extends Common
             $user->MANAGE_POLICE_AREA_CODE = $dmmc['DEPTCODE'];
             $user->MANAGE_POLICE_AREA_NAME = $dmmc['DEPTNAME'];
         }
-    }
-
-    /**
-     * 保存决定书
-     * @param Request $request
-     * @param UserUsersModel $user
-     */
-    protected function saveDecision(Request $request,UserUsersModel $user){
-
-        if (!$request->post('CONTENT')) {
-            $this->error('请填写决定书内容');
-        }
-
-        $decision = UserDecisions::where('UUID',$user->ID)->find();
-        if (!$decision) {
-            $isNew = true;
-            $decision = new UserDecisions();
-        } else {
-            $isNew = false;
-        }
-
-        $decision->UUID = $user->ID;
-        $decision->TITLE = $request->post('TITLE') ? : $user->NAME . '决定书';
-        $decision->CONTENT = $request->post('CONTENT');
-        $decision->UPDATE_TIME = Carbon::now()->toDateTimeString();
-
-        $decision->save();
-
-        $log_content = '决定书标题：' . $decision->TITLE . '<br/>' . '决定书内容：' . $decision->CONTENT;
-        $this->addAdminLog($isNew ? self::OPER_TYPE_CREATE : self::OPER_TYPE_UPDATE,
-            $isNew ? '新增决定书' : '修改决定书',
-            $log_content, $user->ID);
-
-        $this->success('保存成功',url('UserUsers/index'));
     }
 
     /**

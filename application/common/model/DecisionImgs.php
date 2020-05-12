@@ -14,9 +14,6 @@ class DecisionImgs extends BaseModel
         }
         $inserts = [];
         foreach($images as $img) {
-            if (!file_exists($img)) {
-                continue;
-            }
             $inserts[] = [
                 'MEDIA_TYPE'=>$media_type,
                 'USER_DECISIONS_ID' => $decision_id,

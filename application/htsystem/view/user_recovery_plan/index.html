@@ -1,0 +1,90 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span7"><h4 class="page-header">康复人员【{$user.NAME}】的康复计划</h4></div>
+                    <div class="span5">
+                        <a href="javascript:history.back();" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                        <a href="{:url('UserRecoveryPlan/create', ['id' => $user.ID])}" class="btn btn-primary pull-right"><i class="icon-plus"></i>新增计划</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!---->
+
+        {empty name="list"}
+        <tr><td>没有找到相关的信息</td></tr>
+        {else/}
+        {foreach name="list" item="da"}
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+            <tr>
+                <th style="width:120px;">创建时间</th><td>{$da.CREATE_TIME}</td></tr>
+            <tr>
+                <th>创建人</th>
+                <td>{$da.CREATE_USER_NAME}</td>
+            </tr>
+            <tr>
+                <th>创建单位</th>
+                <td>{$da.CREATE_DEPT_NAME}</td>
+            </tr>
+            <tr>
+                <th>康复人员姓名</th>
+                <td>{$da.NAME}</td>
+            </tr>
+            <tr>
+                <th>康复人员身份证号码</th>
+                <td>{$da.ID_NUMBER}</td>
+            </tr>
+            <tr>
+                <th>戒毒（康复）起止时间</th>
+                <td>{$da.BEGIN_DATE} ~ {$da.END_DATE}</td>
+            </tr>
+            <tr>
+                <th>家庭成员</th>
+                <td>{$da.FAMILY_MEMBERS}</td>
+            </tr>
+            <tr>
+                <th>吸毒史及治疗情况</th>
+                <td>{$da.DRUG_HISTORY_AND_TREATMENT}</td>
+            </tr>
+            <tr>
+                <th>当前情况</th>
+                <td>{$da.CURRENT_STATUS}</td>
+            </tr>
+            <tr>
+                <th>应采取的戒毒治疗措施</th>
+                <td>{$da.CURE_MEASURES}</td>
+            </tr>
+            <tr>
+                <th>是否动员参加药物维持治疗情况</th>
+                <td>{$da.WHETHER_MEDICHINE_ENCOURAGED}</td>
+            </tr>
+            <tr>
+                <th>是否需要戒毒治疗</th>
+                <td>{$da.WHETHER_DETOXIFICATION_REQUIRED}</td>
+            </tr>
+            <tr>
+                <th>心理咨询疏导计划</th>
+                <td>{$da.PSYCHOLOGICAL_CONSULTING_PLAN}</td>
+            </tr>
+            <tr>
+                <th>拟采取帮扶救助措施</th>
+                <td>{$da.ASSISTANCE_MEASURES}</td>
+            </tr>
+            <tr>
+                <th>操　　作</th>
+                <td>
+                    <a href="javascript:;" data-href="{:url('UserRecoveryPlan/delete',array('uuid' => $da['UUID'], 'decisionId' => $da['ID']))}" class="btn mini btn-danger" onclick="deldata(this);"><i class="icon-trash"></i>删除</a>
+                </td>
+            </tr>
+            </tbody>
+
+        </table>
+        {/foreach}
+        {/empty}
+    </div>
+</div>

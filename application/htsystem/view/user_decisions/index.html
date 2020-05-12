@@ -11,10 +11,10 @@
             <div class="span12">
                 <div class="primary-head">
 
-                    <div class="span7"><h4 class="page-header">康复人员【{$user.NAME}】的社戒社康协议</h4></div>
+                    <div class="span7"><h4 class="page-header">康复人员【{$user.NAME}】的决定书</h4></div>
                     <div class="span5">
-                        <a href="javascript:history.back();" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
-                        <a href="{:url('UserAgreements/create', ['id' => $user.ID])}" class="btn btn-primary pull-right"><i class="icon-plus"></i>新增协议</a>
+                        <a href="{:url('UserUsers/index')}" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                        <a href="{:url('UserDecisions/create', ['id' => $user.ID])}" class="btn btn-primary pull-right"><i class="icon-plus"></i>新增决定书</a>
                     </div>
                 </div>
             </div>
@@ -31,11 +31,11 @@
             <tr>
                 <th style="width:120px;">添加时间</th><td>{$da.ADD_TIME}</td></tr>
             <tr>
-                <th>协议内容</th>
+                <th>决定书内容</th>
                 <td>
-                    {notempty name="$da.images"}
+                    {notempty name="$da.imgs"}
                     <ul class="imageWrapper">
-                        {foreach name="$da.images" item="image"}
+                        {foreach name="$da.imgs" item="image"}
                             <li><img data-original="{$image.SRC_PATH}" src="{$image.SRC_PATH}" style="width: 60px;height: 80px;" /></li>
                         {/foreach}
                     </ul>
@@ -45,7 +45,7 @@
             <tr>
                 <th>操　　作</th>
                 <td>
-                    <a href="javascript:;" data-href="{:url('UserAgreements/delete',array('uuid' => $da['UUID'], 'agreementId' => $da['ID']))}" class="btn mini btn-danger" onclick="deldata(this);"><i class="icon-trash"></i>删除</a>
+                    <a href="javascript:;" data-href="{:url('UserDecisions/delete',array('uuid' => $da['UUID'], 'decisionId' => $da['ID']))}" class="btn mini btn-danger" onclick="deldata(this);"><i class="icon-trash"></i>删除</a>
                 </td>
             </tr>
             </tbody>
@@ -53,12 +53,5 @@
         </table>
         {/foreach}
         {/empty}
-
-        <!--<div class="row-fluid">-->
-        <!--<div class="span6"><div class="dataTables_info"></div></div>-->
-        <!--<div class="span6"><div class="dataTables_paginate paging_bootstrap pagination">-->
-        <!--{ $ page| r aw}-->
-        <!--</div></div>-->
-        <!--</div>-->
     </div>
 </div>

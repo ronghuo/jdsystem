@@ -451,3 +451,34 @@ function exportExcel($columnName, $list, $setTitle='Sheet1', $fileName='demo')
     header('Cache-Control: max-age=0');
     $PHPWriter->save("php://output");
 }
+
+/**
+ * 从UEditor编辑器中截取图片路径信息
+ * @param $content  UEditor编辑器中HTML文本内容
+ * @param $images   待填充的图片路径数组
+ * @param string $startNeedle   截取起始标识
+ * @param array $endNeedles     截取结束标识
+ * @return mixed
+ */
+function getImagesFromUEditor($content, &$images, $startNeedle = 'src="', $endNeedles = ['.jpg', '.png', '.bmp', '.gif']) {
+    $start = strpos($content, $startNeedle, 0);
+    if (!$start) {
+        return;
+    }
+    $getStart = $start + strlen($startNeedle);
+    foreach ($endNeedles as $endNeedle) {
+        $end = strpos($content, $endNeedle, $getStart);
+        if ($end >= 0) {
+            $endNeedleLen = strlen($endNeedle);
+            break;
+        }
+    }
+    if (!$end) {
+        return;
+    }
+    $getEnd = $end + $endNeedleLen;
+    $len = $getEnd - $getStart;
+    array_push($images, substr($content, $getStart, $len));
+    $content = substr($content, $getEnd, strlen($content) - $getEnd);
+    getImagesFromUEditor($content, $images);
+}

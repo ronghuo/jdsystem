@@ -17,7 +17,7 @@ use app\common\model\UserUsers,
 
 class Holiday extends Common{
 
-    public function index(Request $request,$status){
+    public function index(Request $request, $status) {
         $page = $request->param('page',1,'int');
         $status_maps = [
             'wait'=>[0],
@@ -31,12 +31,15 @@ class Holiday extends Common{
         // 加上当前人员的管辖范围条件
         $ids = UserHolidayApplies::where('STATUS','in',$status_maps[$status])
             ->where('ISDEL','=',0)
-            ->where(function($query)use($request){
+            ->where(function($query) use($request) {
                 if (!$request->User->isTopPower) {
                     $query->whereIn('UUID',$this->getManageUserIds($request->MUID));
                 }
+                $uuid = $request->param('UUID', '', 'int');
+                if (!empty($uuid)) {
+                    $query->where('UUID', $uuid);
+                }
             })
-            //->whereIn('UUID',$this->getManageUserIds($request->MUID))
             ->page($page,self::PAGE_SIZE)
             ->select()
             ->column('ID');

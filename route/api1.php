@@ -20,6 +20,7 @@ Route::get('/options','api1/Options/index');
 Route::post('/upload/image','api1/Upload/images');
 Route::post('/upload/video','api1/Upload/videos');
 Route::post('/upload/audio','api1/Upload/audios');
+Route::get('/version/index', 'api1/Version/index');
 
 //-----------------------------------------------------//
 //-------------------康复端----------------------------//
