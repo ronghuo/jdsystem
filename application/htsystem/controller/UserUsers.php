@@ -5,7 +5,6 @@ namespace app\htsystem\controller;
 use app\common\model\BaseCertificateType;
 use app\common\model\BaseNationalityType;
 use app\common\model\BaseNationType;
-use app\common\model\BaseSexType;
 use app\common\model\BaseUserDangerLevel;
 use app\common\model\BaseUserStatus;
 use app\common\model\NbAuthDept;
@@ -13,11 +12,9 @@ use app\common\model\Options as Opts;
 use app\common\model\Subareas;
 use app\common\model\Upareatable;
 use app\common\model\UserChangeLog;
-use app\common\model\UserDecisions;
 use app\common\model\UserPhoneDataAddress;
 use app\common\model\UserPhoneDataCalls;
 use app\common\model\UserPhoneDataSms;
-use app\common\model\UserRecoveryPlan;
 use app\common\model\UserUsers as UserUsersModel;
 use app\common\model\WaitDeleteFiles;
 use app\common\validate\UserUsersVer;
@@ -57,7 +54,7 @@ class UserUsers extends Common
      */
     const STATUS_RELATIONS = [
         '社区戒毒中' => [self::STATUS_START_TIME_NAME => '戒毒开始时间'],
-        '社区康复中' => [self::STATUS_START_TIME_NAME => '康复起始时间', self::STATUS_END_TIME_NAME => '康复截止时间'],
+        '社区康复中' => [self::STATUS_START_TIME_NAME => '康复开始时间'],
         '自愿戒毒中' => [self::STATUS_START_TIME_NAME => '自愿戒毒开始时间', 'executePlace' => '自愿戒毒执行地点'],
         '强制戒毒中' => [self::STATUS_START_TIME_NAME => '强制戒毒起始时间', self::STATUS_END_TIME_NAME => '强制戒毒截止时间', 'executePlace' => '强制戒毒执行地点'],
         '未报到未移交' => [],
@@ -67,8 +64,8 @@ class UserUsers extends Common
         '社会面' => [],
         '戒断三年未复吸' => [],
         '出国中' => [self::STATUS_START_TIME_NAME => '出国时间', 'country' => '国家名称'],
-        '服刑中' => [self::STATUS_START_TIME_NAME => '服刑起始时间', self::STATUS_END_TIME_NAME => '服刑结束时间', 'servePlace' => '服刑地点'],
-        '拘留中' => [self::STATUS_START_TIME_NAME => '拘留起始时间', self::STATUS_END_TIME_NAME => '拘留截止时间', 'detainPlace' => '拘留地点'],
+        '社戒社康终止' => [self::STATUS_START_TIME_NAME => '终止时间'],
+        '羁押拘留中' => [self::STATUS_START_TIME_NAME => '拘留起始时间', self::STATUS_END_TIME_NAME => '拘留截止时间', 'detainPlace' => '拘留地点'],
         '已死亡' => [self::STATUS_START_TIME_NAME => '死亡时间']
     ];
 
@@ -78,7 +75,6 @@ class UserUsers extends Common
     const SUB_STATUS_RELATIONS = [
         '请假中' => [self::SUB_STATUS_START_TIME_NAME => '请假起始时间', self::SUB_STATUS_END_TIME_NAME => '请假截止时间'],
         '中止' => [self::SUB_STATUS_START_TIME_NAME => '中止起始时间', self::SUB_STATUS_END_TIME_NAME => '中止截止时间', 'suspendZZCXSM' => '中止程序说明', 'suspendReason' => '终止原因'],
-        '终止' => [self::SUB_STATUS_START_TIME_NAME => '终止时间', 'terminateZZCXSM' => '终止程序说明', 'terminateReason' => '终止原因'],
         '双向管控中' => [self::SUB_STATUS_START_TIME_NAME => '双向管控开始时间', 'SXGKH' => '双向管控函', 'sxgkReason' => '双向管控原因'],
         '已解除社区戒毒' => [self::SUB_STATUS_START_TIME_NAME => '解除时间', 'JCS' => '解除书'],
         '已解除社区康复' => [self::SUB_STATUS_START_TIME_NAME => '解除时间', 'JCS' => '解除书']
@@ -96,7 +92,6 @@ class UserUsers extends Common
         'wfxyyyjYZWFXYZM',
         'wfxyyyjYJHZ',
         'suspendZZCXSM',
-        'terminateZZCXSM',
         'SXGKH',
         'JCS'
     ];
@@ -109,17 +104,6 @@ class UserUsers extends Common
     const CHANGE_LOG_TYPE_ASSIGN = 3;   // 指派
 
     const LOG_PAGE_SIZE = 20;
-
-    const USER_LIVING_STATUSES = [
-        'SCHOOL' => '就学',
-        'HOSPITAL' => '就医',
-        'EMPLOYMENT' => '就业'
-    ];
-
-    const WHETHER = [
-        '0' => '否',
-        '1' => '是'
-    ];
 
     /**
      * 用于人员图片信息作回显标识
@@ -178,30 +162,6 @@ class UserUsers extends Common
         'JD_REMARKS' => '备注'
     ];
 
-    /**
-     * 康复计划字段名称-注解映射器
-     */
-    const RECOVERY_PLAN_FIELD_NAME_DESC_MAPPER = [
-        'NAME' => '姓名',
-        'GENDER' => '性别',
-        'ID_NUMBER' => '证件号码',
-        'MOBILE' => '手机号码',
-        'DOMICILE_PLACE' => '户籍所在地',
-        'LIVE_PLACE' => '现居住地址',
-        'BEGIN_DATE' => '社区戒毒(康复)时间(起)',
-        'END_DATE' => '社区戒毒(康复)时间(止)',
-        'FAMILY_MEMBERS' => '家庭成员',
-        'DRUG_HISTORY_AND_TREATMENT' => '吸毒史及治疗情况',
-        'CURRENT_STATUS' => '当前情况',
-        'CURE_MEASURES' => '应采取的戒毒治疗措施',
-        'WHETHER_MEDICHINE_ENCOURAGED' => '是否动员参加药物维持治疗情况',
-        'WHETHER_DETOXIFICATION_REQUIRED' => '是否需要戒毒治疗',
-        'PSYCHOLOGICAL_CONSULTING_PLAN' => '心理咨询疏导计划',
-        'ASSISTANCE_MEASURES' => '拟采取帮扶救助措施',
-        'COMMUNITY_NAME' => '社区名称',
-        'SIGN_DATE' => '落款日期'
-    ];
-
     const STATISTICS_EXCEL_TITLE_LIST = [
         '县市区',
         '乡镇街道',
@@ -213,14 +173,14 @@ class UserUsers extends Common
      */
     const DEFAULT_COUNTY_ID = '431201000000';
 
-    protected $admin_log_target_type = 'UserUser';
+    protected $MODULE = 'UserUser';
 
     /**
      * 显示资源列表
      *
      * @return \think\Response
      */
-    public function index(Request $request, $zhipai = '')
+    public function index($zhipai = '')
     {
         $result = $this->doSearch($zhipai);
         $is_so = $result['is_so'];
@@ -377,6 +337,7 @@ class UserUsers extends Common
             $item->HEAD_IMG_URL= build_http_img_url($item->HEAD_IMG);
             $areas = Upareatable::where('UPAREAID','in',$item->LIVE_IDS)->order('UPAREAID','ASC')->column('NAME');
             $item->LIVE_ADDRESS = implode(' ',$areas).' '.$item->LIVE_ADDRESS;
+            $item->MANAGED_BY_COMMUNITY = in_array($item->USER_STATUS_NAME, [STATUS_COMMUNITY_DETOXIFICATION, STATUS_COMMUNITY_RECOVERING]);
             return $item;
         });
 
@@ -470,8 +431,6 @@ class UserUsers extends Common
         $this->assign('user_status',$opts['user_status']);
         $this->assign('user_sub_status', $opts['user_sub_status']);
         $this->assign('danger_level',$opts['danger_level']);
-        $this->assign('utypes', UserUsersModel::$utypes);
-        $this->assign('utype218', UserUsersModel::$utype218);
         $this->assign('lvlValue', $lv1Value);
 
         return $this->fetch('create');
@@ -981,15 +940,6 @@ class UserUsers extends Common
 
         $utype = $request->param('UTYPE_ID',0,'trim');
         $utype218 = $request->param('UTYPE_ID_218',0,'trim');
-        if($user_status_id == 7){
-
-            if(!in_array($utype218, [1, 2])){
-                $this->error('缺少社区康复年限信息');
-            }
-
-        }else{
-            $utype218 = 0;
-        }
 
         $domicileplaceids = $request->param('domicileplace');
 
@@ -1196,8 +1146,8 @@ class UserUsers extends Common
 
     private function getJdEndTime(Request $request, $user_status_name, $jd_start_time = '') {
         $relationNames = array_keys(self::STATUS_RELATIONS[$user_status_name]);
-        // 社区戒毒起止时间时长为固定3年
-        if ($user_status_name == STATUS_COMMUNITY_DETOXIFICATION) {
+        // 社区戒毒和社区康复起止时间时长均为固定3年
+        if (in_array($user_status_name, [STATUS_COMMUNITY_DETOXIFICATION, STATUS_COMMUNITY_RECOVERING])) {
             $jd_end_time = date('Y-m-d', strtotime('+3 year', strtotime($jd_start_time)));
         }
         else if (in_array(self::STATUS_END_TIME_NAME, $relationNames)) {
@@ -1403,147 +1353,6 @@ class UserUsers extends Common
         $param['keywords'] = $keywords;
 
         return ['query' => $query, 'param' => $param, 'is_so' => $is_so];
-    }
-
-    public function recoveryPlan($id = 0) {
-        $user = UserUsersModel::find($id);
-        if (empty($user)) {
-            $this->error('用户不存在或已删除.');
-        }
-        if (!$this->checkUUid($id)) {
-            $this->error('权限不足.');
-        }
-        $plan = UserRecoveryPlan::where('UUID', $id)->find();
-        if (empty($plan)) {
-            $plan = new UserRecoveryPlan();
-            $plan->UUID = $id;
-            $plan->NAME = $user->NAME;
-            $plan->GENDER = $user->GENDER;
-            $plan->ID_NUMBER = $user->ID_NUMBER;
-            $plan->MOBILE = $user->MOBILE;
-            $plan->DOMICILE_PLACE = $user->DOMICILE_PLACE . ' ' . $user->DOMICILE_ADDRESS;
-            $plan->LIVE_PLACE = $user->LIVE_PLACE . ' ' . $user->LIVE_ADDRESS;
-            $plan->BEGIN_DATE = $user->JD_START_TIME;
-            $plan->END_DATE = $user->JD_END_TIME;
-        }
-        $this->assign('plan', $plan);
-        $css = $this->loadJsCss(array('userusers_recoveryplan'), 'css', 'admin');
-        $this->assign('headercss', $css);
-        $this->assign('genders', BaseSexType::all());
-        $this->assign('statuses', self::USER_LIVING_STATUSES);
-        $this->assign('whether', self::WHETHER);
-        return $this->fetch('recovery_plan');
-    }
-
-    public function saveRecoveryPlan(Request $request) {
-        if (!$request->isPost()) {
-            $this->error("只支持POST请求方式.");
-        }
-        $uuid = $request->post('UUID');
-        if (empty($uuid)) {
-            $this->error('用户ID不能为空.');
-        }
-        if (!$this->checkUUid($uuid)) {
-            $this->checkUUid('权限不足.');
-        }
-        $data = [
-            'UUID' => $request->post('UUID'),
-            'NAME' => $request->post('NAME'),
-            'GENDER' => ifEmptyThenNull($request->post('GENDER')),
-            'ID_NUMBER' => $request->post('ID_NUMBER'),
-            'MOBILE' => $request->post('MOBILE'),
-            'DOMICILE_PLACE' => $request->post('DOMICILE_PLACE'),
-            'LIVE_PLACE' => $request->post('LIVE_PLACE'),
-            'BEGIN_DATE' => ifEmptyThenNull($request->post('BEGIN_DATE')),
-            'END_DATE' => ifEmptyThenNull($request->post('END_DATE')),
-            'FAMILY_MEMBERS' => $request->post('FAMILY_MEMBERS'),
-            'DRUG_HISTORY_AND_TREATMENT' => $request->post('DRUG_HISTORY_AND_TREATMENT'),
-            'CURRENT_STATUS' => $request->post('CURRENT_STATUS'),
-            'CURE_MEASURES' => $request->post('CURE_MEASURES'),
-            'WHETHER_MEDICHINE_ENCOURAGED' => ifEmptyThenNull($request->post('WHETHER_MEDICHINE_ENCOURAGED')),
-            'WHETHER_DETOXIFICATION_REQUIRED' => ifEmptyThenNull($request->post('WHETHER_DETOXIFICATION_REQUIRED')),
-            'PSYCHOLOGICAL_CONSULTING_PLAN' => $request->post('PSYCHOLOGICAL_CONSULTING_PLAN'),
-            'ASSISTANCE_MEASURES' => $request->post('ASSISTANCE_MEASURES'),
-            'COMMUNITY_NAME' => $request->post('COMMUNITY_NAME'),
-            'SIGN_DATE' => ifEmptyThenNull($request->post('SIGN_DATE')),
-
-            'UPDATE_USER_ID' => session('user_id'),
-            'UPDATE_USER_NAME' => session('name'),
-            'UPDATE_TIME' => Carbon::now()->toDateTimeString()
-        ];
-        $id = $request->post('ID');
-        if (!empty($id)) {
-            $isNew = false;
-            $plan = UserRecoveryPlan::find($id);
-        } else {
-            $isNew = true;
-            $plan = new UserRecoveryPlan();
-            $data['CREATE_USER_ID'] = session('user_id');
-            $data['CREATE_USER_NAME'] = session('name');
-            $data['CREATE_TIME'] = Carbon::now()->toDateTimeString();
-        }
-        $plan->save($data);
-
-        if ($isNew) {
-            $log_oper_Name = '新增康复计划';
-            $log_content = '新增康复计划，计划信息如下：' . self::LOG_CONTENT_BREAK;
-            $log_oper_type = self::OPER_TYPE_CREATE;
-        } else {
-            $log_oper_Name = '修改康复计划';
-            $log_content = '修改康复计划，计划信息如下：' . self::LOG_CONTENT_BREAK;
-            $log_oper_type = self::OPER_TYPE_UPDATE;
-        }
-        foreach ($data as $name => $value) {
-            if (!isset(self::RECOVERY_PLAN_FIELD_NAME_DESC_MAPPER[$name])) {
-                continue;
-            }
-            $log_content .= self::RECOVERY_PLAN_FIELD_NAME_DESC_MAPPER[$name] . '：' . $value . self::LOG_CONTENT_BREAK;
-        }
-        $this->addAdminLog($log_oper_type, $log_oper_Name, $log_content, $uuid);
-
-
-        $this->success('保存成功.');
-    }
-
-    public function printRecoveryPlan($planId = 0) {
-        $plan = UserRecoveryPlan::find($planId);
-        if (empty($plan)) {
-            $this->error('康复计划不存在.');
-        }
-        $uuid = $plan->UUID;
-        if (!$this->checkUUid($uuid)) {
-            return $this->error('权限不足.');
-        }
-        $genders = BaseSexType::all();
-        foreach ($genders as $gender) {
-            if ($gender->ID == $plan->GENDER) {
-                $plan->GENDER = $gender->NAME;
-                break;
-            }
-        }
-        if (!empty($plan->BEGIN_DATE)) {
-            $plan->BEGIN_DATE = date_parse($plan->BEGIN_DATE);
-        }
-        if (!empty($plan->END_DATE)) {
-            $plan->END_DATE = date_parse($plan->END_DATE);
-        }
-        if (!empty($plan->CURRENT_STATUS)) {
-            $plan->CURRENT_STATUS = self::USER_LIVING_STATUSES[$plan->CURRENT_STATUS];
-        }
-        if (!is_null($plan->WHETHER_MEDICHINE_ENCOURAGED)) {
-            $plan->WHETHER_MEDICHINE_ENCOURAGED = self::WHETHER[$plan->WHETHER_MEDICHINE_ENCOURAGED];
-        }
-        if (!is_null($plan->WHETHER_DETOXIFICATION_REQUIRED)) {
-            $plan->WHETHER_DETOXIFICATION_REQUIRED = self::WHETHER[$plan->WHETHER_DETOXIFICATION_REQUIRED];
-        }
-        if (!empty($plan->SIGN_DATE)) {
-            $plan->SIGN_DATE = date_parse($plan->SIGN_DATE);
-        }
-        $this->assign('plan', $plan);
-
-        $this->addAdminLog(self::OPER_TYPE_QUERY, '打印康复计划', '康复计划打印成功', $uuid);
-
-        return $this->fetch('recovery_plan_print');
     }
 
     public function statusChanges($id = 0) {

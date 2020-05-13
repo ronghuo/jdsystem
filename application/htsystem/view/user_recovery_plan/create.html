@@ -4,14 +4,14 @@
             <div class="span12">
                 <div class="primary-head">
 
-                    <div class="span3"><h3 class="page-header">社区戒毒(康复)计划</h3></div>
+                    <div class="span3"><h3 class="page-header">{$title}康复计划</h3></div>
                     <div class="span9">
-                        <a href="{:url('UserUsers/index')}" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                        <a href="{:url('UserRecoveryPlan/index', array('uuid' => $plan.UUID))}" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
                     </div>
                 </div>
             </div>
         </div>
-        <form class="form-horizontal left-align" method="post" action="{:url('UserUsers/saveRecoveryPlan')}" enctype="multipart/form-data">
+        <form class="form-horizontal left-align" method="post" action="{:url('UserRecoveryPlan/' . $action, ['uuid' => $plan.UUID])}" enctype="multipart/form-data">
             {notempty name="plan"}
                 {notempty name="plan.ID"}
                     <input type="hidden" name="ID" value="{$plan.ID}"/>
@@ -176,9 +176,6 @@
 
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary" id="subbtn">保存资料</button>
-                {notempty name="plan.ID"}
-                <a href="{:url('UserUsers/printRecoveryPlan', array('planId' => $plan.ID))}" target="_blank" class="btn btn-info"><i class="icon-print"></i>打印</a>
-                {/notempty}
                 <a href="{:url('UserUsers/index')}" class="btn"><i class="icon-reply"></i> 取消</a>
             </div>
         </form>

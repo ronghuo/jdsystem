@@ -10,7 +10,7 @@ use think\Request;
 
 class UserDecisions extends Common {
 
-    protected $admin_log_target_type = 'UserDecisions';
+    protected $MODULE = 'UserUser';
 
     public function index($id = 0) {
         if (!$id) {
@@ -41,7 +41,7 @@ class UserDecisions extends Common {
         return $this->fetch();
     }
 
-    public function create(Request $request,$id = 0){
+    public function create(Request $request, $id = 0){
         if (!$id) {
             $this->error('访问错误');
         }

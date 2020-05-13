@@ -59,20 +59,10 @@ $(function () {
 
         },'json');
     });
-    var utype_id_218 = $('#utype_id_218');
     var ustatus = $('#ustatus');
-
-    if(ustatus.val() == '7'){
-        utype_id_218.show();
-    }
 
     ustatus.on('change', function () {
        var val = $(this).val();
-       if(val == '7'){
-           utype_id_218.show();
-       }else{
-           utype_id_218.hide();
-       }
        formValid.hideErr($(this));
        var status = $(this).children('option:selected').text();
        $('#userStatusName').val(status);
@@ -101,34 +91,15 @@ $(function () {
             idnumber = $('#idnumber'),
             mobile = $('#mobile'),
             pwsd = $('#pwsd'),
-            //alias_name = $('#alias_name'),
             gender = $('#gender'),
-            utype = $('#utype'),
-            utype_id_218 = $('#utype_id_218'),
-            jd_start_time = $('#jd_start_time'),
-            jd_end_time = $('#jd_end_time'),
             nationality = $('#nationality'),
-            nation = $('#nation'),//se
-            //height = $('#height'),
-            //education = $('#education'),//se
-            //job_status = $('#job_status'),//se
-            //martial_status = $('#martial_status'),//se
+            nation = $('#nation'),
             domicile_address = $('#domicile_address'),
             domicile_police_name = $('#domicile_police_name'),
-            //domicile_police_code = $('#domicile_police_code'),
             live_address = $('#live_address'),
             live_police_name = $('#live_police_name'),
-            //live_police_code = $('#live_police_code'),
-            //drug_type = $('#drug_type'),//se
-            //narcotics_type = $('#narcotics_type'),//se
-            //police_code = $('#police_code'),
-            //police_name = $('#police_name'),
-            // police_mobile = $('#police_mobile'),
             jd_zhuangan = $('#jd_zhuangan'),
             jd_zhuangan_mobile = $('#jd_zhuangan_mobile');
-
-
-
 
         if(!checkInputEmpty(name)){
             formValid.showErr(name,'缺少姓名');
@@ -166,13 +137,6 @@ $(function () {
             }
         }
 
-        // if(!checkInputEmpty(alias_name)){
-        //     formValid.showErr(alias_name,'缺少绰号');
-        //     return false;
-        // }else{
-        //     formValid.showSuccess(alias_name);
-        // }
-
         if(!checkSelectEmpty(gender)){
             formValid.showErr(gender,'缺少性别');
             return false;
@@ -186,34 +150,9 @@ $(function () {
         }else{
             formValid.showSuccess(ustatus);
         }
-        var statusId = ustatus.val()
-        if(statusId == '7' && !checkSelectEmpty(utype_id_218)){
-            formValid.showErr(utype_id_218,'请选择社区康复年限');
-            return false;
-        }else{
-            formValid.showSuccess(utype_id_218);
-        }
-        // if (statusId ==6 || statusId==7 || statusId==8){
-        //     //jd_end_time
-        //     if(!checkInputEmpty(jd_start_time)){
-        //         formValid.showErr(jd_start_time,'缺少起始时间');
-        //         return false;
-        //     }else{
-        //         formValid.showSuccess(jd_start_time);
-        //     }
-        //
-        //     if(!checkInputEmpty(jd_end_time)){
-        //         formValid.showErr(jd_end_time,'缺少截止时间');
-        //         return false;
-        //     }else{
-        //         formValid.showSuccess(jd_end_time);
-        //     }
-        // }
         if (!validStatusRelations()) {
             return false;
         }
-
-
         if(!checkSelectEmpty(nationality)){
             formValid.showErr(nationality,'缺少国藉');
             return false;
@@ -227,33 +166,6 @@ $(function () {
         }else{
             formValid.showSuccess(nation);
         }
-
-
-        // if(!checkInputEmpty(height)){
-        //     formValid.showErr(height,'缺少身高');
-        //     return false;
-        // }else{
-        //     formValid.showSuccess(height);
-        // }
-
-        // if(!checkSelectEmpty(education)){
-        //     formValid.showErr(education,'缺少文化程度');
-        //     return false;
-        // }else{
-        //     formValid.showSuccess(education);
-        // }
-        // if(!checkSelectEmpty(job_status)){
-        //     formValid.showErr(job_status,'缺少就业信息');
-        //     return false;
-        // }else{
-        //     formValid.showSuccess(job_status);
-        // }
-        // if(!checkSelectEmpty(martial_status)){
-        //     formValid.showErr(martial_status,'缺少婚姻状况');
-        //     return false;
-        // }else{
-        //     formValid.showSuccess(martial_status);
-        // }
         // 户籍地 areas1
         var areas1 = $('#areas1'),
             lv3 = areas1.children('select.lv3').val();
@@ -277,13 +189,6 @@ $(function () {
         }else{
             formValid.showSuccess(domicile_police_name);
         }
-
-        // if(!checkInputEmpty(domicile_police_code)){
-        //     formValid.showErr(domicile_police_code,'缺少户籍地派出所代码');
-        //     return false;
-        // }else{
-        //     formValid.showSuccess(domicile_police_code);
-        // }
 
         // 居住地 areas2
         var areas2 = $('#areas2'),
@@ -309,27 +214,6 @@ $(function () {
             formValid.showSuccess(live_police_name);
         }
 
-        // if(!checkInputEmpty(live_police_code)){
-        //     formValid.showErr(live_police_code,'缺少居住地派出所代码');
-        //     return false;
-        // }else{
-        //     formValid.showSuccess(live_police_code);
-        // }
-
-        // if(!checkSelectEmpty(drug_type)){
-        //     formValid.showErr(drug_type,'缺少吸毒方式');
-        //     return false;
-        // }else{
-        //     formValid.showSuccess(drug_type);
-        // }
-        // if(!checkSelectEmpty(narcotics_type)){
-        //     formValid.showErr(narcotics_type,'缺少毒品种类');
-        //     return false;
-        // }else{
-        //     formValid.showSuccess(narcotics_type);
-        // }
-
-
         // 所在社区 areas3
         var areas3 = $('#areas3'),
             lv1 = areas3.children('select.lv1').val();
@@ -340,9 +224,6 @@ $(function () {
             formValid.showSuccess(areas3);
         }
 
-
-        // 所属警务 areas4
-
         var areas4 = $('#areas4'),
             dmmcs = areas4.find('select:not(:first)');
         if (!$(dmmcs[0]).val()) {
@@ -351,29 +232,6 @@ $(function () {
         }else{
             formValid.showSuccess(areas4);
         }
-
-
-
-        // if(!checkInputEmpty(police_code)){
-        //     formValid.showErr(police_code,'缺少责任民警警号');
-        //     return false;
-        // }else{
-        //     formValid.showSuccess(police_code);
-        // }
-        //
-        // if(!checkInputEmpty(police_name)){
-        //     formValid.showErr(police_name,'缺少责任民警姓名');
-        //     return false;
-        // }else{
-        //     formValid.showSuccess(police_name);
-        // }
-        //
-        // if(!checkInputEmpty(police_mobile)){
-        //     formValid.showErr(police_mobile,'缺少责任民警联系电话');
-        //     return false;
-        // }else{
-        //     formValid.showSuccess(police_mobile);
-        // }
 
         if(!checkInputEmpty(jd_zhuangan)){
             formValid.showErr(jd_zhuangan,'缺少负责专干姓名');
@@ -388,7 +246,6 @@ $(function () {
         }else{
             formValid.showSuccess(jd_zhuangan_mobile);
         }
-
 
         return true;
     });
@@ -456,13 +313,6 @@ var initImageViewer = function() {
     suspendCxsm.localKey = 'suspendCxsm';
     suspendCxsm.init();
 
-    // 关于终止社区戒毒（康复）程序说明
-    var terminateCxsm = cloneObj(fileview);
-    terminateCxsm.ele = '.terminate-cxsm-file';
-    terminateCxsm.btn = '.terminate-cxsm-selector';
-    terminateCxsm.localKey = 'terminateCxsm';
-    terminateCxsm.init();
-
     // 双向管控函
     var sxgkh = cloneObj(fileview);
     sxgkh.ele = '.sxgkh-file';
@@ -482,6 +332,22 @@ var STATUS_START_TIME = 'JD_START_TIME';
 var STATUS_END_TIME = 'JD_END_TIME';
 var SUB_STATUS_START_TIME = 'SUB_STATUS_START_TIME';
 var SUB_STATUS_END_TIME = 'SUB_STATUS_END_TIME';
+var ZT_SQJDZ = '社区戒毒中',
+    ZT_SQKFZ = '社区康复中',
+    ZT_QZJDZ = '强制戒毒中',
+    ZT_ZYJDZ = '自愿戒毒中',
+    ZT_SJSKZZ = '社戒社康终止',
+    ZT_JYJLZ = '羁押拘留中',
+    ZT_YSW = '已死亡',
+    ZT_CGZ = '出国中',
+    ZT_WBDYYJ = '未报到已移交',
+    ZT_WFXXYYJ = '违反协议已移交',
+    EJZT_QJZ = '请假中',
+    EJZT_ZZ = '中止',
+    EJZT_SXGKZ = '双向管控中',
+    EJZT_YJCSQJD = '已解除社区戒毒',
+    EJZT_YJCSQKF = '已解除社区康复';
+
 
 
 var switchVisibility4StatusRelations = function(status, subStatus, trigger) {
@@ -504,53 +370,50 @@ var switchVisibility4StatusRelations = function(status, subStatus, trigger) {
     else {
         $('.status-relation,.sub-status-relation').hide();
     }
-    if ('社区戒毒中' == status) {
+    if (ZT_SQJDZ == status) {
         showRelations(status, [STATUS_START_TIME, 'USER_SUB_STATUS_ID']);
     }
-    else if ('社区康复中' == status) {
-        showRelations(status, [STATUS_START_TIME, STATUS_END_TIME, 'USER_SUB_STATUS_ID']);
+    else if (ZT_SQKFZ == status) {
+        showRelations(status, [STATUS_START_TIME, 'USER_SUB_STATUS_ID']);
     }
-    else if ('强制戒毒中' == status) {
+    else if (ZT_QZJDZ == status) {
         showRelations(status, [STATUS_START_TIME, STATUS_END_TIME, 'executePlace']);
     }
-    else if ('自愿戒毒中' == status) {
+    else if (ZT_ZYJDZ == status) {
         showRelations(status, [STATUS_START_TIME, 'executePlace']);
     }
-    else if ('服刑中' == status) {
-        showRelations(status, [STATUS_START_TIME, STATUS_END_TIME, 'servePlace']);
-    }
-    else if ('拘留中' == status) {
-        showRelations(status, [STATUS_START_TIME, STATUS_END_TIME, 'detainPlace']);
-    }
-    else if ('已死亡' == status) {
+    else if (ZT_SJSKZZ == status) {
         showRelations(status, [STATUS_START_TIME]);
     }
-    else if ('出国中' == status) {
+    else if (ZT_JYJLZ == status) {
+        showRelations(status, [STATUS_START_TIME, STATUS_END_TIME, 'detainPlace']);
+    }
+    else if (ZT_YSW == status) {
+        showRelations(status, [STATUS_START_TIME]);
+    }
+    else if (ZT_CGZ == status) {
         showRelations(status, [STATUS_START_TIME, 'country']);
     }
-    else if ('未报到已移交' == status) {
+    else if (ZT_WBDYYJ == status) {
         showRelations(status, [STATUS_START_TIME, 'wbdyyjGJS']);
     }
-    else if ('违反协议已移交' == status) {
+    else if (ZT_WFXXYYJ == status) {
         showRelations(status, [STATUS_START_TIME, 'wfxyyyjGJS']);
     }
     if (subStatus) {
-        if ('请假中' == subStatus) {
+        if (EJZT_QJZ == subStatus) {
             showRelations(subStatus, [SUB_STATUS_START_TIME, SUB_STATUS_END_TIME], true);
         }
-        else if ('中止' == subStatus) {
+        else if (EJZT_ZZ == subStatus) {
             showRelations(subStatus, [SUB_STATUS_START_TIME, SUB_STATUS_END_TIME, 'suspendZZCXSM', 'suspendReason'], true);
         }
-        else if ('终止' == subStatus) {
-            showRelations(subStatus, [SUB_STATUS_START_TIME, 'terminateZZCXSM', 'terminateReason'], true);
-        }
-        else if ('双向管控中' == subStatus) {
+        else if (EJZT_SXGKZ == subStatus) {
             showRelations(subStatus, [SUB_STATUS_START_TIME, 'SXGKH', 'sxgkReason'], true);
         }
-        else if ('已解除社区戒毒' == subStatus) {
+        else if (EJZT_YJCSQJD == subStatus) {
             showRelations(subStatus, [SUB_STATUS_START_TIME, 'JCS'], true);
         }
-        else if ('已解除社区康复' == subStatus) {
+        else if (EJZT_YJCSQKF == subStatus) {
             showRelations(subStatus, [SUB_STATUS_START_TIME, 'JCS'], true);
         }
     }
@@ -558,20 +421,17 @@ var switchVisibility4StatusRelations = function(status, subStatus, trigger) {
 
 var validStatusRelations = function () {
     var status = $('#ustatus').children('option:selected').text();
-    if ('社区戒毒中' == status) {
+    if (ZT_SQJDZ == status) {
         if (!nonNullValid(STATUS_START_TIME, '缺少开始时间')) {
             return false;
         }
     }
-    else if ('社区康复中' == status) {
-        if (!nonNullValid(STATUS_START_TIME, '缺少起始时间')) {
-            return false;
-        }
-        if (!nonNullValid(STATUS_END_TIME, '缺少截止时间')) {
+    else if (ZT_SQKFZ == status) {
+        if (!nonNullValid(STATUS_START_TIME, '缺少开始时间')) {
             return false;
         }
     }
-    else if ('强制戒毒中' == status) {
+    else if (ZT_QZJDZ == status) {
         if (!nonNullValid(STATUS_START_TIME, '缺少起始时间')) {
             return false;
         }
@@ -582,7 +442,7 @@ var validStatusRelations = function () {
             return false;
         }
     }
-    else if ('自愿戒毒中' == status) {
+    else if (ZT_ZYJDZ == status) {
         if (!nonNullValid(STATUS_START_TIME, '缺少开始时间')) {
             return false;
         }
@@ -590,18 +450,12 @@ var validStatusRelations = function () {
             return false;
         }
     }
-    else if ('服刑中' == status) {
-        if (!nonNullValid(STATUS_START_TIME, '缺少起始时间')) {
-            return false;
-        }
-        if (!nonNullValid(STATUS_END_TIME, '缺少截止时间')) {
-            return false;
-        }
-        if (!nonNullValid('servePlace', '缺少服刑地点')) {
+    else if (ZT_SJSKZZ == status) {
+        if (!nonNullValid(STATUS_START_TIME, '缺少终止时间')) {
             return false;
         }
     }
-    else if ('拘留中' == status) {
+    else if (ZT_JYJLZ == status) {
         if (!nonNullValid(STATUS_START_TIME, '缺少起始时间')) {
             return false;
         }
@@ -612,12 +466,12 @@ var validStatusRelations = function () {
             return false;
         }
     }
-    else if ('已死亡' == status) {
+    else if (ZT_YSW == status) {
         if (!nonNullValid(STATUS_START_TIME, '缺少死亡时间')) {
             return false;
         }
     }
-    else if ('出国中' == status) {
+    else if (ZT_CGZ == status) {
         if (!nonNullValid(STATUS_START_TIME, '缺少出国时间')) {
             return false;
         }
@@ -625,7 +479,7 @@ var validStatusRelations = function () {
             return false;
         }
     }
-    else if ('未报到已移交' == status) {
+    else if (ZT_WBDYYJ == status) {
         if (!nonNullValid(STATUS_START_TIME, '缺少移交时间')) {
             return false;
         }
@@ -639,7 +493,7 @@ var validStatusRelations = function () {
             return false;
         }
     }
-    else if ('违反协议已移交' == status) {
+    else if (ZT_WFXXYYJ == status) {
         if (!nonNullValid(STATUS_START_TIME, '缺少移交时间')) {
             return false;
         }
@@ -658,7 +512,7 @@ var validStatusRelations = function () {
     }
     var subStatus = $('#userSubStatusSelector').children('option:selected').text();
     if (subStatus) {
-        if ('请假中' == subStatus) {
+        if (EJZT_QJZ == subStatus) {
             if (!nonNullValid(SUB_STATUS_START_TIME, '缺少起始时间')) {
                 return false;
             }
@@ -666,7 +520,7 @@ var validStatusRelations = function () {
                 return false;
             }
         }
-        else if ('中止' == subStatus) {
+        else if (EJZT_ZZ == subStatus) {
             if (!nonNullValid(SUB_STATUS_START_TIME, '缺少起始时间')) {
                 return false;
             }
@@ -680,18 +534,7 @@ var validStatusRelations = function () {
                 return false;
             }
         }
-        else if ('终止' == subStatus) {
-            if (!nonNullValid(SUB_STATUS_START_TIME, '缺少终止时间')) {
-                return false;
-            }
-            if (!nonNullValid('terminateZZCXSM', '缺少终止程序说明')) {
-                return false;
-            }
-            if (!nonNullValid('terminateReason', '缺少终止原因')) {
-                return false;
-            }
-        }
-        else if ('双向管控中' == subStatus) {
+        else if (EJZT_SXGKZ == subStatus) {
             if (!nonNullValid(SUB_STATUS_START_TIME, '缺少开始时间')) {
                 return false;
             }
@@ -702,7 +545,7 @@ var validStatusRelations = function () {
                 return false;
             }
         }
-        else if ('已解除社区戒毒' == subStatus) {
+        else if (EJZT_YJCSQJD == subStatus) {
             if (!nonNullValid(SUB_STATUS_START_TIME, '缺少解除时间')) {
                 return false;
             }
@@ -710,7 +553,7 @@ var validStatusRelations = function () {
                 return false;
             }
         }
-        else if ('已解除社区康复' == subStatus) {
+        else if (EJZT_YJCSQKF == subStatus) {
             if (!nonNullValid(SUB_STATUS_START_TIME, '缺少解除时间')) {
                 return false;
             }

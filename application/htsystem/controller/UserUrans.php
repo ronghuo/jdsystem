@@ -13,7 +13,7 @@ use app\common\model\BaseSexType;
 class UserUrans extends Common
 {
 
-    protected $admin_log_target_type = 'UserUser';
+    protected $MODULE = 'UserUser';
 
     /**
      * 显示资源列表

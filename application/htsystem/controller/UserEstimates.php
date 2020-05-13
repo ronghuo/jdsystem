@@ -10,9 +10,9 @@ use Carbon\Carbon;
 
 class UserEstimates extends Common {
 
-    protected $admin_log_target_type = 'UserUser';
+    protected $MODULE = 'UserUser';
 
-    public function index(Request $request,$id=0){
+    public function index($id=0){
         if(!$id){
             $this->error('访问错误');
         }

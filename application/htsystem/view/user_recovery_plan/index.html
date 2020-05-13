@@ -6,8 +6,8 @@
 
                     <div class="span7"><h4 class="page-header">康复人员【{$user.NAME}】的康复计划</h4></div>
                     <div class="span5">
-                        <a href="javascript:history.back();" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
-                        <a href="{:url('UserRecoveryPlan/create', ['id' => $user.ID])}" class="btn btn-primary pull-right"><i class="icon-plus"></i>新增计划</a>
+                        <a href="{:url('UserUsers/index')}" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                        <a href="{:url('UserRecoveryPlan/create', ['uuid' => $user.ID])}" class="btn btn-primary pull-right"><i class="icon-plus"></i>新增计划</a>
                     </div>
                 </div>
             </div>
@@ -78,7 +78,9 @@
             <tr>
                 <th>操　　作</th>
                 <td>
-                    <a href="javascript:;" data-href="{:url('UserRecoveryPlan/delete',array('uuid' => $da['UUID'], 'decisionId' => $da['ID']))}" class="btn mini btn-danger" onclick="deldata(this);"><i class="icon-trash"></i>删除</a>
+                    <a href="javascript:;" data-href="{:url('UserRecoveryPlan/delete',array('uuid' => $da['UUID'], 'planId' => $da['ID']))}" class="btn mini btn-danger" onclick="deldata(this);"><i class="icon-trash"></i>删除</a>
+                    <a href="{:url('UserRecoveryPlan/edit',array('uuid' => $da['UUID'], 'planId' => $da['ID']))}" class="btn mini btn-primary"><i class="icon-edit"></i>编辑</a>
+                    <a href="{:url('UserRecoveryPlan/_print',array('planId' => $da['ID']))}" target="_blank" class="btn mini btn-info" ><i class="icon-print"></i>打印</a>
                 </td>
             </tr>
             </tbody>

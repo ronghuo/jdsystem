@@ -136,7 +136,7 @@
                                 <li>
                                     <a href="javascript:;" data-url="{:url('UserUsers/changePwsd',array('id'=>$da['ID']))}" class="openlayerwin1"><i class="icon-edit"></i> 修改密码</a>
                                 </li>
-                                {if in_array($da.USER_STATUS_NAME, [STATUS_COMMUNITY_DETOXIFICATION, STATUS_COMMUNITY_RECOVERING]) }
+                                {if $da.MANAGED_BY_COMMUNITY }
                                 <li>
                                     <a href="{:url('UserAgreements/index', array('id'=>$da['ID']))}"><i class="icon-info-sign"></i> 社戒社康协议</a>
                                 </li>
@@ -144,12 +144,16 @@
                                 <li>
                                     <a href="{:url('UserEstimates/index',['id'=>$da.ID])}"><i class="icon-info-sign"></i> 风险评估</a>
                                 </li>
+                                {if $da.MANAGED_BY_COMMUNITY }
                                 <li>
                                     <a href="{:url('UserDecisions/index',array('id'=>$da['ID']))}"><i class="icon-book"></i> 决定书</a>
                                 </li>
+                                {/if}
+                                {if $da.MANAGED_BY_COMMUNITY }
                                 <li>
-                                    <a href="{:url('UserRecoveryPlan/index',array('id'=>$da['ID']))}"><i class="icon-book"></i> 康复计划</a>
+                                    <a href="{:url('UserRecoveryPlan/index',array('uuid'=>$da['ID']))}"><i class="icon-book"></i> 康复计划</a>
                                 </li>
+                                {/if}
                                 <li>
                                     <a href="{:url('UserUrans/index',array('uuid'=>$da['ID']))}"><i class="icon-book"></i> 尿检报告</a>
                                 </li>

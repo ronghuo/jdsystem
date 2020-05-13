@@ -138,3 +138,5 @@ Route::post('/manage/decision/save','api1/manage.Decision/save')->middleware('Ap
 // 康复计划
 Route::get('/manage/recoveryplan','api1/manage.RecoveryPlan/index')->middleware('Api1ManageAuth');
 Route::post('/manage/recoveryplan/save','api1/manage.RecoveryPlan/save')->middleware('Api1ManageAuth');
+// 社戒社康协议
+Route::get('/manage/agreement','api1/manage.AgreementAPI/index')->middleware('Api1ManageAuth');

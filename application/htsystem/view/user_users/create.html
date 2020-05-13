@@ -82,14 +82,6 @@
                         {/foreach}
                     </select>
                     <input id="userStatusName" type="hidden" name="USER_STATUS_NAME" value="{if $info}{$info.USER_STATUS_NAME}{/if}" />
-
-                    <select name="UTYPE_ID_218" id="utype_id_218" style="display: none;">
-                        <option value="">请选择</option>
-                        {foreach name="utype218" item="utyp" key="uk2"}
-                        <option value="{$uk2}"{if $info&&$info.UTYPE_ID_218==$uk2} selected{/if}>{$utyp}</option>
-                        {/foreach}
-                    </select>
-
                     {if $info}
                         <a id="statusChangesViewer" href="javascript:void(0);" data-url="{:url('UserUsers/statusChanges',['id'=>$info.ID])}" style="margin-left: 6px;">历史记录</a>
                     {/if}
@@ -97,10 +89,10 @@
             </div>
             <div class="control-group status-relation">
                 <label class="control-label date-label" status="社区戒毒中"><span class="error">*</span> 开始时间 </label>
-                <label class="control-label date-label" status="社区康复中"><span class="error">*</span> 起止时间 </label>
+                <label class="control-label date-label" status="社区康复中"><span class="error">*</span> 开始时间 </label>
                 <label class="control-label date-label" status="强制戒毒中"><span class="error">*</span> 起止时间 </label>
-                <label class="control-label date-label" status="服刑中"><span class="error">*</span> 起止时间 </label>
-                <label class="control-label date-label" status="拘留中"><span class="error">*</span> 起止时间 </label>
+                <label class="control-label date-label" status="社戒社康终止"><span class="error">*</span> 终止时间 </label>
+                <label class="control-label date-label" status="羁押拘留中"><span class="error">*</span> 起止时间 </label>
                 <label class="control-label date-label" status="未报到已移交"><span class="error">*</span> 移交时间 </label>
                 <label class="control-label date-label" status="违反协议已移交"><span class="error">*</span> 移交时间 </label>
                 <label class="control-label date-label" status="自愿戒毒中"><span class="error">*</span> 开始时间 </label>
@@ -116,12 +108,6 @@
                 <label class="control-label"><span class="error">*</span> 执行地点 </label>
                 <div class="controls">
                     <input type="text" name="executePlace" value="{if $info && isset($info.executePlace)}{$info.executePlace}{/if}" style="width: 438px;" />
-                </div>
-            </div>
-            <div class="control-group status-relation">
-                <label class="control-label"><span class="error">*</span> 服刑地点 </label>
-                <div class="controls">
-                    <input type="text" name="servePlace" value="{if $info && isset($info.servePlace)}{$info.servePlace}{/if}" style="width: 438px;" />
                 </div>
             </div>
             <div class="control-group status-relation">
@@ -237,7 +223,6 @@
             <div class="control-group sub-status-relation">
                 <label class="control-label date-label" status="请假中"><span class="error">*</span> 起止时间 </label>
                 <label class="control-label date-label" status="中止"><span class="error">*</span> 起止时间 </label>
-                <label class="control-label date-label" status="终止"><span class="error">*</span> 终止时间 </label>
                 <label class="control-label date-label" status="双向管控中"><span class="error">*</span> 开始时间 </label>
                 <label class="control-label date-label" status="已解除社区戒毒"><span class="error">*</span> 解除时间 </label>
                 <label class="control-label date-label" status="已解除社区康复"><span class="error">*</span> 解除时间 </label>
@@ -259,21 +244,6 @@
                         <div class=" text-error update"></div>
                         {if $info}
                             <img src="{if $info && isset($info.suspendZZCXSM_url)}{$info.suspendZZCXSM_url}{else/}/static/images/empty.png{/if}" />
-                        {/if}
-                    </div>
-                </div>
-            </div>
-            <div class="control-group sub-status-relation">
-                <div class="controls" style="margin-bottom: -20px;">
-                    <div class="mcdoc_upload_box status-file-view-box">
-                        <h6 style="margin-bottom: 10px;"><span class="error">*</span>终止程序说明</h6>
-                        <button type="button" class="btn btn-success terminate-cxsm-selector">选择图片</button>
-                        <input type="file" name="terminateZZCXSM" accept="image/*" class="terminate-cxsm-file hide-file-button"/>
-                        <input type="hidden" name="terminateZZCXSM_uri" value="{if $info && isset($info.terminateZZCXSM)}{$info.terminateZZCXSM}{/if}" />
-                        <div class="mt10 ml10 muted">仅允许jpg和png格式，1.5M内</div>
-                        <div class=" text-error update"></div>
-                        {if $info}
-                            <img src="{if $info && isset($info.terminateZZCXSM_url)}{$info.terminateZZCXSM_url}{else/}/static/images/empty.png{/if}" />
                         {/if}
                     </div>
                 </div>
@@ -312,12 +282,6 @@
                 <label class="control-label"><span class="error">*</span> 中止原因 </label>
                 <div class="controls">
                     <textarea rows="5" name="suspendReason" style="width: 438px;">{if $info && isset($info.suspendReason)}{$info.suspendReason}{/if}</textarea>
-                </div>
-            </div>
-            <div class="control-group sub-status-relation">
-                <label class="control-label"><span class="error">*</span> 终止原因 </label>
-                <div class="controls">
-                    <textarea rows="5" name="terminateReason" style="width: 438px;">{if $info && isset($info.terminateReason)}{$info.terminateReason}{/if}</textarea>
                 </div>
             </div>
             <div class="control-group sub-status-relation">

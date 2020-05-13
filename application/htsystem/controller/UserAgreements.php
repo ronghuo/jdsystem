@@ -9,7 +9,7 @@ use think\Request;
 
 class UserAgreements extends Common {
 
-    protected $admin_log_target_type = 'UserAgreements';
+    protected $MODULE = 'UserUser';
 
     public function index($id = 0) {
         if (!$id) {

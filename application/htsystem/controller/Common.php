@@ -38,7 +38,7 @@ class Common extends Controller
      */
     const LOG_CONTENT_BREAK = '<br/>';
 
-    protected $admin_log_target_type = '';  // 后台用户操作日志-目标类型
+    protected $MODULE = 'Common';  // 后台用户操作日志-目标类型
 
 
     public function initialize()
@@ -525,7 +525,7 @@ class Common extends Controller
         $log->CONTENT = empty($content) ? $operName : $content;
         $log->IP = get_client_ip();
         $log->URL = $request->url();
-        $log->TARGET_TYPE = $this->admin_log_target_type;
+        $log->TARGET_TYPE = $this->MODULE;
         $log->TARGET_ID = $targetId;
         $log->ADD_TIME = date("Y-m-d H:i:s");
         $log->save();
