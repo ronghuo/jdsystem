@@ -31,8 +31,8 @@ class Admins extends BaseModel{
         return isset($maps[$data['IS_WORK']]) ? $maps[$data['IS_WORK']] : $maps[0];
     }
 
-    public function changePwdByUsername($username, $encryptedPwd, $salt) {
-        $admin = $this->where("LOG", $username)->find();
+    public function changePwdByMobile($mobile, $encryptedPwd, $salt) {
+        $admin = $this->where(['MOBILE' => $mobile, 'ISDEL' => 0])->find();
         if (empty($admin)) {
             return;
         }

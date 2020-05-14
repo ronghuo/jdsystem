@@ -62,7 +62,7 @@ class UserManagersVer extends Validate
     protected $scene = [
         'add'  =>  ['MOBILE','NAME','ID_NUMBER','JOB','UNIT_NAME','SPECIAL_ABILITY'],
         'htadd'  =>  ['MOBILE','NAME','ID_NUMBER','DMM_ID'],
-        'edit'=>['NAME','GENDER','ID_NUMBER','JOB','UNIT_NAME'],
+        'edit' => ['NAME','GENDER','ID_NUMBER','JOB','UNIT_NAME'],
         'htedit'  =>  ['MOBILE','NAME','ID_NUMBER','DMM_ID']
     ];
 }

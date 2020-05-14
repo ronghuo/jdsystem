@@ -2,13 +2,12 @@
 
 namespace app\htsystem\controller;
 
+use app\common\model\NbAuthDept;
+use app\htsystem\model\Admins;
+use app\htsystem\model\Systable as mSystable;
 use Carbon\Carbon;
 use think\helper\Str;
 use think\Request;
-use app\htsystem\model\Systable as mSystable;
-use app\common\model\NbAuthDept;
-use app\htsystem\validate\AdminVer,
-    app\htsystem\model\Admins;
 
 class SystemUsers extends Common
 {
@@ -215,16 +214,15 @@ class SystemUsers extends Common
     protected function save(Request $request)
     {
         $ref = $request->post('ref') ? : url('SystemUsers/index');
-        $role = explode('-',$request->post('role','','trim'));
 
         $id = $request->post('ID',0,'int');
+        $isNew = $id == 0;
 
-
-        $pwd = $request->post('PWD','','trim');
-        $stat = Str::random(5);
-
-        $power = $request->param('power','','trim');
-        $power = array_filter($power);
+        $role = $request->post('role','','trim');
+        if (empty($role)) {
+            $this->error('请选择管理权限角色');
+        }
+        $role = explode('-', $request->post('role','','trim'));
 
         $dmmcids = $request->param('dmmc', [], 'trim');
         $dmmcids = array_filter($dmmcids);
@@ -236,75 +234,73 @@ class SystemUsers extends Common
             $this->error('缺少所属禁毒办信息');
         }
 
+        $log = $request->param('LOG','','trim');
+        if ($isNew) {
+            $admin = Admins::where(['LOG' => $log, 'ISDEL' => 0])->find();
+            if (!empty($admin)) {
+                $this->error('账号已经被使用');
+            }
+        } else {
+            $admin = Admins::where(['LOG' => $log, 'ISDEL' => 0])->find();
+            if (!empty($admin) && $admin->ID != $id) {
+                $this->error('账号已经被使用');
+            }
+        }
+
+        $mobile = $request->param('MOBILE','','trim');
+        if ($isNew) {
+            $admin = Admins::where(['MOBILE' => $mobile, 'ISDEL' => 0])->find();
+            if (!empty($admin)) {
+                $this->error('手机号码已经被使用');
+            }
+        } else {
+            $admin = Admins::where(['MOBILE' => $mobile, 'ISDEL' => 0])->find();
+            if (!empty($admin) && $admin->ID != $id) {
+                $this->error('手机号码已经被使用');
+            }
+        }
+
+        $pwd = $request->post('PWD','','trim');
+        $stat = Str::random(5);
+
+        $power = $request->param('power','','trim');
+        $power = array_filter($power);
+
         $data = [
-            'ROLE_ID'=>$role[0],
-            'ROLE'=>$role[1],
-            'NAME'=>$request->param('NAME','','trim'),
-            'GENDER'=>$request->param('GENDER','','trim'),
-            'DMMC_ID'=> $dmmc->ID,
-            'DMMC_NAME'=> $dmmc->DEPTDESC,
-            'POST'=>$request->param('POST','','trim'),
-            'CONTACT'=>$request->param('CONTACT','','trim'),
-            'REMARK'=>$request->param('REMARK','','trim'),
-            'POWER_CITY_ID'=>431200,
-            'POWER_COUNTY_ID'=>isset($power[0]) ? substr($power[0], 0, 6) : 0,
-            'POWER_COUNTY_ID_12'=>$power[0] ??   0,
-            'POWER_STREET_ID'=>$power[1] ??   0,
-            'POWER_COMMUNITY_ID'=>$power[2] ??   0,
-            'POWER_IDS'=>implode(',',$power),
-            'DMMCIDS'=>implode(',', $dmmcids)
+            'LOG' => $log,
+            'MOBILE' => $mobile,
+            'ROLE_ID' => $role[0],
+            'ROLE' => $role[1],
+            'NAME' => $request->param('NAME','','trim'),
+            'GENDER' => $request->param('GENDER','','trim'),
+            'DMMC_ID' => $dmmc->ID,
+            'DMMC_NAME' => $dmmc->DEPTDESC,
+            'POST' => $request->param('POST','','trim'),
+            'CONTACT' => $request->param('CONTACT','','trim'),
+            'REMARK' => $request->param('REMARK','','trim'),
+            'POWER_CITY_ID' => 431200,
+            'POWER_COUNTY_ID' => isset($power[0]) ? substr($power[0], 0, 6) : 0,
+            'POWER_COUNTY_ID_12'=> $power[0] ??   0,
+            'POWER_STREET_ID' => $power[1] ??   0,
+            'POWER_COMMUNITY_ID' => $power[2] ??   0,
+            'POWER_IDS' => implode(',',$power),
+            'DMMCIDS' => implode(',', $dmmcids)
         ];
-        if ($request->has('MOBILE')) {
-            $data['MOBILE'] = $request->param('MOBILE','','trim');
-        }
-        if ($request->has('LOG')) {
-            $data['LOG'] = $request->param('LOG','','trim');
-        }
+
         if ($request->has('PWD')) {
             $data['PWD'] = create_pwd($pwd,$stat);
             $data['STAT'] = $stat;
         }
 
-        // 当新增后台用户时，如果新增用户在系统中已存在（但是已删除状态或其他非正常状态）时，我们就认定当前操作为“编辑”
-        $admin = Admins::where('LOG', $data['LOG'])->find();
-        if ($id == 0) {
-            if (!empty($admin)) {
-                $scene = AdminVer::SCENE_EDIT;
-                $isNew = false;
-            } else {
-                $scene = AdminVer::SCENE_ADD;
-                $isNew = true;
-            }
-        } else {
-            if (empty($admin) || $admin->ID != $id) {
-                $scene = AdminVer::SCENE_EDIT_LOG;
-            } else {
-                $scene = AdminVer::SCENE_EDIT;
-            }
-            $isNew = false;
-        }
-
-        $v = new AdminVer();
-        if (!$v->scene($scene)->check($data)) {
-            $this->error($v->getError());
-        }
-
-        // 当新增后台用户时，如果新增用户在系统中已存在（但是已删除状态或其他非正常状态）时，我们即恢复该用户为正常状态并根据输入的新内容更新其对应信息
-        if ($id == 0) {
-            if (!$isNew) {
-                $id = $admin->ID;
-                $admin->ISDEL = 0;
-                $admin->save($data);
-            } else {
-                $id = (new Admins())->insertGetId($data);
-            }
+        if ($isNew) {
+            $id = (new Admins())->insertGetId($data);
         } else {
             Admins::where('ID', $id)->update($data);
         }
 
-        $img = $this->uploadImage($request,['sysusers/']);
+        $img = $this->uploadImage($request, ['sysusers/']);
         if (isset($img['images'])) {
-            Admins::where('ID','=',$id)->update(['HEAD_IMG'=>$img['images'][0]]);
+            Admins::where('ID','=', $id)->update(['HEAD_IMG' => $img['images'][0]]);
         }
 
         $this->success('保存用户信息成功',$ref);

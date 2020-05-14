@@ -3,6 +3,7 @@ namespace app\htsystem\controller;
 
 use app\common\model\Agreement;
 use app\common\model\AgreementImgs;
+use app\common\model\NbAuthDept;
 use app\common\model\UserUsers as UserUsersModel;
 use Carbon\Carbon;
 use think\Request;
@@ -82,9 +83,19 @@ class UserAgreements extends Common {
         }
 
         $agreement = new Agreement();
+        $admin = session('info');
+        if (!empty($admin['DMMCIDS'])) {
+            $dmmcids = explode(',', $admin['DMMCIDS']);
+            $dmmc = NbAuthDept::find(end($dmmcids));
+        }
         $agreement->UUID = $user->ID;
         $agreement->TITLE = $request->post('TITLE', '', 'trim');
         $agreement->CONTENT = $request->post('CONTENT', '', 'trim');
+        $agreement->ADD_USER_MOBILE = $admin['MOBILE'];
+        $agreement->ADD_USER_NAME = $admin['NAME'];
+        $agreement->ADD_DEPT_CODE = empty($dmmc) ? '' : $dmmc->DEPTCODE;
+        $agreement->ADD_DEPT_NAME = empty($dmmc) ? '' : $dmmc->DEPTNAME;
+        $agreement->ADD_TERMINAL = TERMINAL_WEB;
         $agreement->UPDATE_TIME = Carbon::now()->toDateTimeString();
 
         $agreement->save();

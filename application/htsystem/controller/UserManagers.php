@@ -242,7 +242,7 @@ class UserManagers extends Common
 
             // 同步修改后台管理用户的密码
             $adminsModel = new AdminsModel();
-            $adminsModel->changePwdByUsername($info->MOBILE, $info->PWSD, $info->SALT);
+            $adminsModel->changePwdByMobile($info->MOBILE, $info->PWSD, $info->SALT);
 
             $this->jsalert('修改密码成功',7);
             return ;
@@ -585,15 +585,6 @@ class UserManagers extends Common
             $ha->where('UMID',$uuid)->where('LEVEL',1)->delete();
         }
 
-//        print_r([
-//            $lv4_datas,
-//            $lv3_datas,
-//            $lv2_datas,
-//            $lv1_datas,
-//        ]);
-        //$umpower->save();
-//
-//
         $this->success('配置成功',url('UserManagers/index'));
     }
 
@@ -891,7 +882,7 @@ class UserManagers extends Common
 //            'DOMICILE_IDS'=>implode(',',$domicileplaceids)
         ];
 
-        if($request->has('PWSD')){
+        if ($request->has('PWSD')) {
             $pwsd = $request->post('PWSD');
             $stat = Str::random(6);
             $data['PWSD'] = create_pwd($pwsd,$stat);
@@ -900,14 +891,14 @@ class UserManagers extends Common
 
         $isedit = true;
         //审批通过
-        if($ckeck_result==1){
+        if ($ckeck_result == 1) {
             $data['CHECK_USER_ID'] = session('user_id');
             $data['CHECK_USER_NAME'] = session('name');
             $data['STATUS'] = 1;
             $data['CHECK_OK_TIME'] = Carbon::now()->toDateTimeString();
             $isedit = false;
         }//不通过
-        elseif($ckeck_result==2){
+        elseif ($ckeck_result == 2) {
             $data['CHECK_USER_ID'] = session('user_id');
             $data['CHECK_USER_NAME'] = session('name');
             $data['STATUS'] = 2;
@@ -915,12 +906,12 @@ class UserManagers extends Common
             $isedit = false;
         }
 
-        if(!$manager->UCODE){
+        if (!$manager->UCODE) {
             $data['UCODE'] = $manager->createNewUCode($data['DMM_ID']);
         }
 
         $v = new UserManagersVer();
-        if(!$v->scene('htedit')->check($data)){
+        if(!$v->scene('htedit')->check($data)) {
             $this->error($v->getError());
         }
 
@@ -942,10 +933,10 @@ class UserManagers extends Common
         $manager->save($data);
 
 
-        if($isedit){
-            $this->success('保存人员资料成功',$ref);
+        if ($isedit) {
+            $this->success('保存人员资料成功', $ref);
         }else{
-            $this->success('审批人员资料成功',$ref);
+            $this->success('审批人员资料成功', $ref);
         }
 
     }
