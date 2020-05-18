@@ -1,0 +1,34 @@
+<style>
+    .imageWrapper {margin: 0; font-size: 0;}
+    .imageWrapper li { display: inline-block; margin-left: 1%; padding-top: 1%;}
+    .viewer-toolbar>li {
+        line-height: inherit;
+    }
+</style>
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span7"><h4 class="page-header">登录协议</h4></div>
+                    <div class="span5">
+                        <a href="{:url('UserUsers/index')}" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                        <a href="{:url('LoginAgreement/create', ['id' => empty($info) ? 0 : $info.ID])}" class="btn btn-primary pull-right"><i class="icon-plus"></i>{empty name="info"}新增{else/}编辑{/empty}协议</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!---->
+
+        {empty name="info"}
+        <tr><td>没有找到相关的信息</td></tr>
+        {else/}
+        <div id="ueCloth" style="display: none;">
+            <textarea id="content" rows="20" style="height: 400px;">{$info.CONTENT}</textarea>
+        </div>
+        <p/>
+        {/empty}
+    </div>
+</div>

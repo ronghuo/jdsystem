@@ -6,6 +6,7 @@
  */
 namespace app\h5\controller;
 
+use app\common\model\LoginAgreement;
 use think\Controller;
 use think\Request;
 use Carbon\Carbon;
@@ -70,6 +71,9 @@ class AppPages extends Controller {
             //康复协议
             case 4:
                 $info = Agreement::where('UUID',$id)->find();
+                break;
+            case 5:
+                $info = LoginAgreement::find();
                 break;
         }
 

@@ -27,9 +27,6 @@ Route::get('/version/index', 'api1/Version/index');
 //-----------------------------------------------------//
 Route::any('/uuser/test/:mothed','api1/uuser.Test/:mothed');
 
-
-
-
 Route::post('/uuser/login','api1/uuser.Login/index');
 Route::post('/uuser/smslogin','api1/uuser.Login/sms');
 //首页
@@ -130,7 +127,7 @@ Route::post('/manage/tongji','api1/manage.Statistics/index')->middleware('Api1Ma
 //Route::post('/manage/tongji/userusers','api1/manage.Statistics/userUsers')->middleware('Api1ManageAuth');
 //Route::post('/manage/tongji/uran','api1/manage.Statistics/uran')->middleware('Api1ManageAuth');
 //Route::post('/manage/tongji/mhelper','api1/manage.Statistics/mhelper')->middleware('Api1ManageAuth');
-//风险评估
+// 风险评估
 Route::get('/manage/estimate/:uuid','api1/manage.Estimates/listByUser')->middleware('Api1ManageAuth');
 // 决定书
 Route::get('/manage/decision','api1/manage.Decision/index')->middleware('Api1ManageAuth');

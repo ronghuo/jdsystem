@@ -180,13 +180,15 @@ class UserUsers extends Common
      *
      * @return \think\Response
      */
-    public function index($zhipai = '')
+    public function index(Request $request, $zhipai = '')
     {
         $result = $this->doSearch($zhipai);
         $is_so = $result['is_so'];
         $title = $result['title'];
         $rows = $result['rows'];
         $params = $result['params'];
+        $statusList = create_kv(BaseUserStatus::all(), 'ID', 'NAME');
+        $statusList[UserUsersModel::STATUS_ID_OTHER] = UserUsersModel::STATUS_NAME_OTHER;
 
         $js = $this->loadJsCss(array('p:cate/jquery.cate', 'userusers_index'), 'js', 'admin');
         $css = $this->loadJsCss(array('userusers_index'), 'css', 'admin');
@@ -206,7 +208,7 @@ class UserUsers extends Common
         $this->assign('remove_allowed', in_array($powerLevel, [self::POWER_LEVEL_CITY, self::POWER_LEVEL_COUNTY]));
         $this->assign('powerLevel', $powerLevel);
         $this->assign('userStatus', $params['userStatus']);
-        $this->assign('user_status_list', BaseUserStatus::all());
+        $this->assign('user_status_list', $statusList);
         $this->assign('estimate', $params['estimate']);
         $this->assign('estimate_list', UserUsersModel::ESTIMATE_DANGER_LEVEL_LIST);
 
@@ -234,9 +236,11 @@ class UserUsers extends Common
 
         $userStatus = input('get.userStatus', '');
         if ($userStatus != '') {
-            if ($userStatus == 0) {
-                $query->whereNotIn('USER_STATUS_ID', array_column(BaseUserStatus::all()->toArray(), 'ID'));
-            } else {
+            $statusIdList = array_column(BaseUserStatus::all()->toArray(), 'ID');
+            if ($userStatus == UserUsersModel::STATUS_ID_OTHER) {
+                $query->whereNotIn('USER_STATUS_ID', $statusIdList);
+            }
+            else if (in_array($userStatus, $statusIdList)) {
                 $query->where('USER_STATUS_ID', $userStatus);
             }
             $is_so = true;
@@ -1366,7 +1370,10 @@ class UserUsers extends Common
 
     public function statisticsStatus(Request $request) {
         return $this->statistic($request, function ($pageNO, $pageSize, $condition) {
-            $this->assign('statusList', BaseUserStatus::all());
+            $statusList = create_kv(BaseUserStatus::all(), 'ID', 'NAME');
+            $statusList[UserUsersModel::STATUS_ID_OTHER] = UserUsersModel::STATUS_NAME_OTHER;
+            $statusList[UserUsersModel::STATISTICS_ID_TOTAL] = UserUsersModel::STATISTICS_NAME_TOTAL;
+            $this->assign('statusList', $statusList);
             return UserUsersModel::statisticsStatus($pageNO, $pageSize, $condition);
         }, 'statistics_status');
     }

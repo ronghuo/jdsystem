@@ -79,7 +79,7 @@ class UserAgreements extends Common {
     protected function saveAgreement(Request $request, UserUsersModel $user) {
 
         if (!$request->post('CONTENT')) {
-            $this->error('请填写康复内容');
+            $this->error('请填写协议内容');
         }
 
         $agreement = new Agreement();

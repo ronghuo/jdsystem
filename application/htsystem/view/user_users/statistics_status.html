@@ -42,11 +42,9 @@
                 <th width="40px">县市区</th>
                 <th width="60px">乡镇街道</th>
                 <th width="60px">村级社区</th>
-                {foreach name="statusList" item="status"}
-                    <th width="{if strlen($status.NAME) egt 5}45px{else/}30px{/if}">{$status.NAME}</th>
+                {foreach name="statusList" key="id" item="name"}
+                    <th width="{if strlen($name) egt 5}45px{else/}30px{/if}">{$name}</th>
                 {/foreach}
-                <th width="30px">其它</th>
-                <th width="30px">合计</th>
             </tr>
             {empty name="list"}
             <tr><td colspan="19">木有找到相关的信息</td></tr>
@@ -56,26 +54,14 @@
                 <td>全部</td>
                 <td>全部</td>
                 {foreach name="allList" item="all"}
-                    {foreach name="statusList" item="status"}
+                    {foreach name="statusList" key="id" item="name"}
                         <td>
-                            {if $all[$status.NAME] gt 0}
-                                <a href="./index?userStatus={$status.ID}{if isset($area1)}&area1={$area1}{/if}{if isset($area2)}&area2={$area2}{/if}{if isset($area3)}&area3={$area3}{/if}">{$all[$status.NAME]}</a>
-                            {else/}{$all[$status.NAME]}
+                            {if $all[$name] gt 0}
+                                <a href="./index?userStatus={$id}{if isset($area1)}&area1={$area1}{/if}{if isset($area2)}&area2={$area2}{/if}{if isset($area3)}&area3={$area3}{/if}">{$all[$name]}</a>
+                            {else/}{$all[$sname]}
                             {/if}
                         </td>
                     {/foreach}
-                    <td>
-                        {if $all['其它'] gt 0}
-                            <a href="./index?userStatus=0{if isset($area1)}&area1={$area1}{/if}{if isset($area2)}&area2={$area2}{/if}{if isset($area3)}&area3={$area3}{/if}">{$all['其它']}</a>
-                        {else/}{$all['其它']}
-                        {/if}
-                    </td>
-                    <td>
-                        {if $all['合计'] gt 0}
-                            <a href="./index?{if isset($area1)}area1={$area1}{/if}{if isset($area2)}&area2={$area2}{/if}{if isset($area3)}&area3={$area3}{/if}">{$all['合计']}</a>
-                        {else/}{$all['合计']}
-                        {/if}
-                    </td>
                 {/foreach}
             </tr>
             {foreach name="list" item="da"}
@@ -83,26 +69,14 @@
                     <td>{$da.COUNTY_NAME}</td>
                     <td>{if isset($da.STREET_NAME)}{$da.STREET_NAME}{/if}</td>
                     <td>{if isset($da.COMMUNITY_NAME)}{$da.COMMUNITY_NAME}{/if}</td>
-                    {foreach name="statusList" item="status"}
+                    {foreach name="statusList" key="id" item="name"}
                         <td>
-                            {if $da[$status.NAME] gt 0}
-                            <a href="./index?userStatus={$status.ID}{if isset($da.COUNTY_ID_12)}&area1={$da.COUNTY_ID_12}{/if}{if isset($da.STREET_ID)}&area2={$da.STREET_ID}{/if}{if isset($da.COMMUNITY_ID)}&area3={$da.COMMUNITY_ID}{/if}">{$da[$status.NAME]}</a>
-                            {else/}{$da[$status.NAME]}
+                            {if $da[$name] gt 0}
+                            <a href="./index?userStatus={$id}{if isset($da.COUNTY_ID_12)}&area1={$da.COUNTY_ID_12}{/if}{if isset($da.STREET_ID)}&area2={$da.STREET_ID}{/if}{if isset($da.COMMUNITY_ID)}&area3={$da.COMMUNITY_ID}{/if}">{$da[$name]}</a>
+                            {else/}{$da[$name]}
                             {/if}
                         </td>
                     {/foreach}
-                    <td>
-                        {if $da['其它'] gt 0}
-                        <a href="./index?userStatus=0{if isset($da.COUNTY_ID_12)}&area1={$da.COUNTY_ID_12}{/if}{if isset($da.STREET_ID)}&area2={$da.STREET_ID}{/if}{if isset($da.COMMUNITY_ID)}&area3={$da.COMMUNITY_ID}{/if}">{$da['其它']}</a>
-                        {else/}{$da['其它']}
-                        {/if}
-                    </td>
-                    <td>
-                        {if $da['合计'] gt 0}
-                        <a href="./index?{if isset($da.COUNTY_ID_12)}area1={$da.COUNTY_ID_12}{/if}{if isset($da.STREET_ID)}&area2={$da.STREET_ID}{/if}{if isset($da.COMMUNITY_ID)}&area3={$da.COMMUNITY_ID}{/if}">{$da['合计']}</a>
-                        {else/}{$da['合计']}
-                        {/if}
-                    </td>
                 </tr>
             {/foreach}
             {/empty}

@@ -34,8 +34,11 @@ class UserUsers extends BaseModel
         'zhipai3' => self::ASSIGNMENT_STATUS_RELIVED
     ];
 
-    const STATISTICS_TOTAL_TITLE = '合计';
+    const STATISTICS_ID_TOTAL = 'total';
+    const STATISTICS_NAME_TOTAL = '合计';
     const STATISTICS_OTHER_TITLE = '其它';
+    const STATUS_ID_OTHER = 'other';
+    const STATUS_NAME_OTHER = '状况不明';
 
     protected $pk = 'ID';
     public $table = 'USER_USERS';
@@ -207,21 +210,21 @@ class UserUsers extends BaseModel
             foreach ($userStatus as $id => $name) {
                 $subSql .= "sum(case USER_STATUS_ID when $id then 1 else 0 end) '$name',";
             }
-            $subSql .= "sum(case when USER_STATUS_ID not in (" . implode(',', $userStatusId) . ") then 1 else 0 end) '" . self::STATISTICS_OTHER_TITLE . "'";
+            $subSql .= "sum(case when USER_STATUS_ID not in (" . implode(',', $userStatusId) . ") then 1 else 0 end) '" . self::STATUS_NAME_OTHER . "'";
             $subSql .= " from user_users A where ISDEL = 0 group by " . implode(',', $groupBy);
             return $subSql;
         }, function ($sql) use ($userStatus) {
             foreach ($userStatus as $id => $name) {
                 $sql .= "sum($name) '$name',";
             }
-            $sql .= "sum(" . self::STATISTICS_OTHER_TITLE . ") '" . self::STATISTICS_OTHER_TITLE . "'";
+            $sql .= "sum(" . self::STATUS_NAME_OTHER . ") '" . self::STATUS_NAME_OTHER . "'";
             return $sql;
         }, function (&$item) use ($userStatus) {
-            $total = $item[self::STATISTICS_OTHER_TITLE];
+            $total = $item[self::STATUS_NAME_OTHER];
             foreach ($userStatus as $id => $name) {
                 $total += $item[$name];
             }
-            $item[self::STATISTICS_TOTAL_TITLE] = $total;
+            $item[self::STATISTICS_NAME_TOTAL] = $total;
         }, $pageSize, $pageNO, $condition);
     }
 
@@ -248,7 +251,7 @@ class UserUsers extends BaseModel
             foreach (self::ESTIMATE_DANGER_LEVEL_LIST as $id => $name) {
                 $total += $item[$name];
             }
-            $item[self::STATISTICS_TOTAL_TITLE] = $total;
+            $item[self::STATISTICS_NAME_TOTAL] = $total;
         }, $pageSize, $pageNO, $condition);
     }
 
@@ -277,7 +280,7 @@ class UserUsers extends BaseModel
             foreach ($statusList as $name) {
                 $total += $item[$name];
             }
-            $item[self::STATISTICS_TOTAL_TITLE] = $total;
+            $item[self::STATISTICS_NAME_TOTAL] = $total;
         }, $pageSize, $pageNO, $condition);
 
     }

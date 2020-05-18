@@ -32,10 +32,9 @@
                         <select name="userStatus">
                             <option value="">请选择</option>
                             {notempty name="user_status_list"}
-                                {foreach name="user_status_list" item="status"}
-                                    <option {if isset($userStatus) && $userStatus eq $status.ID}selected{/if} value="{$status.ID}">{$status.NAME}</option>
+                                {foreach name="user_status_list" key="id" item="name"}
+                                    <option {if isset($userStatus) && $userStatus eq $id}selected{/if} value="{$id}">{$name}</option>
                                 {/foreach}
-                                <option {if isset($userStatus) && $userStatus eq strval(0)}selected{/if} value="0">其它</option>
                             {/notempty}
                         </select>
                     </div>
