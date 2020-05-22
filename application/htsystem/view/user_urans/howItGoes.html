@@ -1,0 +1,93 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+                    <div class="span3"><h3 class="page-header">尿检完成情况</h3></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row-fluid">
+
+            <div class="controls ml0">
+                <form class="form-horizontal">
+                    <div class="">搜索查询</div>
+                    <div class="control-group">
+                    <label class="control-label"> 所属地区 </label>
+                    <div class="controls" id="areas3">
+                        <select name="area1" class="lv1" {if $powerLevel egt 2}disabled{/if} data-value="{$param['area1']}"></select>
+                        <select name="area2" class="lv2" {if $powerLevel egt 3}disabled{/if} data-value="{$param['area2']}"></select>
+                        <select name="area3" class="lv3" {if $powerLevel egt 4}disabled{/if} data-value="{$param['area3']}"></select>
+                    </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label"></label>
+                        <div class="controls">
+                            <button class="btn btn-success"><i class="icon-search"></i> 搜索</button>
+                            {if $is_so}
+                            <a id="btnClear" href="javascript:void(0);" class="btn btn-warning"><i class="icon-trash"></i> 清空搜索</a>
+                            {/if}
+
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <hr/>
+        </div>
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+            <tr>
+                <th colspan="4" style="text-align: center;">受检人</th>
+                <th colspan="2" style="text-align: center;">第一年</th>
+                <th colspan="2" style="text-align: center;">第二年</th>
+                <th colspan="2" style="text-align: center;">第三年</th>
+                <th colspan="2" style="text-align: center;">总计</th>
+            </tr>
+            <tr>
+                <th>姓名</th>
+                <th>状态</th>
+                <th>所属辖区</th>
+                <th>社戒(社康)开始时间</th>
+                <th>完成次数</th>
+                <th>缺失次数</th>
+                <th>完成次数</th>
+                <th>缺失次数</th>
+                <th>完成次数</th>
+                <th>缺失次数</th>
+                <th>完成次数</th>
+                <th>缺失次数</th>
+            </tr>
+            {empty name="rows"}
+            <tr><td colspan="12">没有找到相关的信息</td></tr>
+            {else/}
+            {foreach name="rows" item="da"}
+            <tr>
+                <td>{$da.NAME}</td>
+                <td>{$da.USER_STATUS_NAME}</td>
+                <td>{$da.AREA}</td>
+                <td>{empty name="da.JD_START_TIME"}<a href="javascript:void(0);" class="openlayerwin" data-url="{:url('UserUsers/setJdStartTime', ['id' => $da.ID])}" style="color: red;">未设置</a>{else/}{$da.JD_START_TIME}{/empty}</td>
+                <td>{$da.1th}</td>
+                <td>{$da.lack_1th}</td>
+                <td>{$da.2th}</td>
+                <td>{$da.lack_2th}</td>
+                <td>{$da.3th}</td>
+                <td>{$da.lack_3th}</td>
+                <td>{$da.totalFinished}</td>
+                <td>{$da.totalMissing}</td>
+            </tr>
+            {/foreach}
+            {/empty}
+            </tbody>
+
+        </table>
+
+        <div class="row-fluid">
+            <div class="span6"><div class="dataTables_info text-info">总记录： {$total} 条</div></div>
+            <div class="span6"><div class="dataTables_paginate paging_bootstrap pagination">
+                {$page|raw}
+            </div></div>
+        </div>
+    </div>
+</div>

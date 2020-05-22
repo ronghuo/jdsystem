@@ -2,7 +2,9 @@
 
 namespace app\htsystem\controller;
 
+use app\common\model\BaseUserStatus;
 use Carbon\Carbon;
+use think\paginator\driver\Bootstrap;
 use think\Request;
 use app\common\model\Urans;
 use app\common\model\UserUsers;
@@ -247,51 +249,122 @@ class UserUrans extends Common
         return $this->fetch('print');
     }
 
-    /**
-     * 显示创建资源表单页.
-     *
-     * @return \think\Response
-     */
-    public function create()
-    {
-        //
+    public function howItGoes(Request $request) {
+        $userStatus = create_kv(BaseUserStatus::all()->toArray(), 'ID', 'NAME');
+        $fitStatusIds = [];
+        foreach ($userStatus as $id => $name) {
+            if ($name == STATUS_COMMUNITY_DETOXIFICATION) {
+                $fitStatusIds[$id] = URINE_CHECK_RATE_DETOXIFICATION;
+                continue;
+            }
+            if ($name == STATUS_COMMUNITY_RECOVERING) {
+                $fitStatusIds[$id] = URINE_CHECK_RATE_RECOVERING;
+                continue;
+            }
+        }
+        $whereIn = implode(',', array_keys($fitStatusIds));
+
+        $subSql = "select ID,`NAME`,USER_STATUS_ID,USER_STATUS_NAME,JD_START_TIME,if(JD_START_TIME is not null, TIMESTAMPDIFF(MONTH, JD_START_TIME, DATE_FORMAT(now(),'%Y-%m-%d')) + if(JD_START_TIME > now(), 0, 1), 0) months,";
+        $subSql .= "concat_ws(' ', (select `NAME` from subareas where CODE12 = COUNTY_ID_12),(select `NAME` from subareas where CODE12 = STREET_ID),(select `NAME` from subareas where CODE12 = COMMUNITY_ID)) AREA,";
+
+        for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
+            $num = ($i + 1) . "th";
+            $subSql .= "(select count(1) from urans where UUID = A.ID and CHECK_TIME >= DATE_ADD(A.JD_START_TIME,INTERVAL $i year) and CHECK_TIME < DATE_ADD(A.JD_START_TIME,INTERVAL ($i + 1) year)) $num,";
+        }
+        $subSql = substr($subSql, 0, strlen($subSql) - 1);
+        $subSql .= " from user_users A where USER_STATUS_ID in ($whereIn) and ISDEL = 0";
+
+        $where = [];
+        $powerLevel = $this->getPowerLevel();
+        $area1 = $request->param('area1', 0);
+        $area2 = $request->param('area2', 0);
+        $area3 = $request->param('area3', 0);
+        if (POWER_LEVEL_COUNTY == $powerLevel) {
+            $where['COUNTY_ID_12'] = session('info')['POWER_COUNTY_ID_12'];
+            $where['STREET_ID'] = $area2;
+            $where['COMMUNITY_ID'] = $area3;
+        }
+        elseif (self::POWER_LEVEL_STREET == $powerLevel) {
+            $where['COUNTY_ID_12'] = session('info')['POWER_COUNTY_ID_12'];
+            $where['STREET_ID'] = session('info')['POWER_STREET_ID'];
+            $where['COMMUNITY_ID'] = $area3;
+        }
+        elseif (self::POWER_LEVEL_COMMUNITY == $powerLevel) {
+            $where['COUNTY_ID_12'] = session('info')['POWER_COUNTY_ID_12'];
+            $where['STREET_ID'] = session('info')['POWER_STREET_ID'];
+            $where['COMMUNITY_ID'] = session('info')['POWER_COMMUNITY_ID'];
+        }
+        else {
+            $where['COUNTY_ID_12'] = $area1;
+            $where['STREET_ID'] = $area2;
+            $where['COMMUNITY_ID'] = $area3;
+        }
+        if (!empty($where)) {
+            foreach ($where as $name => $value) {
+                if (empty($value)) {
+                    continue;
+                }
+                $subSql .= " and $name = '$value'";
+            }
+        }
+
+        $sql = "select count(1) from ($subSql) A";
+        $rows = db()->query($sql);
+        foreach ($rows as $row) {
+            foreach ($row as $index => $value) {
+                $total = $value;
+            }
+        }
+
+        $sql = "select ID,`NAME`,AREA,USER_STATUS_ID,USER_STATUS_NAME,JD_START_TIME,";
+        for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
+            $year = $i + 1;
+            $num = ($i + 1) . "th";
+            $sql .= "$num,case";
+            foreach ($fitStatusIds as $statusId => $checkTimesList) {
+                $checkTimes = $checkTimesList[$i];
+                $shouldTimes = "ceil(if(months > 12*$year, 12, if(months > 12*$i, months - 12*$i, 0)) / (12 / $checkTimes))";
+                $sql .= " when USER_STATUS_ID = $statusId then $shouldTimes - $num";
+            }
+            $sql .= " end lack_$num,";
+        }
+        $sql = substr($sql, 0, strlen($sql) - 1);
+        $sql .= " from ($subSql) AA";
+        $pageNO = $request->param('page', 1);
+        if ($pageNO < 1) {
+            $pageNO = 1;
+        }
+        $limit = self::PAGE_SIZE;
+        $offset = ($pageNO - 1) * $limit;
+        $sql .= ' limit ?,?';
+        $rows = db()->query($sql, [$offset,$limit]);
+
+        foreach ($rows as &$row) {
+            $row['totalFinished'] = $row['totalMissing'] = 0;
+            for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
+                $num = $i + 1;
+                $row['totalFinished'] += $row[$num . "th"];
+                $row['totalMissing'] += $row["lack_$num" . "th"];
+            }
+        }
+
+        $paginator = Bootstrap::make($rows, self::PAGE_SIZE, $pageNO, $total, false,
+            ['path'=> Bootstrap::getCurrentPath(), 'query' => $request->param()]
+        );
+
+        $js = $this->loadJsCss(array('p:cate/jquery.cate', 'userurans_howitgoes'), 'js', 'admin');
+        $this->assign('footjs', $js);
+        $this->assign('is_so', false);
+        $this->assign('param', [
+            'area1' => $where['COUNTY_ID_12'],
+            'area2' => $where['STREET_ID'],
+            'area3' => $where['COMMUNITY_ID']
+        ]);
+        $this->assign('powerLevel', $powerLevel);
+        $this->assign('total', $total);
+        $this->assign('rows', $rows);
+        $this->assign('page', $paginator->render());
+        return $this->fetch();
     }
-
-    /**
-     * 保存新建的资源
-     *
-     * @param  \think\Request  $request
-     * @return \think\Response
-     */
-    public function save(Request $request)
-    {
-        //
-    }
-
-
-
-    /**
-     * 显示编辑资源表单页.
-     *
-     * @param  int  $id
-     * @return \think\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * 保存更新的资源
-     *
-     * @param  \think\Request  $request
-     * @param  int  $id
-     * @return \think\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
 
 }

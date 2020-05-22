@@ -37,6 +37,13 @@ define('POWER_LEVEL_COMMUNITY', 4);    // 村(社区)级
 define('STATUS_COMMUNITY_DETOXIFICATION', '社区戒毒中');
 define('STATUS_COMMUNITY_RECOVERING', '社区康复中');
 
+/**
+ * 尿检相关属性
+ */
+define('URINE_CHECK_YEARS', 3);                         // 尿检年限
+define('URINE_CHECK_RATE_DETOXIFICATION', [12, 6, 4]);  // 社区戒毒尿检频率[第一年：12次，第二年：6次，第三年：4次]
+define('URINE_CHECK_RATE_RECOVERING', [6, 4, 2]);       // 社区康复尿检频率[第一年：6次，第二年：4次，第三年：2次]
+
 
 /**
  * 创建无限分类树

@@ -1410,6 +1410,22 @@ class UserUsers extends Common
         }, '人员指派统计报表');
     }
 
+    public function statisticsUrine(Request $request) {
+        return $this->statistic($request, function ($pageNO, $pageSize, $condition) {
+            $chineseTexts = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+            $columnNames = [];
+            for ($i = 0; $i < UserUsersModel::STATISTICS_URINE_YEARS; $i++) {
+                $num = ($i + 1) . 'th';
+                $columnNames[$num] = "第" . $chineseTexts[$i] . "年完成次数";
+                $columnNames["lack_$num"] = "第" . $chineseTexts[$i] . "年缺失次数";
+            }
+            $columnNames['totalFinished'] = "总计完成次数";
+            $columnNames['totalMissing'] = "总计缺失次数";
+            $this->assign('columnNames', $columnNames);
+            return UserUsersModel::statisticsUrine($pageNO, $pageSize, $condition);
+        }, 'statistics_urine');
+    }
+
     private function statistic(Request $request, $dataGetter, $view) {
         $pageNO = $request->param('page', 1);
         if ($pageNO < 1) {
@@ -1417,21 +1433,22 @@ class UserUsers extends Common
         }
         $condition = $request->param();
         $powerLevel = $this->getPowerLevel();
-        if (self::POWER_LEVEL_COUNTY == $powerLevel) {
+        if (POWER_LEVEL_COUNTY == $powerLevel) {
             $condition['area1'] = session('info')['POWER_COUNTY_ID_12'];
             $condition['area2'] = $request->param('area2');
             $condition['area3'] = $request->param('area3');
         }
-        elseif (self::POWER_LEVEL_STREET == $powerLevel) {
+        elseif (POWER_LEVEL_STREET == $powerLevel) {
             $condition['area1'] = session('info')['POWER_COUNTY_ID_12'];
             $condition['area2'] = session('info')['POWER_STREET_ID'];
             $condition['area3'] = $request->param('area3');
         }
-        elseif (self::POWER_LEVEL_COMMUNITY == $powerLevel) {
+        elseif (POWER_LEVEL_COMMUNITY == $powerLevel) {
             $condition['area1'] = session('info')['POWER_COUNTY_ID_12'];
             $condition['area2'] = session('info')['POWER_STREET_ID'];
             $condition['area3'] = session('info')['POWER_COMMUNITY_ID'];
-        } else {
+        }
+        else {
             $condition['area1'] = $request->param('area1', 0);
             $condition['area2'] = $request->param('area2', 0);
             $condition['area3'] = $request->param('area3', 0);
@@ -1530,6 +1547,34 @@ class UserUsers extends Common
 
         $list = array_merge($allList, $pageList);
         exportExcel($columnName, $list, '统计数据', $fileName);
+    }
+
+    public function setJdStartTime(Request $request, $id = 0) {
+        if (empty($id)) {
+            $this->error('参数错误');
+        }
+        $user = UserUsersModel::find($id);
+        if (!$user) {
+            $this->error('人员不存在');
+        }
+        if (!$this->checkUUid($id)) {
+            $this->error('权限不足');
+        }
+        if ($request->isGet()) {
+            $js = $this->loadJsCss(array( 'userusers_setjdstarttime'), 'js', 'admin');
+            $this->assign('footjs', $js);
+            $this->assign('ref', $request->param('ref', '', 'trim'));
+            $this->assign("info", $user);
+            return $this->fetch();
+        }
+        $startTime = $request->param('startTime', '', 'trim');
+        $user->save([
+            'JD_START_TIME' => $startTime,
+            'JD_END_TIME' => date('Y-m-d', strtotime('+3 year', strtotime($startTime)))
+        ]);
+        $this->addAdminLog(self::OPER_TYPE_UPDATE, '设置康复人员社戒社康时间', '设置成功', $id);
+
+        $this->jsalert('社戒社康时间设置成功',4, $request->param('ref', '', 'trim'));
     }
 
 }

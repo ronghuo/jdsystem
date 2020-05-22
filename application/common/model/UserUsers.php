@@ -39,6 +39,7 @@ class UserUsers extends BaseModel
     const STATISTICS_OTHER_TITLE = '其它';
     const STATUS_ID_OTHER = 'other';
     const STATUS_NAME_OTHER = '状况不明';
+    const STATISTICS_URINE_YEARS = 3;
 
     protected $pk = 'ID';
     public $table = 'USER_USERS';
@@ -283,6 +284,61 @@ class UserUsers extends BaseModel
             $item[self::STATISTICS_NAME_TOTAL] = $total;
         }, $pageSize, $pageNO, $condition);
 
+    }
+
+    public static function statisticsUrine($pageNO = 1, $pageSize = 20, $condition = []) {
+        $userStatus = create_kv(BaseUserStatus::all()->toArray(), 'ID', 'NAME');
+        $fitStatusIds = [];
+        foreach ($userStatus as $id => $name) {
+            if ($name == STATUS_COMMUNITY_DETOXIFICATION) {
+                $fitStatusIds[$id] = URINE_CHECK_RATE_DETOXIFICATION;
+                continue;
+            }
+            if ($name == STATUS_COMMUNITY_RECOVERING) {
+                $fitStatusIds[$id] = URINE_CHECK_RATE_RECOVERING;
+                continue;
+            }
+        }
+        return self::statistics(function ($subSql, $groupBy) use ($fitStatusIds) {
+            $whereIn = implode(',', array_keys($fitStatusIds));
+            for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
+                $year = $i + 1;
+                $num = ($i + 1) . "th";
+                $subSql .= "sum($num) $num,sum(case";
+                foreach ($fitStatusIds as $statusId => $checkTimesList) {
+                    $checkTimes = $checkTimesList[$i];
+                    $shouldTimes = "ceil(if(months > 12*$year, 12, if(months > 12*$i, months - 12*$i, 0)) / (12 / $checkTimes))";
+                    $subSql .= " when USER_STATUS_ID = $statusId then $shouldTimes - $num";
+                }
+                $subSql .= " end) lack_$num,";
+            }
+            $subSql = substr($subSql, 0, strlen($subSql) - 1);
+            $subSql .= " from (select USER_STATUS_ID,JD_START_TIME,if(JD_START_TIME is not null, TIMESTAMPDIFF(MONTH, JD_START_TIME, DATE_FORMAT(NOW(),'%Y-%m-%d')) + if(JD_START_TIME > now(), 0, 1), 0) months,COUNTY_ID_12,STREET_ID,COMMUNITY_ID,";
+            for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
+                $num = ($i + 1) . "th";
+                $subSql .= "(select count(1) from urans where UUID = A.ID and CHECK_TIME >= DATE_ADD(A.JD_START_TIME,INTERVAL $i year) and CHECK_TIME < DATE_ADD(A.JD_START_TIME,INTERVAL ($i + 1) year)) $num,";
+            }
+            $subSql = substr($subSql, 0, strlen($subSql) - 1);
+            $subSql .= " from user_users A where USER_STATUS_ID in ($whereIn) and ISDEL = 0) A";
+            $subSql .= "  group by " . implode(',', $groupBy);
+            return $subSql;
+        }, function ($sql) {
+            for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
+                $num = ($i + 1) . "th";
+                $sql .= "sum($num) $num,sum(lack_$num) lack_$num,";
+            }
+            $sql = substr($sql, 0, strlen($sql) - 1);
+            return $sql;
+        }, function (&$item) use ($userStatus) {
+            $totalFinished = $totalMissing = 0;
+            for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
+                $num = ($i + 1) . "th";
+                $totalFinished += $item[$num];
+                $totalMissing += $item["lack_$num"];
+            }
+            $item['totalFinished'] = $totalFinished;
+            $item['totalMissing'] = $totalMissing;
+        }, $pageSize, $pageNO, $condition);
     }
 
     private static function statistics($buildSubSql, $buildSql, $calcTotal, $pageSize, $pageNO, $condition) {
