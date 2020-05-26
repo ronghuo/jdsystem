@@ -42,11 +42,11 @@ class UserUrans extends Common
         return $this->fetch();
     }
 
-    protected function doSearch($uuid){
+    protected function doSearch($uuid) {
 
         $is_so = false;
         $query = Urans::with([
-            'uuser'=>function($query){
+            'uuser' => function($query){
                 return $query->field('ID,NAME');
             }
         ])->where('ISDEL',0);
@@ -67,15 +67,15 @@ class UserUrans extends Common
         $param['sdate'] = input('get.sdate', '');
         $param['edate'] = input('get.edate', '');
 
-        if($param['sdate'] && !$param['edate']){
+        if ($param['sdate'] && !$param['edate']) {
 
             $query->whereTime('CHECK_TIME', '>=', Carbon::parse($param['sdate'])->startOfDay()->toDateTimeString());
             $is_so = true;
-        }elseif(!$param['sdate'] && $param['edate']){
+        } elseif (!$param['sdate'] && $param['edate']) {
 
             $query->whereTime('CHECK_TIME', '<=', Carbon::parse($param['edate'])->endOfDay()->toDateTimeString());
             $is_so = true;
-        }elseif($param['sdate'] && $param['edate']){
+        } elseif ($param['sdate'] && $param['edate']) {
 
             $query->whereTime('CHECK_TIME', 'between', [
 
@@ -98,26 +98,26 @@ class UserUrans extends Common
         $param['a1'] = input('area1', '');
         $param['a2'] = input('area2', '');
         $param['a3'] = input('area3', '');
-        if($param['a1'] > 0){
+        if ($param['a1'] > 0) {
             $code12 = strlen($param['a1'])==6 ? $param['a1'].'000000' : $param['a1'];
             $code6 = substr($param['a1'], 0, 6);
             $query->whereIn('COUNTY_ID', [$code6, $code12]);
             $is_so = true;
         }
-        if($param['a2'] > 0){
+        if ($param['a2'] > 0) {
             $query->where('STREET_ID', $param['a2']);
             $is_so = true;
         }
-        if($param['a3'] > 0){
+        if ($param['a3'] > 0) {
             $query->where('COMMUNITY_ID', $param['a3']);
             $is_so = true;
         }
 
         $soids = [];
 
-        $query->where(function ($query)use($soids, $is_so){
+        $query->where(function ($query) use($soids, $is_so) {
             $muids = $this->getManageUUids();
-            if($muids != 'all'){
+            if ($muids != 'all') {
                 $query->whereIn('UUID', $muids);
             }
         });
@@ -283,13 +283,15 @@ class UserUrans extends Common
             $where['COUNTY_ID_12'] = session('info')['POWER_COUNTY_ID_12'];
             $where['STREET_ID'] = $area2;
             $where['COMMUNITY_ID'] = $area3;
+            $is_so = !empty($area2) || !empty($area3);
         }
-        elseif (self::POWER_LEVEL_STREET == $powerLevel) {
+        elseif (POWER_LEVEL_STREET == $powerLevel) {
             $where['COUNTY_ID_12'] = session('info')['POWER_COUNTY_ID_12'];
             $where['STREET_ID'] = session('info')['POWER_STREET_ID'];
             $where['COMMUNITY_ID'] = $area3;
+            $is_so = !empty($area3);
         }
-        elseif (self::POWER_LEVEL_COMMUNITY == $powerLevel) {
+        elseif (POWER_LEVEL_COMMUNITY == $powerLevel) {
             $where['COUNTY_ID_12'] = session('info')['POWER_COUNTY_ID_12'];
             $where['STREET_ID'] = session('info')['POWER_STREET_ID'];
             $where['COMMUNITY_ID'] = session('info')['POWER_COMMUNITY_ID'];
@@ -298,6 +300,7 @@ class UserUrans extends Common
             $where['COUNTY_ID_12'] = $area1;
             $where['STREET_ID'] = $area2;
             $where['COMMUNITY_ID'] = $area3;
+            $is_so = !empty($area1) || !empty($area2) || !empty($area3);
         }
         if (!empty($where)) {
             foreach ($where as $name => $value) {
@@ -329,7 +332,7 @@ class UserUrans extends Common
             $sql .= " end lack_$num,";
         }
         $sql = substr($sql, 0, strlen($sql) - 1);
-        $sql .= " from ($subSql) AA";
+        $sql .= " from ($subSql) AA order by JD_START_TIME desc";
         $pageNO = $request->param('page', 1);
         if ($pageNO < 1) {
             $pageNO = 1;
@@ -354,7 +357,7 @@ class UserUrans extends Common
 
         $js = $this->loadJsCss(array('p:cate/jquery.cate', 'userurans_howitgoes'), 'js', 'admin');
         $this->assign('footjs', $js);
-        $this->assign('is_so', false);
+        $this->assign('is_so', $is_so);
         $this->assign('param', [
             'area1' => $where['COUNTY_ID_12'],
             'area2' => $where['STREET_ID'],

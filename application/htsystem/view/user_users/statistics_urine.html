@@ -4,10 +4,10 @@
         <div class="row-fluid ">
             <div class="span12">
                 <div class="primary-head">
-                    <div class="span5"><h4 class="page-header">统计-人员状态</h4></div>
-                    <!--<div class="span7">
+                    <div class="span5"><h4 class="page-header">统计-尿检记录</h4></div>
+                    <div class="span7">
                         <a href="javascript:void(0);" id="btnExport" class="btn btn-primary pull-right"><i class="icon-file"></i>导出</a>
-                    </div>-->
+                    </div>
                 </div>
             </div>
         </div>
@@ -39,44 +39,61 @@
         <table class="stat-table responsive table table-stats table-striped table-bordered">
             <tbody>
             <tr>
-                <th width="40px">县市区</th>
-                <th width="60px">乡镇街道</th>
-                <th width="60px">村级社区</th>
-                {foreach name="columnNames" key="id" item="name"}
-                    <th width="{if strlen($name) egt 5}45px{else/}30px{/if}">{$name}</th>
+                <th width="40px" rowspan="3" style="vertical-align: middle;">县市区</th>
+                <th width="60px" rowspan="3" style="vertical-align: middle;">乡镇街道</th>
+                <th width="60px" rowspan="3" style="vertical-align: middle;">村级社区</th>
+                {foreach name="columns_1" item="name"}
+                    <th width="{if strlen($name) egt 5}45px{else/}30px{/if}" colspan="6">{$name}</th>
+                {/foreach}
+                <th width="60px" rowspan="3" style="vertical-align: middle;">操作</th>
+            </tr>
+            <tr>
+                {foreach name="columns_2" item="name"}
+                <th width="{if strlen($name) egt 5}45px{else/}30px{/if}" colspan="2">{$name}</th>
+                {/foreach}
+            </tr>
+            <tr>
+                {foreach name="columns_3" item="name"}
+                <th width="{if strlen($name) egt 5}45px{else/}30px{/if}">{$name}</th>
                 {/foreach}
             </tr>
             {empty name="list"}
-            <tr><td colspan="19">木有找到相关的信息</td></tr>
+            <tr><td colspan="21">木有找到相关的信息</td></tr>
             {else/}
             <tr class="total-row">
                 <td>全部</td>
                 <td>全部</td>
                 <td>全部</td>
                 {foreach name="allList" item="all"}
-                    {foreach name="columnNames" key="id" item="name"}
+                    {foreach name="columns_3" key="id" item="name"}
                         <td>
-                            {if $all[$id] gt 0}
-                                <a href="../user_urans/howitgoes?{if isset($area1)}area1={$area1}{/if}{if isset($area2)}&area2={$area2}{/if}{if isset($area3)}&area3={$area3}{/if}">{$all[$id]}</a>
+                            {if $all[$id] gt 0 && strpos($id, 'LACK_') eq false}
+                                <a href="../user_urans/index?{if isset($area1)}area1={$area1}{/if}{if isset($area2)}&area2={$area2}{/if}{if isset($area3)}&area3={$area3}{/if}">{$all[$id]}</a>
                             {else/}{$all[$id]}
                             {/if}
                         </td>
                     {/foreach}
                 {/foreach}
+                <td>
+                    <a href="../user_urans/howitgoes?{if isset($area1)}area1={$area1}{/if}{if isset($area2)}&area2={$area2}{/if}{if isset($area3)}&area3={$area3}{/if}" class="btn mini btn-primary openlayerwin2">详情</a>
+                </td>
             </tr>
             {foreach name="list" item="da"}
                 <tr>
                     <td>{$da.COUNTY_NAME}</td>
                     <td>{if isset($da.STREET_NAME)}{$da.STREET_NAME}{/if}</td>
                     <td>{if isset($da.COMMUNITY_NAME)}{$da.COMMUNITY_NAME}{/if}</td>
-                    {foreach name="columnNames" key="id" item="name"}
+                    {foreach name="columns_3" key="id" item="name"}
                         <td>
-                            {if $da[$id] gt 0}
-                            <a href="../user_urans/howitgoes?{if isset($da.COUNTY_ID_12)}area1={$da.COUNTY_ID_12}{/if}{if isset($da.STREET_ID)}&area2={$da.STREET_ID}{/if}{if isset($da.COMMUNITY_ID)}&area3={$da.COMMUNITY_ID}{/if}">{$da[$id]}</a>
+                            {if $da[$id] gt 0 && strpos($id, 'LACK_') eq false}
+                            <a href="../user_urans/index?{if isset($da.COUNTY_ID_12)}area1={$da.COUNTY_ID_12}{/if}{if isset($da.STREET_ID)}&area2={$da.STREET_ID}{/if}{if isset($da.COMMUNITY_ID)}&area3={$da.COMMUNITY_ID}{/if}">{$da[$id]}</a>
                             {else/}{$da[$id]}
                             {/if}
                         </td>
                     {/foreach}
+                    <td>
+                        <a href="../user_urans/howitgoes?{if isset($da.COUNTY_ID_12)}area1={$da.COUNTY_ID_12}{/if}{if isset($da.STREET_ID)}&area2={$da.STREET_ID}{/if}{if isset($da.COMMUNITY_ID)}&area3={$da.COMMUNITY_ID}{/if}" class="btn mini btn-primary openlayerwin2">详情</a>
+                    </td>
                 </tr>
             {/foreach}
             {/empty}

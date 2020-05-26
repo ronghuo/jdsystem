@@ -1412,18 +1412,40 @@ class UserUsers extends Common
 
     public function statisticsUrine(Request $request) {
         return $this->statistic($request, function ($pageNO, $pageSize, $condition) {
-            $chineseTexts = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
-            $columnNames = [];
-            for ($i = 0; $i < UserUsersModel::STATISTICS_URINE_YEARS; $i++) {
-                $num = ($i + 1) . 'th';
-                $columnNames[$num] = "第" . $chineseTexts[$i] . "年完成次数";
-                $columnNames["lack_$num"] = "第" . $chineseTexts[$i] . "年缺失次数";
+            $availableStatus = UserUsersModel::getUrineAvailableStatus();
+//            array_push($availableStatus, [
+//               'name' => UserUsersModel::STATISTICS_NAME_TOTAL,
+//               'finished_name' => 'TOTAL_',
+//               'missing_name' => 'TOTAL_LACK_'
+//            ]);
+            $columns_1 = $columns_2 = $columns_3 = [];
+            foreach ($availableStatus as $attr) {
+                array_push($columns_1, $attr['name']);
+                for ($i = 0; $i < UserUsersModel::URINE_YEARS; $i++) {
+                    $year = $i + 1;
+                    $finishedName = $attr['finished_name'] . "$year";
+                    $missingName = $attr['missing_name'] . "$year";
+                    array_push($columns_2, $this->getYearSinicized($i));
+                    $columns_3[$finishedName] = "完成";
+                    $columns_3[$missingName] = "缺失";
+                }
             }
-            $columnNames['totalFinished'] = "总计完成次数";
-            $columnNames['totalMissing'] = "总计缺失次数";
-            $this->assign('columnNames', $columnNames);
+            $this->assign('columns_1', $columns_1);
+            $this->assign('columns_2', $columns_2);
+            $this->assign('columns_3', $columns_3);
             return UserUsersModel::statisticsUrine($pageNO, $pageSize, $condition);
         }, 'statistics_urine');
+    }
+
+    public function exportStatisticsUrine(Request $request) {
+        $this->exportStatistics($request, function ($pageNO, $pageSize, $condition) {
+            return UserUsersModel::statisticsUrine($pageNO, $pageSize, $condition);
+        }, '尿检记录统计报表', array_values($this->getStatisticsUrineColumnNames()));
+    }
+
+    private function getYearSinicized($index) {
+        $numSinicizeds = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+        return "第" . $numSinicizeds[$index] . "年";
     }
 
     private function statistic(Request $request, $dataGetter, $view) {
@@ -1477,7 +1499,7 @@ class UserUsers extends Common
         return $this->fetch("$view");
     }
 
-    public function exportStatistics(Request $request, $dataGetter, $fileName) {
+    public function exportStatistics(Request $request, $dataGetter, $fileName, $columnNames = []) {
         $condition = $request->param();
         $powerLevel = $this->getPowerLevel();
         if (self::POWER_LEVEL_COUNTY == $powerLevel) {
@@ -1537,7 +1559,7 @@ class UserUsers extends Common
         $allList = $result['allList'];
         $totalRow = &$allList[0];
 
-        $columnName = array_merge(self::STATISTICS_EXCEL_TITLE_LIST, array_keys($totalRow));
+        $columnName = array_merge(self::STATISTICS_EXCEL_TITLE_LIST, empty($columnNames) ? array_keys($totalRow) : $columnNames);
 
         $totalRow = [
                 $countyName => '全部',

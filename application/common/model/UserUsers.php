@@ -39,7 +39,11 @@ class UserUsers extends BaseModel
     const STATISTICS_OTHER_TITLE = '其它';
     const STATUS_ID_OTHER = 'other';
     const STATUS_NAME_OTHER = '状况不明';
-    const STATISTICS_URINE_YEARS = 3;
+    const URINE_YEARS = 3;
+    const URINE_PREFIX_QUIT_FINISHED = 'QUIT_';              // 尿检统计属性字段前缀（社区戒毒完成）
+    const URINE_PREFIX_QUIT_MISSING = 'QUIT_LACK_';          // 尿检统计属性字段前缀（社区戒毒缺失）
+    const URINE_PREFIX_RECOVERY_FINISHED = 'RECOVERY_';      // 尿检统计属性字段前缀（社区康复完成）
+    const URINE_PREFIX_RECOVERY_MISSING = 'RECOVERY_LACK_';  // 尿检统计属性字段前缀（社区康复缺失）
 
     protected $pk = 'ID';
     public $table = 'USER_USERS';
@@ -287,57 +291,62 @@ class UserUsers extends BaseModel
     }
 
     public static function statisticsUrine($pageNO = 1, $pageSize = 20, $condition = []) {
-        $userStatus = create_kv(BaseUserStatus::all()->toArray(), 'ID', 'NAME');
-        $fitStatusIds = [];
-        foreach ($userStatus as $id => $name) {
-            if ($name == STATUS_COMMUNITY_DETOXIFICATION) {
-                $fitStatusIds[$id] = URINE_CHECK_RATE_DETOXIFICATION;
-                continue;
+        $availableStatus = self::getUrineAvailableStatus();
+        return self::statistics(function ($subSql, $groupBy) use ($availableStatus) {
+            $whereIn = implode(',', array_keys($availableStatus));
+            foreach ($availableStatus as $statusId => $attr) {
+                $userNumName = $attr['finished_name'] . "USER_NUM";
+                $subSql .= "sum(case when USER_STATUS_ID = $statusId then 1 else 0 end) $userNumName,";
+                for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
+                    $year = $i + 1;
+                    $finishedName = $attr['finished_name'] . "$year";
+                    $missingName = $attr['missing_name'] . "$year";
+                    $checkTimes = $attr['rate'][$i];
+                    $subSql .= "sum(case when USER_STATUS_ID = $statusId then CNT_$year else 0 end) $finishedName,";
+                    $subSql .= "sum(case when USER_STATUS_ID = $statusId then ceil(if(MONTHS > 12*$year, 12, if(MONTHS > 12*$i, MONTHS - 12*$i, 0)) / (12 / $checkTimes)) - CNT_$year else 0 end) $missingName,";
+                }
             }
-            if ($name == STATUS_COMMUNITY_RECOVERING) {
-                $fitStatusIds[$id] = URINE_CHECK_RATE_RECOVERING;
-                continue;
-            }
-        }
-        return self::statistics(function ($subSql, $groupBy) use ($fitStatusIds) {
-            $whereIn = implode(',', array_keys($fitStatusIds));
+            $subSql = substr($subSql, 0, -1);
+            $subSql .= " from (select USER_STATUS_ID,JD_START_TIME,if(JD_START_TIME is not null, TIMESTAMPDIFF(MONTH, JD_START_TIME, DATE_FORMAT(NOW(),'%Y-%m-%d')) + if(JD_START_TIME > now(), 0, 1), 0) MONTHS,COUNTY_ID_12,STREET_ID,COMMUNITY_ID,";
             for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
                 $year = $i + 1;
-                $num = ($i + 1) . "th";
-                $subSql .= "sum($num) $num,sum(case";
-                foreach ($fitStatusIds as $statusId => $checkTimesList) {
-                    $checkTimes = $checkTimesList[$i];
-                    $shouldTimes = "ceil(if(months > 12*$year, 12, if(months > 12*$i, months - 12*$i, 0)) / (12 / $checkTimes))";
-                    $subSql .= " when USER_STATUS_ID = $statusId then $shouldTimes - $num";
-                }
-                $subSql .= " end) lack_$num,";
-            }
-            $subSql = substr($subSql, 0, strlen($subSql) - 1);
-            $subSql .= " from (select USER_STATUS_ID,JD_START_TIME,if(JD_START_TIME is not null, TIMESTAMPDIFF(MONTH, JD_START_TIME, DATE_FORMAT(NOW(),'%Y-%m-%d')) + if(JD_START_TIME > now(), 0, 1), 0) months,COUNTY_ID_12,STREET_ID,COMMUNITY_ID,";
-            for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
-                $num = ($i + 1) . "th";
-                $subSql .= "(select count(1) from urans where UUID = A.ID and CHECK_TIME >= DATE_ADD(A.JD_START_TIME,INTERVAL $i year) and CHECK_TIME < DATE_ADD(A.JD_START_TIME,INTERVAL ($i + 1) year)) $num,";
+                $subSql .= "(select count(1) from urans where UUID = A.ID and CHECK_TIME >= DATE_ADD(A.JD_START_TIME,INTERVAL $i year) and CHECK_TIME < DATE_ADD(A.JD_START_TIME,INTERVAL ($i + 1) year)) CNT_$year,";
             }
             $subSql = substr($subSql, 0, strlen($subSql) - 1);
             $subSql .= " from user_users A where USER_STATUS_ID in ($whereIn) and ISDEL = 0) A";
             $subSql .= "  group by " . implode(',', $groupBy);
             return $subSql;
-        }, function ($sql) {
-            for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
-                $num = ($i + 1) . "th";
-                $sql .= "sum($num) $num,sum(lack_$num) lack_$num,";
+        }, function ($sql) use ($availableStatus) {
+            foreach ($availableStatus as $attr) {
+                for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
+                    $year = $i + 1;
+                    $finishedName = $attr['finished_name'] . "$year";
+                    $missingName = $attr['missing_name'] . "$year";
+                    $sql .= "sum($finishedName) $finishedName,sum($missingName) $missingName,";
+                }
             }
-            $sql = substr($sql, 0, strlen($sql) - 1);
+            $sql = substr($sql, 0, -1);
             return $sql;
-        }, function (&$item) use ($userStatus) {
-            $totalFinished = $totalMissing = 0;
-            for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
-                $num = ($i + 1) . "th";
-                $totalFinished += $item[$num];
-                $totalMissing += $item["lack_$num"];
+        }, function (&$item) use ($availableStatus) {
+            foreach ($availableStatus as $attr) {
+                for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
+                    $year = $i + 1;
+                    $finishedName = $attr['finished_name'] . "$year";
+                    $missingName = $attr['missing_name'] . "$year";
+                    $totalFinishedName = "TOTAL_$year";
+                    $totalMissingName = "TOTAL_LACK_$year";
+                    if (isset($item[$totalFinishedName])) {
+                        $item[$totalFinishedName] += $item[$finishedName];
+                    } else {
+                        $item[$totalFinishedName] = $item[$finishedName];
+                    }
+                    if (isset($item[$totalMissingName])) {
+                        $item[$totalMissingName] += $item[$missingName];
+                    } else {
+                        $item[$totalMissingName] = $item[$missingName];
+                    }
+                }
             }
-            $item['totalFinished'] = $totalFinished;
-            $item['totalMissing'] = $totalMissing;
         }, $pageSize, $pageNO, $condition);
     }
 
@@ -427,6 +436,35 @@ class UserUsers extends BaseModel
             'pageTotal' => $pageTotal,
             'pageList' => $pageList
         ];
+    }
+
+    public static function getUrineAvailableStatus() {
+        $userStatus = create_kv(BaseUserStatus::all()->toArray(), 'ID', 'NAME');
+        $availableStatus = [];
+        foreach ($userStatus as $id => $name) {
+            if (count($availableStatus) == 2) {
+                break;
+            }
+            if ($name == STATUS_COMMUNITY_DETOXIFICATION) {
+                $availableStatus[$id] = [
+                    'name' => $name,
+                    'rate' => URINE_CHECK_RATE_DETOXIFICATION,
+                    'finished_name' => self::URINE_PREFIX_QUIT_FINISHED,
+                    'missing_name' => self::URINE_PREFIX_QUIT_MISSING
+                ];
+                continue;
+            }
+            if ($name == STATUS_COMMUNITY_RECOVERING) {
+                $availableStatus[$id] = [
+                    'name' => $name,
+                    'rate' => URINE_CHECK_RATE_RECOVERING,
+                    'finished_name' => self::URINE_PREFIX_RECOVERY_FINISHED,
+                    'missing_name' => self::URINE_PREFIX_RECOVERY_MISSING
+                ];
+                continue;
+            }
+        }
+        return $availableStatus;
     }
 
 }
