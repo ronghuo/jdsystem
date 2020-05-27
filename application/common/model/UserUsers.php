@@ -328,13 +328,13 @@ class UserUsers extends BaseModel
             $sql = substr($sql, 0, -1);
             return $sql;
         }, function (&$item) use ($availableStatus) {
+            $totalFinishedName = "TOTAL_FINISHED";
+            $totalMissingName = "TOTAL_MISSING";
             foreach ($availableStatus as $attr) {
                 for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
                     $year = $i + 1;
                     $finishedName = $attr['finished_name'] . "$year";
                     $missingName = $attr['missing_name'] . "$year";
-                    $totalFinishedName = "TOTAL_$year";
-                    $totalMissingName = "TOTAL_LACK_$year";
                     if (isset($item[$totalFinishedName])) {
                         $item[$totalFinishedName] += $item[$finishedName];
                     } else {

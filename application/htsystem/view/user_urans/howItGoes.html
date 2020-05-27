@@ -68,14 +68,14 @@
                 <td>{$da.USER_STATUS_NAME}</td>
                 <td>{$da.AREA}</td>
                 <td>{empty name="da.JD_START_TIME"}<a href="javascript:void(0);" class="openlayerwin" data-url="{:url('UserUsers/setJdStartTime', ['id' => $da.ID])}" style="color: red;">未设置</a>{else/}{$da.JD_START_TIME}{/empty}</td>
-                <td>{$da.1th}</td>
-                <td>{$da.lack_1th}</td>
-                <td>{$da.2th}</td>
-                <td>{$da.lack_2th}</td>
-                <td>{$da.3th}</td>
-                <td>{$da.lack_3th}</td>
-                <td>{$da.totalFinished}</td>
-                <td>{$da.totalMissing}</td>
+                <td>{$da.FINISHED_1}</td>
+                <td>{$da.MISSING_1}</td>
+                <td>{$da.FINISHED_2}</td>
+                <td>{$da.MISSING_2}</td>
+                <td>{$da.FINISHED_3}</td>
+                <td>{$da.MISSING_3}</td>
+                <td>{if $da.TOTAL_FINISHED gt 0}<a href="{:url('UserUrans/index', ['uuid' => $da.ID])}">{$da.TOTAL_FINISHED}</a>{else/}{$da.TOTAL_FINISHED}{/if}</td>
+                <td>{$da.TOTAL_MISSING}</td>
             </tr>
             {/foreach}
             {/empty}

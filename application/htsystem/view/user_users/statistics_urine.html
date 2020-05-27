@@ -42,20 +42,20 @@
                 <th width="40px" rowspan="3" style="vertical-align: middle;">县市区</th>
                 <th width="60px" rowspan="3" style="vertical-align: middle;">乡镇街道</th>
                 <th width="60px" rowspan="3" style="vertical-align: middle;">村级社区</th>
-                {foreach name="columns_1" item="name"}
-                    <th width="{if strlen($name) egt 5}45px{else/}30px{/if}" colspan="6">{$name}</th>
-                {/foreach}
+                {volist name="columns_1" id="name"}
+                    <th width="{if strlen($name) egt 5}45px{else/}30px{/if}" {if $i lt count($columns_1)}colspan="6"{else/}colspan="2"{/if}>{$name}</th>
+                {/volist}
                 <th width="60px" rowspan="3" style="vertical-align: middle;">操作</th>
             </tr>
             <tr>
-                {foreach name="columns_2" item="name"}
+                {volist name="columns_2" id="name"}
                 <th width="{if strlen($name) egt 5}45px{else/}30px{/if}" colspan="2">{$name}</th>
-                {/foreach}
+                {/volist}
             </tr>
             <tr>
-                {foreach name="columns_3" item="name"}
+                {volist name="columns_3" id="name"}
                 <th width="{if strlen($name) egt 5}45px{else/}30px{/if}">{$name}</th>
-                {/foreach}
+                {/volist}
             </tr>
             {empty name="list"}
             <tr><td colspan="21">木有找到相关的信息</td></tr>
@@ -67,7 +67,7 @@
                 {foreach name="allList" item="all"}
                     {foreach name="columns_3" key="id" item="name"}
                         <td>
-                            {if $all[$id] gt 0 && strpos($id, 'LACK_') eq false}
+                            {if $all[$id] gt 0 && 'TOTAL_FINISHED' eq $id}
                                 <a href="../user_urans/index?{if isset($area1)}area1={$area1}{/if}{if isset($area2)}&area2={$area2}{/if}{if isset($area3)}&area3={$area3}{/if}">{$all[$id]}</a>
                             {else/}{$all[$id]}
                             {/if}
@@ -85,7 +85,7 @@
                     <td>{if isset($da.COMMUNITY_NAME)}{$da.COMMUNITY_NAME}{/if}</td>
                     {foreach name="columns_3" key="id" item="name"}
                         <td>
-                            {if $da[$id] gt 0 && strpos($id, 'LACK_') eq false}
+                            {if $da[$id] gt 0 && 'TOTAL_FINISHED' eq $id}
                             <a href="../user_urans/index?{if isset($da.COUNTY_ID_12)}area1={$da.COUNTY_ID_12}{/if}{if isset($da.STREET_ID)}&area2={$da.STREET_ID}{/if}{if isset($da.COMMUNITY_ID)}&area3={$da.COMMUNITY_ID}{/if}">{$da[$id]}</a>
                             {else/}{$da[$id]}
                             {/if}

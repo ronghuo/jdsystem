@@ -1413,11 +1413,6 @@ class UserUsers extends Common
     public function statisticsUrine(Request $request) {
         return $this->statistic($request, function ($pageNO, $pageSize, $condition) {
             $availableStatus = UserUsersModel::getUrineAvailableStatus();
-//            array_push($availableStatus, [
-//               'name' => UserUsersModel::STATISTICS_NAME_TOTAL,
-//               'finished_name' => 'TOTAL_',
-//               'missing_name' => 'TOTAL_LACK_'
-//            ]);
             $columns_1 = $columns_2 = $columns_3 = [];
             foreach ($availableStatus as $attr) {
                 array_push($columns_1, $attr['name']);
@@ -1425,11 +1420,16 @@ class UserUsers extends Common
                     $year = $i + 1;
                     $finishedName = $attr['finished_name'] . "$year";
                     $missingName = $attr['missing_name'] . "$year";
-                    array_push($columns_2, $this->getYearSinicized($i));
+                    $chineseYear = number2chinese($year);
+                    array_push($columns_2, "第" . $chineseYear . "年");
                     $columns_3[$finishedName] = "完成";
                     $columns_3[$missingName] = "缺失";
                 }
             }
+            array_push($columns_1, UserUsersModel::STATISTICS_NAME_TOTAL);
+            array_push($columns_2, "整社戒社康期间");
+            $columns_3['TOTAL_FINISHED'] = "完成";
+            $columns_3['TOTAL_MISSING'] = "缺失";
             $this->assign('columns_1', $columns_1);
             $this->assign('columns_2', $columns_2);
             $this->assign('columns_3', $columns_3);
@@ -1441,11 +1441,6 @@ class UserUsers extends Common
         $this->exportStatistics($request, function ($pageNO, $pageSize, $condition) {
             return UserUsersModel::statisticsUrine($pageNO, $pageSize, $condition);
         }, '尿检记录统计报表', array_values($this->getStatisticsUrineColumnNames()));
-    }
-
-    private function getYearSinicized($index) {
-        $numSinicizeds = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
-        return "第" . $numSinicizeds[$index] . "年";
     }
 
     private function statistic(Request $request, $dataGetter, $view) {
