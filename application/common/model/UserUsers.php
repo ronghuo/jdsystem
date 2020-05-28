@@ -324,27 +324,22 @@ class UserUsers extends BaseModel
                     $missingName = $attr['missing_name'] . "$year";
                     $sql .= "sum($finishedName) $finishedName,sum($missingName) $missingName,";
                 }
+                $userNumName = $attr['finished_name'] . 'USER_NUM';
+                $sql .= "sum($userNumName) $userNumName,";
             }
             $sql = substr($sql, 0, -1);
             return $sql;
         }, function (&$item) use ($availableStatus) {
             $totalFinishedName = "TOTAL_FINISHED";
             $totalMissingName = "TOTAL_MISSING";
+            $item[$totalFinishedName] = $item[$totalMissingName] = 0;
             foreach ($availableStatus as $attr) {
                 for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
                     $year = $i + 1;
                     $finishedName = $attr['finished_name'] . "$year";
                     $missingName = $attr['missing_name'] . "$year";
-                    if (isset($item[$totalFinishedName])) {
-                        $item[$totalFinishedName] += $item[$finishedName];
-                    } else {
-                        $item[$totalFinishedName] = $item[$finishedName];
-                    }
-                    if (isset($item[$totalMissingName])) {
-                        $item[$totalMissingName] += $item[$missingName];
-                    } else {
-                        $item[$totalMissingName] = $item[$missingName];
-                    }
+                    $item[$totalFinishedName] += $item[$finishedName];
+                    $item[$totalMissingName] += $item[$missingName];
                 }
             }
         }, $pageSize, $pageNO, $condition);

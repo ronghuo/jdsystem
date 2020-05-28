@@ -173,6 +173,8 @@ class UserUsers extends Common
      */
     const DEFAULT_COUNTY_ID = '431201000000';
 
+    const YEAR_NUMBER = "第%s年";
+
     protected $MODULE = 'UserUser';
 
     /**
@@ -1412,28 +1414,34 @@ class UserUsers extends Common
 
     public function statisticsUrine(Request $request) {
         return $this->statistic($request, function ($pageNO, $pageSize, $condition) {
+            $data = UserUsersModel::statisticsUrine($pageNO, $pageSize, $condition);
+            $allListRow = $data['allList'][0];
             $availableStatus = UserUsersModel::getUrineAvailableStatus();
-            $columns_1 = $columns_2 = $columns_3 = [];
+            $columns_1 = $columns_2 = $columns_3 = $userNumbers = [];
+            $column1Format = "%s（%u人）";
+            $totalUserNum = 0;
             foreach ($availableStatus as $attr) {
-                array_push($columns_1, $attr['name']);
+                $userNum = $allListRow[$attr['finished_name'] . "USER_NUM"];
+                $totalUserNum += $userNum;
+                array_push($columns_1, sprintf($column1Format, mb_substr($attr['name'], 0, -1), $userNum));
                 for ($i = 0; $i < UserUsersModel::URINE_YEARS; $i++) {
                     $year = $i + 1;
                     $finishedName = $attr['finished_name'] . "$year";
                     $missingName = $attr['missing_name'] . "$year";
                     $chineseYear = number2chinese($year);
-                    array_push($columns_2, "第" . $chineseYear . "年");
-                    $columns_3[$finishedName] = "完成";
-                    $columns_3[$missingName] = "缺失";
+                    array_push($columns_2, sprintf(self::YEAR_NUMBER, $chineseYear));
+                    $columns_3[$finishedName] = URINE_CHECK_FINISHED;
+                    $columns_3[$missingName] = URINE_CHECK_MISSING;
                 }
             }
-            array_push($columns_1, UserUsersModel::STATISTICS_NAME_TOTAL);
+            array_push($columns_1, sprintf($column1Format, UserUsersModel::STATISTICS_NAME_TOTAL, $totalUserNum));
             array_push($columns_2, "整社戒社康期间");
-            $columns_3['TOTAL_FINISHED'] = "完成";
-            $columns_3['TOTAL_MISSING'] = "缺失";
+            $columns_3['TOTAL_FINISHED'] = URINE_CHECK_FINISHED;
+            $columns_3['TOTAL_MISSING'] = URINE_CHECK_MISSING;
             $this->assign('columns_1', $columns_1);
             $this->assign('columns_2', $columns_2);
             $this->assign('columns_3', $columns_3);
-            return UserUsersModel::statisticsUrine($pageNO, $pageSize, $condition);
+            return $data;
         }, 'statistics_urine');
     }
 
