@@ -7,10 +7,10 @@
  */
 namespace app\common\library;
 
-class Mylog{
+class Mylog {
 
 
-    public static function write($mseg, $fname='test', $needTimeLine = true){
+    public static function write($mseg, $fname='test', $needTimeLine = true) {
         if(is_array($mseg)){
             $mseg = print_r($mseg,1);
         }

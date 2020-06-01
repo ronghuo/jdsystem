@@ -588,9 +588,7 @@ class UserUsers extends Common
                 $this->error('提交数据不能为空');
             }
 
-            $info = UserUsersModel::where('ISDEL','=',0)
-
-                ->find($id);
+            $info = UserUsersModel::where('ISDEL','=',0)->find($id);
             if(!$info){
                 $this->error('该人员信息不存在或已删除');
             }
@@ -1415,29 +1413,8 @@ class UserUsers extends Common
     public function statisticsUrine(Request $request) {
         return $this->statistic($request, function ($pageNO, $pageSize, $condition) {
             $data = UserUsersModel::statisticsUrine($pageNO, $pageSize, $condition);
-            $allListRow = $data['allList'][0];
-            $availableStatus = UserUsersModel::getUrineAvailableStatus();
-            $columns_1 = $columns_2 = $columns_3 = $userNumbers = [];
-            $column1Format = "%s（%u人）";
-            $totalUserNum = 0;
-            foreach ($availableStatus as $attr) {
-                $userNum = $allListRow[$attr['finished_name'] . "USER_NUM"];
-                $totalUserNum += $userNum;
-                array_push($columns_1, sprintf($column1Format, mb_substr($attr['name'], 0, -1), $userNum));
-                for ($i = 0; $i < UserUsersModel::URINE_YEARS; $i++) {
-                    $year = $i + 1;
-                    $finishedName = $attr['finished_name'] . "$year";
-                    $missingName = $attr['missing_name'] . "$year";
-                    $chineseYear = number2chinese($year);
-                    array_push($columns_2, sprintf(self::YEAR_NUMBER, $chineseYear));
-                    $columns_3[$finishedName] = URINE_CHECK_FINISHED;
-                    $columns_3[$missingName] = URINE_CHECK_MISSING;
-                }
-            }
-            array_push($columns_1, sprintf($column1Format, UserUsersModel::STATISTICS_NAME_TOTAL, $totalUserNum));
-            array_push($columns_2, "整社戒社康期间");
-            $columns_3['TOTAL_FINISHED'] = URINE_CHECK_FINISHED;
-            $columns_3['TOTAL_MISSING'] = URINE_CHECK_MISSING;
+            $columns_1 = $columns_2 = $columns_3 = [];
+            $this->setHeaderRows($data, $columns_1, $columns_2, $columns_3);
             $this->assign('columns_1', $columns_1);
             $this->assign('columns_2', $columns_2);
             $this->assign('columns_3', $columns_3);
@@ -1448,7 +1425,63 @@ class UserUsers extends Common
     public function exportStatisticsUrine(Request $request) {
         $this->exportStatistics($request, function ($pageNO, $pageSize, $condition) {
             return UserUsersModel::statisticsUrine($pageNO, $pageSize, $condition);
-        }, '尿检记录统计报表', array_values($this->getStatisticsUrineColumnNames()));
+        }, '尿检记录统计报表', function ($data) {
+            $columns_1 = $columns_2 = $columns_3 = [];
+            $this->setHeaderRows($data, $columns_1, $columns_2, $columns_3);
+            $row1 = $row2 = $row3 = [];
+            foreach (self::STATISTICS_EXCEL_TITLE_LIST as $name) {
+                array_push($row1, [
+                    'name' => $name,
+                    'mergeY' => 2,
+                    'alignY' => \PHPExcel_Style_Alignment::VERTICAL_CENTER
+                ]);
+            }
+            foreach ($columns_1 as $name) {
+                array_push($row1, [
+                    'name' => $name,
+                    'mergeX' => end($columns_1) == $name ? 1 : 5
+                ]);
+            }
+            $row2['offset'] = 3;
+            foreach ($columns_2 as $name) {
+                array_push($row2, [
+                    'name' => $name,
+                    'mergeX' => 1
+                ]);
+            }
+            $row3['offset'] = 3;
+            foreach (array_values($columns_3) as $name) {
+                array_push($row3, [
+                    'name' => $name
+                ]);
+            }
+            return [$row1, $row2, $row3];
+        }, ['QUIT_USER_NUM', 'RECOVERY_USER_NUM']);
+    }
+
+    private function setHeaderRows($data, &$columns_1, &$columns_2, &$columns_3) {
+        $allListRow = $data['allList'][0];
+        $availableStatus = UserUsersModel::getUrineAvailableStatus();
+        $column1Format = "%s（%u人）";
+        $totalUserNum = 0;
+        foreach ($availableStatus as $attr) {
+            $userNum = $allListRow[$attr['finished_name'] . "USER_NUM"];
+            $totalUserNum += $userNum;
+            array_push($columns_1, sprintf($column1Format, mb_substr($attr['name'], 0, -1), $userNum));
+            for ($i = 0; $i < UserUsersModel::URINE_YEARS; $i++) {
+                $year = $i + 1;
+                $finishedName = $attr['finished_name'] . "$year";
+                $missingName = $attr['missing_name'] . "$year";
+                $chineseYear = number2chinese($year);
+                array_push($columns_2, sprintf(self::YEAR_NUMBER, $chineseYear));
+                $columns_3[$finishedName] = URINE_CHECK_FINISHED;
+                $columns_3[$missingName] = URINE_CHECK_MISSING;
+            }
+        }
+        array_push($columns_1, sprintf($column1Format, UserUsersModel::STATISTICS_NAME_TOTAL, $totalUserNum));
+        array_push($columns_2, "整社戒社康期间");
+        $columns_3['TOTAL_FINISHED'] = URINE_CHECK_FINISHED;
+        $columns_3['TOTAL_MISSING'] = URINE_CHECK_MISSING;
     }
 
     private function statistic(Request $request, $dataGetter, $view) {
@@ -1502,7 +1535,7 @@ class UserUsers extends Common
         return $this->fetch("$view");
     }
 
-    public function exportStatistics(Request $request, $dataGetter, $fileName, $columnNames = []) {
+    public function exportStatistics(Request $request, $dataGetter, $fileName, $headerGetter = 'default', $ignoredHeaders = []) {
         $condition = $request->param();
         $powerLevel = $this->getPowerLevel();
         if (self::POWER_LEVEL_COUNTY == $powerLevel) {
@@ -1562,7 +1595,11 @@ class UserUsers extends Common
         $allList = $result['allList'];
         $totalRow = &$allList[0];
 
-        $columnName = array_merge(self::STATISTICS_EXCEL_TITLE_LIST, empty($columnNames) ? array_keys($totalRow) : $columnNames);
+        if ($headerGetter !== 'default') {
+            $headerRows = $headerGetter($result);
+        } else {
+            $headerRows = array_merge(self::STATISTICS_EXCEL_TITLE_LIST, array_keys($totalRow));
+        }
 
         $totalRow = [
                 $countyName => '全部',
@@ -1571,7 +1608,17 @@ class UserUsers extends Common
             ] + $totalRow;
 
         $list = array_merge($allList, $pageList);
-        exportExcel($columnName, $list, '统计数据', $fileName);
+        if (!empty($ignoredHeaders)) {
+            foreach ($ignoredHeaders as $header) {
+                foreach ($list as &$item) {
+                    if (!isset($item[$header])) {
+                        continue;
+                    }
+                    unset($item[$header]);
+                }
+            }
+        }
+        exportExcel($headerRows, $list, '统计数据', $fileName);
     }
 
     public function setJdStartTime(Request $request, $id = 0) {

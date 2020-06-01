@@ -20,6 +20,7 @@ define('TERMINAL_WEB', 'WEB');  // 后台
 /**
  * 地区代码
  */
+define('MINISTRY_ID', '010000');            // 部
 define('DEFAULT_PROVINCE_ID', '430000');    // 湖南省
 define('DEFAULT_CITY_ID', '431200');        // 怀化市
 
@@ -419,38 +420,77 @@ function ifEmptyThenNull($var) {
     return $var;
 }
 
-function exportExcel($columnName, $list, $setTitle='Sheet1', $fileName='demo')
+function exportExcel($headerRows, $list, $title='Sheet1', $fileName='demo')
 {
-    if (empty($columnName) || empty($list)) {
+    if (empty($headerRows) || empty($list)) {
         return '列名或者内容不能为空';
-    }
-    if (count($list[0]) != count($columnName)) {
-        return '列名跟数据的列不一致';
     }
 
     //实例化PHPExcel类
     $PHPExcel = new PHPExcel();
     //获得当前sheet对象
-    $PHPSheet = $PHPExcel->getActiveSheet();
+    $sheet = $PHPExcel->getActiveSheet();
     //定义sheet名称
-    $PHPSheet->setTitle($setTitle);
+    $sheet->setTitle($title);
 
     //excel的列 这么多够用了吧？不够自个加 AA AB AC ……
     $letter = [
         'A','B','C','D','E','F','G','H','I','J','K','L','M',
         'N','O','P','Q','R','S','T','U','V','W','X','Y','Z'
     ];
-    //把列名写入第1行 A1 B1 C1 ...
-    for ($i=0; $i < count($list[0]); $i++) {
-        //$letter[$i]1 = A1 B1 C1  $letter[$i] = 列1 列2 列3
-        $PHPSheet->setCellValue("$letter[$i]1","$columnName[$i]");
+
+    // 存在多个标题行
+    if (is_array($headerRows[0])) {
+        $row = 1;
+        $sheet->mergeCells('A1:A3');
+        foreach ($headerRows as $headerRow) {
+            $column = 0;
+            if (!empty($headerRow['offset'])) {
+                $column += $headerRow['offset'];
+                unset($headerRow['offset']);
+            }
+            foreach ($headerRow as $setting) {
+                $x = $letter[$column];
+                $y = $row;
+                if (!empty($setting['mergeX'])) {
+                    $mergeX = $letter[$column + $setting['mergeX']];
+                    $column += $setting['mergeX'];
+                } else {
+                    $mergeX = $x;
+                }
+                if (!empty($setting['mergeY'])) {
+                    $mergeY = $y + $setting['mergeY'];
+                } else {
+                    $mergeY = $y;
+                }
+                $mergeTo = "$mergeX$mergeY";
+                $mergeFrom = "$x$y";
+                if ($mergeTo != $mergeFrom) {
+                    $sheet->mergeCells("$mergeFrom:$mergeTo");
+                }
+                $sheet->getStyle($mergeFrom)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+                if (!empty($setting['alignY'])) {
+                    $sheet->getStyle($mergeFrom)->getAlignment()->setVertical($setting['alignY']);
+                }
+                $sheet->setCellValue($mergeFrom, $setting['name']);
+                $column++;
+            }
+            $row++;
+        }
     }
-    //内容第2行开始
+    else {
+        if (count($list[0]) != count($headerRows)) {
+            return '列名跟数据的列不一致';
+        }
+        for ($i = 0; $i < count($list[0]); $i++) {
+            $sheet->setCellValue("$letter[$i]1","$headerRows[$i]");
+        }
+    }
+
     foreach ($list as $key => $val) {
         //array_values 把一维数组的键转为0 1 2 3 ..
         foreach (array_values($val) as $key2 => $val2) {
-            //$letter[$key2].($key+2) = A2 B2 C2 ……
-            $PHPSheet->setCellValue($letter[$key2].($key+2),$val2);
+            $sheet->setCellValue($letter[$key2].($key+$row),$val2);
         }
     }
     //生成2007版本的xlsx

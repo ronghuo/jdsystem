@@ -10,6 +10,7 @@ use think\facade\Route;
 
 Route::any('/test/:name','api1/Test/:name');
 
+Route::get('/options/all_areas','api1/Options/all_areas');
 Route::get('/options/areas','api1/Options/areas');
 Route::get('/options/subareas','api1/Options/subAreas');
 //Route::get('/options/subareasbak','api1/Options/subAreasbak');

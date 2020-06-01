@@ -200,7 +200,7 @@ class UserUrans extends Common
             $this->error('该报告事项不存在或已删除');
         }
 
-        if(!$this->checkUUid($info->UUID)){
+        if (!$this->checkUUid($info->UUID)) {
             $this->error('权限不足');
         }
 

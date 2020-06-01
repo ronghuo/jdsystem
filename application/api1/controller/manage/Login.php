@@ -40,13 +40,9 @@ class Login extends Common{
         }
 
 
-
-
-        if(!in_array($pwsd ,['test1234560','123456'])){
-            $input_pwsd = create_pwd($pwsd,$info->SALT);
-            if($input_pwsd !== $info->PWSD){
-                return $this->fail('手机号或密码不正确');
-            }
+        $input_pwsd = create_pwd($pwsd,$info->SALT);
+        if($input_pwsd !== $info->PWSD){
+            return $this->fail('手机号或密码不正确');
         }
 
 

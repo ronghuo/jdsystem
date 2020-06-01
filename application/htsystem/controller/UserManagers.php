@@ -127,11 +127,11 @@ class UserManagers extends Common
      *
      * @return \think\Response
      */
-    public function create(Request $request, $id=0,$act='add')
+    public function create(Request $request, $id = 0, $act = 'add')
     {
 
         if($request->isPost()){
-            if($act == 'add') {
+            if ($act == 'add') {
                 return $this->saveCreate($request);
             }else{
                 return $this->save($request);
@@ -221,10 +221,10 @@ class UserManagers extends Common
                 $this->error('密码长度不得少于6位');
             }
             // 校验密码强度
-            $strength = calcPwdStrength($pwsd);
-            if ($strength < 5) {
-                $this->error('密码必须是数字、字母、特殊字符的组合');
-            }
+//            $strength = calcPwdStrength($pwsd);
+//            if ($strength < 5) {
+//                $this->error('密码必须是数字、字母、特殊字符的组合');
+//            }
 
             $info = UserManagersModel::where('ISDEL','=',0)->find($id);
             if(!$info){
@@ -689,7 +689,7 @@ class UserManagers extends Common
             ->where('MOBILE','=',$mobile)
             ->count();
 
-        if($exist){
+        if ($exist) {
             $this->error('新的手机号已存在，请换一个');
         }
 
@@ -770,7 +770,7 @@ class UserManagers extends Common
 
 
         $v = new UserManagersVer();
-        if(!$v->scene('htadd')->check($data)){
+        if (!$v->scene('htadd')->check($data)) {
             $this->error($v->getError());
         }
 

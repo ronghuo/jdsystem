@@ -19,7 +19,7 @@ use app\common\model\Urans,
 class Uran extends Common {
 
 
-    public function index(Request $request){
+    public function index(Request $request) {
 
         $page = $request->param('page',1,'int');
         $user_id = $request->param('userid',0,'int');

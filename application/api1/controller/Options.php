@@ -58,7 +58,7 @@ class Options extends Common
 //            'DMMCS'=>$this->dmmcs($request,true),
         ]);
     }
-    //省-市-区
+    // 市->县->乡->村
     public function areas(Request $request, $return_array = false) {
         $cache_key = config('app.api_keys.areas') . DEFAULT_CITY_ID;
         $trees = cache($cache_key);
@@ -69,16 +69,38 @@ class Options extends Common
 
             $trees = create_level_tree($list, DEFAULT_PROVINCE_ID,'ID','PID');
 
-            cache($cache_key,$trees,3600);
+            cache($cache_key, $trees,3600);
         }
-        if($return_array){
+        if ($return_array) {
             return $trees;
         }
         return $this->ok('ok', [
-            'areas'=>$trees
+            'areas' => $trees
+        ]);
+    }
+
+    // 省->市->县
+    public function all_areas(Request $request, $return_array = false) {
+        $cache_key = config('app.api_keys.areas');
+        $trees = cache($cache_key);
+        if(!$trees){
+            $list = Upareatable::field('UPAREAID as ID,NAME,PID')
+                ->where('UPAREAID', '<>', MINISTRY_ID)
+                ->where('FLAG', 0)->all()->toArray();
+
+            $trees = create_level_tree($list, 0,'ID','PID');
+
+            cache($cache_key, $trees,3600);
+        }
+        if ($return_array) {
+            return $trees;
+        }
+        return $this->ok('ok', [
+            'areas' => $trees
         ]);
 
     }
+
     // 街道-社区信息表
     public function subAreas(Request $request, $return_array = false) {
 
