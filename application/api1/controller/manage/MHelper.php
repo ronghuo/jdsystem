@@ -216,15 +216,15 @@ class MHelper extends Common{
 
         $uuid = $request->post('UUID',0,'int');
 
-        if(!$uuid){
+        if (!$uuid) {
             return $this->fail('缺少帮扶人员信息');
         }
 
         // 检查是否在当前管理员的管辖区
 
-        if(!(new HelperAreas())->isInMyAreas($uuid,$request->MUID)){
-            return $this->fail('该人员不在你的管辖区');
-        }
+//        if (!(new HelperAreas())->isInMyAreas($uuid, $request->MUID)) {
+//            return $this->fail('该人员不在你的管辖区');
+//        }
 
         $dmmid = $request->User->DMM_ID;
         $dmm = NbAuthDept::find($dmmid);

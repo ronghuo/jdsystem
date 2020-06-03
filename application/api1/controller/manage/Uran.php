@@ -156,7 +156,7 @@ class Uran extends Common {
         ]);
     }
 
-    public function save(Request $request){
+    public function save(Request $request) {
         $dmmid = $request->param('DMM_ID',0,'int');
         $dmm = NbAuthDept::find($dmmid);
 
@@ -175,6 +175,7 @@ class Uran extends Common {
             'PROVINCE_ID'=>$request->param('PROVINCE_ID',20,'int'),
             'CITY_ID'=>$request->param('CITY_ID',342,'int'),
             'COUNTY_ID'=>$request->param('COUNTY_ID',0,'int'),
+            'COUNTY_NAME' => $request->param('COUNTY_NAME', '', 'trim'),
             'STREET_ID'=>$request->param('STREET_ID',0,'int'),
             'COMMUNITY_ID'=>$request->param('COMMUNITY_ID',0,'int'),
             'ADDRESS'=>$request->param('ADDRESS','','trim'),

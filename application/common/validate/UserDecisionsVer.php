@@ -14,8 +14,8 @@ class UserDecisionsVer extends Validate
      */
     protected $rule = [
         'UUID' => 'require',
-        'BEGIN_TIME' => 'require',
-        'END_TIME' => 'require'
+        'BEGIN_TIME' => 'require'
+//        'END_TIME' => 'require'
     ];
 
     /**
@@ -26,7 +26,7 @@ class UserDecisionsVer extends Validate
      */
     protected $message = [
         'UUID.require' => '缺少康复人员ID',
-        'BEGIN_TIME.require' => '缺少决定书有效期起始时间',
-        'END_TIME.require' => '缺少决定书有效期截止时间'
+        'BEGIN_TIME.require' => '缺少决定书有效期起始时间'
+//        'END_TIME.require' => '缺少决定书有效期截止时间'
     ];
 }

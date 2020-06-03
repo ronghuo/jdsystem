@@ -439,9 +439,9 @@ function exportExcel($headerRows, $list, $title='Sheet1', $fileName='demo')
         'N','O','P','Q','R','S','T','U','V','W','X','Y','Z'
     ];
 
+    $row = 1;
     // 存在多个标题行
     if (is_array($headerRows[0])) {
-        $row = 1;
         $sheet->mergeCells('A1:A3');
         foreach ($headerRows as $headerRow) {
             $column = 0;
@@ -485,12 +485,13 @@ function exportExcel($headerRows, $list, $title='Sheet1', $fileName='demo')
         for ($i = 0; $i < count($list[0]); $i++) {
             $sheet->setCellValue("$letter[$i]1","$headerRows[$i]");
         }
+        $row++;
     }
 
     foreach ($list as $key => $val) {
         //array_values 把一维数组的键转为0 1 2 3 ..
         foreach (array_values($val) as $key2 => $val2) {
-            $sheet->setCellValue($letter[$key2].($key+$row),$val2);
+            $sheet->setCellValue($letter[$key2].($key + $row),$val2);
         }
     }
     //生成2007版本的xlsx

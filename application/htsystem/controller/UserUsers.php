@@ -207,7 +207,8 @@ class UserUsers extends Common
         $this->assign('area3', $params['area3']);
         $powerLevel = $this->getPowerLevel();
         // 只有市级及县市区级有删除吸毒人员的权限
-        $this->assign('remove_allowed', in_array($powerLevel, [self::POWER_LEVEL_CITY, self::POWER_LEVEL_COUNTY]));
+        $this->assign('removeAllowed', in_array($powerLevel, [self::POWER_LEVEL_CITY, self::POWER_LEVEL_COUNTY]));
+        $this->assign('phoneDataAllowed', $powerLevel == self::POWER_LEVEL_CITY);
         $this->assign('powerLevel', $powerLevel);
         $this->assign('userStatus', $params['userStatus']);
         $this->assign('user_status_list', $statusList);

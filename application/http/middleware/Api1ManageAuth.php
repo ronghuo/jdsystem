@@ -48,7 +48,7 @@ class Api1ManageAuth{
         $request->MUID = $decode->user_id;
         $user = UserManagers::where('ISDEL', 0)->find($decode->user_id);
 
-        if(!$user){
+        if (!$user) {
             return json(['code'=>'401','msg'=>'.禁止访问.'],401);
         }
 

@@ -152,7 +152,7 @@ class Carousel extends Common{
 
         $img = $this->uploadImage($request,['carousels/']);
 
-        if(isset($img['images'])){
+        if(!empty($img['images'])){
             // 如果存在老的图片，刚将其删除
             if($carousel->IMG){
                 WaitDeleteFiles::addOne([

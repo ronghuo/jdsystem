@@ -67,8 +67,7 @@ class Decision extends Common {
             'ADD_TERMINAL' => TERMINAL_APP,
             'ADD_TIME' => date('Y-m-d H:i:s'),
             'UPDATE_TIME' => date('Y-m-d H:i:s'),
-            'BEGIN_TIME' => $request->param('BEGIN_TIME', '', 'trim'),
-            'END_TIME' => $request->param('END_TIME', '', 'trim')
+            'BEGIN_TIME' => $request->param('BEGIN_TIME', '', 'trim')
         ];
         $v = new UserDecisionsVer();
         if (!$v->check($data)) {

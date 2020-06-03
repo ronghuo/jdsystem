@@ -103,13 +103,13 @@ class Login extends Common
     protected function login_session(Admins $user){
 
         $powerLevel = 0;
-        if($user->POWER_COMMUNITY_ID > 0){
+        if ($user->POWER_COMMUNITY_ID > 0) {
             $powerLevel = 4;
-        }elseif($user->POWER_STREET_ID > 0){
+        } elseif ($user->POWER_STREET_ID > 0) {
             $powerLevel = 3;
-        }elseif($user->POWER_COUNTY_ID_12 > 0) {
+        } elseif ($user->POWER_COUNTY_ID_12 > 0) {
             $powerLevel = 2;
-        }elseif($user->POWER_CITY_ID > 0){
+        } elseif ($user->POWER_CITY_ID > 0) {
             $powerLevel = 1;
         }
         session('power_level', $powerLevel);

@@ -127,7 +127,7 @@
                                 <li>
                                     <a href="javascript:;" data-url="{:url('UserUsers/read',array('id'=>$da['ID']))}" class="openlayerwin"><i class="icon-info-sign"></i> 详情</a>
                                 </li>
-                                {if $remove_allowed}
+                                {if $removeAllowed}
                                 <li>
                                     <a href="javascript:;" data-href="{:url('UserUsers/delete',array('id'=>$da['ID']))}" onclick="deldata(this);"><i class="icon-trash"></i> 删除</a>
                                 </li>
@@ -156,9 +156,11 @@
                                 <li>
                                     <a href="{:url('UserUrans/index',array('uuid'=>$da['ID']))}"><i class="icon-book"></i> 尿检报告</a>
                                 </li>
+                                {if $phoneDataAllowed }
                                 <li>
                                     <a href="{:url('UserUsers/phoneData',array('id'=>$da['ID']))}"><i class="icon-mobile-phone"></i>手机数据</a>
                                 </li>
+                                {/if}
                                 <li>
                                     <a href="{:url('UserUsers/logList',array('id'=>$da['ID']))}"><i class="icon-file"></i> 操作日志</a>
                                 </li>

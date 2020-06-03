@@ -272,10 +272,23 @@ class UserUrans extends Common
 
         for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
             $year = $i + 1;
-            $subSql .= "(select count(1) from urans where UUID = A.ID and CHECK_TIME >= DATE_ADD(A.JD_START_TIME,INTERVAL $i year) and CHECK_TIME < DATE_ADD(A.JD_START_TIME,INTERVAL ($i + 1) year)) CNT_$year,";
+            $subSql .= "case";
+            foreach ($fitStatusIds as $statusId => $checkTimesList) {
+                $checkTimes = $checkTimesList[$i];
+                $subSql .= " when USER_STATUS_ID = $statusId then ";
+                $interval = 12 / $checkTimes;
+                for ($n = 0; $n < $checkTimes; $n++) {
+                    $from = $n * $interval + $i * 12;
+                    $to = ($n + 1) * $interval + $i * 12;
+                    $subSql .= "(select if(count(1) >= 1, 1, 0) from urans where UUID = A.ID and ISDEL = 0 and CHECK_TIME >= DATE_ADD(A.JD_START_TIME,INTERVAL $from MONTH) and CHECK_TIME < DATE_ADD(DATE_ADD(A.JD_START_TIME,INTERVAL $to MONTH),INTERVAL 1 DAY))+";
+                }
+                $subSql = substr($subSql, 0, -1);
+            }
+            $subSql .= " end FINISHED_$year,";
         }
         $subSql = substr($subSql, 0, -1);
         $subSql .= " from user_users A where USER_STATUS_ID in ($whereIn) and ISDEL = 0";
+        echo $subSql;die;
 
         $where = [];
         $powerLevel = $this->getPowerLevel();
@@ -327,15 +340,15 @@ class UserUrans extends Common
             $year = $i + 1;
             $finishedName = "FINISHED_$year";
             $missingName = "MISSING_$year";
-            $sql .= "CNT_$year $finishedName,case";
+            $sql .= "FINISHED_$year $finishedName,case";
             foreach ($fitStatusIds as $statusId => $checkTimesList) {
                 $checkTimes = $checkTimesList[$i];
                 $shouldTimes = "ceil(if(MONTHS > 12*$year, 12, if(MONTHS > 12*$i, MONTHS - 12*$i, 0)) / (12 / $checkTimes))";
-                $sql .= " when USER_STATUS_ID = $statusId then $shouldTimes - CNT_$year";
+                $sql .= " when USER_STATUS_ID = $statusId then $shouldTimes - FINISHED_$year";
             }
             $sql .= " end $missingName,";
         }
-        $sql = substr($sql, 0, strlen($sql) - 1);
+        $sql = substr($sql, 0, -1);
         $sql .= " from ($subSql) AA order by COUNTY_ID_12,STREET_ID,COMMUNITY_ID";
         $pageNO = $request->param('page', 1);
         if ($pageNO < 1) {
