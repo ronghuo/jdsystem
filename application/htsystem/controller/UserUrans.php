@@ -267,11 +267,29 @@ class UserUrans extends Common
         }
         $whereIn = implode(',', array_keys($fitStatusIds));
 
-        $subSql = "select ID,`NAME`,USER_STATUS_ID,USER_STATUS_NAME,JD_START_TIME,if(JD_START_TIME is not null, TIMESTAMPDIFF(MONTH, JD_START_TIME, DATE_FORMAT(now(),'%Y-%m-%d')) + if(JD_START_TIME > now(), 0, 1), 0) MONTHS,";
-        $subSql .= "COUNTY_ID_12,STREET_ID,COMMUNITY_ID,concat_ws(' ', (select `NAME` from subareas where CODE12 = COUNTY_ID_12),(select `NAME` from subareas where CODE12 = STREET_ID),(select `NAME` from subareas where CODE12 = COMMUNITY_ID)) AREA,";
-
+        $subSql = "select *,";
         for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
             $year = $i + 1;
+            $subSql .= "case";
+            foreach ($fitStatusIds as $statusId => $checkTimesList) {
+                $checkTimes = $checkTimesList[$i];
+                $subSql .= " when USER_STATUS_ID = $statusId then CEIL(IF(MONTHS > 12*$year, 12, IF(MONTHS > 12*$i, MONTHS - 12*$i, 0)) / (12 / $checkTimes))";
+            }
+            $subSql .= " end SHOULD_$year,";
+        }
+        $subSql = substr($subSql, 0, -1);
+        $subSql .= " from (select ID,`NAME`,USER_STATUS_ID,USER_STATUS_NAME,JD_START_TIME,if(JD_START_TIME is not null, TIMESTAMPDIFF(MONTH, JD_START_TIME, DATE_FORMAT(now(),'%Y-%m-%d')) + if(JD_START_TIME > now(), 0, 1), 0) MONTHS,";
+        $subSql .= "COUNTY_ID_12,STREET_ID,COMMUNITY_ID,concat_ws(' ', (select `NAME` from subareas where CODE12 = COUNTY_ID_12),(select `NAME` from subareas where CODE12 = STREET_ID),(select `NAME` from subareas where CODE12 = COMMUNITY_ID)) AREA,";
+
+        $shouldNames = $finishedNames = [];
+        for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
+            $year = $i + 1;
+            if (!isset($shouldNames[$i])) {
+                $shouldNames[$i] = "SHOULD_$year";
+            }
+            if (!isset($finishedNames[$i])) {
+                $finishedNames[$i] = "FINISHED_$year";
+            }
             $subSql .= "case";
             foreach ($fitStatusIds as $statusId => $checkTimesList) {
                 $checkTimes = $checkTimesList[$i];
@@ -288,7 +306,6 @@ class UserUrans extends Common
         }
         $subSql = substr($subSql, 0, -1);
         $subSql .= " from user_users A where USER_STATUS_ID in ($whereIn) and ISDEL = 0";
-        echo $subSql;die;
 
         $where = [];
         $powerLevel = $this->getPowerLevel();
@@ -326,8 +343,12 @@ class UserUrans extends Common
                 $subSql .= " and $name = '$value'";
             }
         }
+        $subSql .= ") A";
 
-        $sql = "select count(1) from ($subSql) A";
+        $finishStatus = $request->param('finishStatus', '', 'trim');
+
+        $sql = "select count(1) from ($subSql) A where 1 = 1";
+        $sql = $this->setWhere($sql, $finishStatus, $shouldNames, $finishedNames);
         $rows = db()->query($sql);
         foreach ($rows as $row) {
             foreach ($row as $index => $value) {
@@ -342,14 +363,16 @@ class UserUrans extends Common
             $missingName = "MISSING_$year";
             $sql .= "FINISHED_$year $finishedName,case";
             foreach ($fitStatusIds as $statusId => $checkTimesList) {
-                $checkTimes = $checkTimesList[$i];
-                $shouldTimes = "ceil(if(MONTHS > 12*$year, 12, if(MONTHS > 12*$i, MONTHS - 12*$i, 0)) / (12 / $checkTimes))";
-                $sql .= " when USER_STATUS_ID = $statusId then $shouldTimes - FINISHED_$year";
+                $sql .= " when USER_STATUS_ID = $statusId then SHOULD_$year - FINISHED_$year";
             }
             $sql .= " end $missingName,";
         }
         $sql = substr($sql, 0, -1);
-        $sql .= " from ($subSql) AA order by COUNTY_ID_12,STREET_ID,COMMUNITY_ID";
+        $sql .= " from ($subSql) A where 1 = 1";
+
+        $sql = $this->setWhere($sql, $finishStatus, $shouldNames, $finishedNames);
+
+        $sql .= " order by COUNTY_ID_12,STREET_ID,COMMUNITY_ID";
         $pageNO = $request->param('page', 1);
         if ($pageNO < 1) {
             $pageNO = 1;
@@ -378,13 +401,26 @@ class UserUrans extends Common
         $this->assign('param', [
             'area1' => $where['COUNTY_ID_12'],
             'area2' => $where['STREET_ID'],
-            'area3' => $where['COMMUNITY_ID']
+            'area3' => $where['COMMUNITY_ID'],
+            'finishStatus' => $finishStatus
         ]);
         $this->assign('powerLevel', $powerLevel);
         $this->assign('total', $total);
         $this->assign('rows', $rows);
         $this->assign('page', $paginator->render());
         return $this->fetch();
+    }
+
+    private function setWhere($sql, $finishStatus, $shouldNames, $finishedNames) {
+        if (!empty($finishStatus)) {
+            if ($finishStatus == 'CORRECT') {
+                $sql .= " and JD_START_TIME IS NOT NULL and " . implode("+", $shouldNames) . "=" . implode("+", $finishedNames);
+            }
+            elseif ($finishStatus == 'INCORRECT') {
+                $sql .= " and JD_START_TIME IS NULL or " . implode("+", $shouldNames) . "<>" . implode("+", $finishedNames);
+            }
+        }
+        return $sql;
     }
 
 }

@@ -891,233 +891,36 @@ class UserUsers extends Common
      */
     protected function save(Request $request)
     {
-
         $id = $request->post('ID',0,'int');
+        $isNew = empty($id);
 
-        if ($id > 0) {
-            if (!$this->checkUUid($id)) {
-                $this->error('权限不足');
-            }
-            $isNew = false;
-        } else {
-            $isNew = true;
-        }
+        // 输入校验
+        $this->validUserInput($request);
 
-        $usermodel = new UserUsersModel();
+        // 获取数据
+        $data = $this->getUserData($request, $isNew);
 
-        $mobile = $request->param('MOBILE','','trim');
-
-        $mobile_exist = $usermodel->where(function($t) use ($id,$mobile) {
-            $t->where('MOBILE', '=', $mobile);
-            if ($id > 0) {
-                $t->whereRaw('ID!='.$id);
-            }
-        })->where('ISDEL','=',0)->count();
-
-        if ($mobile_exist) {
-            $this->error('该手机号已经存在');
-        }
-
-        $levelarea = $request->param('levelarea',[]);
-        $levelarea = array_filter($levelarea);
-        $county_id = isset($levelarea[0]) ? $levelarea[0] : 0;
-        $street_id = isset($levelarea[1]) ? $levelarea[1] : 0;
-        $community_id = isset($levelarea[2]) ? $levelarea[2] : 0;
-        $area_info = Subareas::where('CODE12', end($levelarea))->find();
-        if(!$area_info){
-            $this->error('缺少管辖社区信息');
-        }
-
-        $dmmcids = $request->param('dmmc', [], 'trim');
-        $dmmcids = array_filter($dmmcids);
-        if (empty($dmmcids) || empty($dmmcids[1])) {
-            $this->error('缺少所属禁毒办信息');
-        }
-        $dmmc = NbAuthDept::find(end($dmmcids));
-        if (!$dmmc) {
-            $this->error('缺少所属禁毒办信息');
-        }
-
-        $user_status_id = $request->param('USER_STATUS_ID',0,'trim');
-        $user_status_name = $request->param('USER_STATUS_NAME', '');
-        $user_sub_status_id = $request->param('USER_SUB_STATUS_ID', 0);
-        $user_sub_status_name = $request->param('USER_SUB_STATUS_NAME', '');
-
-        $utype = $request->param('UTYPE_ID',0,'trim');
-        $utype218 = $request->param('UTYPE_ID_218',0,'trim');
-
-        $domicileplaceids = $request->param('domicileplace');
-
-        $domicileplace = Upareatable::where('UPAREAID','in',$domicileplaceids)->order('UPAREAID','asc')->select()->column('NAME');
-
-        $liveplaceids = $request->param('liveplace');
-        $liveplace = Upareatable::where('UPAREAID','in',$liveplaceids)->order('UPAREAID','asc')->select()->column('NAME');
-
-        $nationality = BaseNationalityType::find($request->param('NATIONALITY_ID','','trim'));
-        $nation = BaseNationType::find($request->param('NATION_ID','','trim'));
-
-        // 检验人员状态相关信息的合法性
-        $this->validStatusRelations($request);
-
-        $userStatusRelation = $this->buildStatusRelations($request);
-        $userSubStatusRelation = $this->buildSubStatusRelations($request);
-
-        $jd_start_time = $this->getJdStartTime($request, $user_status_name);
-        $jd_end_time = $this->getJdEndTime($request, $user_status_name, $jd_start_time);
-
-        $subStatusStartTime = $this->getSubStatusStartTime($request, $user_sub_status_name);
-        $subStatusEndTime = $this->getSubStatusEndTime($request, $user_sub_status_name);
-
-        $data = [
-            'STATUS'=>1,
-            'NAME'=>$request->param('NAME','','trim'),
-            'ALIAS_NAME'=>$request->param('ALIAS_NAME','','trim'),
-            'ID_NUMBER'=>$request->param('ID_NUMBER','','trim'),
-            'ID_NUMBER_TYPE'=>$request->param('ID_NUMBER_TYPE','','trim'),
-            'MOBILE'=>$request->param('MOBILE','','trim'),
-            'GENDER'=>$request->param('GENDER','','trim'),
-
-            'JD_START_TIME'=>$jd_start_time,
-            'JD_END_TIME'=>$jd_end_time,
-            'SUB_STATUS_START_TIME' => $subStatusStartTime,
-            'SUB_STATUS_END_TIME' => $subStatusEndTime,
-            'USER_STATUS_ID'=>$user_status_id,
-            'USER_STATUS_NAME' => $user_status_name,
-            'USER_SUB_STATUS_ID' => $user_sub_status_id,
-            'USER_SUB_STATUS_NAME' => $user_sub_status_name,
-            'USER_STATUS_RELATION' => $userStatusRelation,
-            'USER_SUB_STATUS_RELATION' => $userSubStatusRelation,
-            'DANGER_LEVEL_ID'=>$request->param('DANGER_LEVEL_ID','','trim'),
-            'UTYPE_ID'=>$utype,
-            'UTYPE_ID_218'=>$utype218,
-
-            'NATIONALITY_ID'=>$request->param('NATIONALITY_ID','','trim'),
-            'NATION_ID'=>$request->param('NATION_ID','','trim'),
-            'HEIGHT'=>$request->param('HEIGHT','','trim'),
-            'EDUCATION_ID'=>$request->param('EDUCATION_ID','','trim'),
-            'JOB_STATUS_ID'=>$request->param('JOB_STATUS_ID','','trim'),
-            'JOB_UNIT'=>$request->param('JOB_UNIT','','trim'),
-            'MARITAL_STATUS_ID'=>$request->param('MARITAL_STATUS_ID','','trim'),
-
-            'DOMICILE_ADDRESS'=>$request->param('DOMICILE_ADDRESS','','trim'),
-            'DOMICILE_POLICE_STATION'=>$request->param('DOMICILE_POLICE_STATION','','trim'),
-            'DOMICILE_POLICE_STATION_CODE'=>$request->param('DOMICILE_POLICE_STATION_CODE','','trim'),
-
-            'LIVE_ADDRESS'=>$request->param('LIVE_ADDRESS','','trim'),
-            'LIVE_POLICE_STATION'=>$request->param('LIVE_POLICE_STATION','','trim'),
-            'LIVE_POLICE_STATION_CODE'=>$request->param('LIVE_POLICE_STATION_CODE','','trim'),
-
-            'DRUG_TYPE_ID'=>$request->param('DRUG_TYPE_ID','','trim'),
-            'NARCOTICS_TYPE_ID'=>$request->param('NARCOTICS_TYPE_ID','','trim'),
-
-            'NATIONALITY'=>$nationality->NAME,
-            'NATION'=>$nation->NAME,
-
-            'EDUCATION'=>Opts::getEdu($request->param('EDUCATION_ID','','trim'))['NAME'],
-            'JOB_STATUS'=>Opts::getJobStatus($request->param('JOB_STATUS_ID','','trim'))['NAME'],
-            'MARITAL_STATUS'=>Opts::getMaritalStatus($request->param('MARITAL_STATUS_ID','','trim'))['NAME'],
-
-            'PROVINCE_ID'=>$area_info->PROVICEID,
-            'CITY_ID'=>$area_info->CITYID,
-            'COUNTY_ID'=>$area_info->COUNTYID,
-            'COUNTY_ID_12'=>$county_id,
-            'STREET_ID'=>$street_id,
-            'COMMUNITY_ID'=>$community_id,
-
-            'DOMICILE_PLACE'=>implode(' ',$domicileplace),
-            'DOMICILE_IDS'=>implode(',',$domicileplaceids),//new
-
-            'LIVE_PLACE'=>implode(' ',$liveplace),
-            'LIVE_IDS'=>implode(',',$liveplaceids),//new
-
-            'DRUG_TYPE'=>Opts::getNameById($request->param('DRUG_TYPE_ID','','trim'))['NAME'],
-            'NARCOTICS_TYPE'=>Opts::getNameById($request->param('NARCOTICS_TYPE_ID','','trim'))['NAME'],
-
-            'MANAGE_POLICE_AREA_CODE'=>$dmmc->DEPTCODE,
-            'MANAGE_POLICE_AREA_NAME'=>$dmmc->DEPTNAME,
-            'MANAGE_COMMUNITY'=>$area_info->NAME,
-            'DMMC_IDS'=>implode(',', $dmmcids),//new
-
-            'POLICE_LIABLE_CODE'=>$request->param('POLICE_LIABLE_CODE','','trim'),
-            'POLICE_LIABLE_NAME'=>$request->param('POLICE_LIABLE_NAME','','trim'),
-            'POLICE_LIABLE_MOBILE'=>$request->param('POLICE_LIABLE_MOBILE','','trim'),
-            'JD_ZHUANGAN'=>$request->param('JD_ZHUANGAN','','trim'),
-            'JD_ZHUANGAN_MOBILE'=>$request->param('JD_ZHUANGAN_MOBILE','','trim'),
-            'JD_REMARKS'=>$request->param('JD_REMARKS', '', 'trim')
-        ];
-
-        if (!$id) {
-            $data['UUCODE'] = $usermodel->createNewUUCode();
-        }
-
-        if ($request->has('PWSD')) {
-            $pwsd = $request->post('PWSD');
-            $stat = Str::random(6);
-            $data['PWSD'] = create_pwd($pwsd,$stat);
-            $data['SALT'] = $stat;
-        }
-        $v = new UserUsersVer();
-        if (!$v->check($data)) {
-            $this->error($v->getError());
-        }
-        $needLogUserStatusChange = false;
-
-        if ($id > 0) {
-            $user = UserUsersModel::find($id);
-            if ($user->USER_STATUS_ID != $user_status_id) {
-                $needLogUserStatusChange = true;
-            }
-            $user->save($data);
-        } else {
-
-            $needLogUserStatusChange = true;
-            $data['CREATE_USER_ID'] = session('user_id');
-            $data['CREATE_USER_NAME'] = session('name');
-
+        // 创建或修改数据
+        if ($isNew) {
             $user = UserUsersModel::create($data);
             $user->HEAD_IMG = '';
             $id = $user->ID;
+        } else {
+            $user = UserUsersModel::find($id);
+            $user->save($data);
         }
-
-
         if (!$id) {
             $this->error('保存失败');
         }
 
-        if ($needLogUserStatusChange) {
+        // 保存人员状态变化日志
+        $this->saveUserStatusChangeLog($request, $user, $isNew);
 
-            $userStatus = create_kv(BaseUserStatus::all()->toArray(), 'ID', 'NAME');
-            $content = '人员状态：'.($userStatus[$user_status_id] ?? 'error');
+        // 保存人员头像信息
+        $this->saveUserHeadImg($request, $user);
 
-            if (!empty($jd_start_time) && !empty($jd_end_time)) {
-                $content .= "，起止时间:{$jd_start_time}到{$jd_end_time}";
-            }
-
-            UserChangeLog::addRow([
-                'UUID'=>$user->ID,
-                'LOG_TYPE' => 1,
-                'CONTENT'=>$content,
-                'OPER_USER_ID'=>session('user_id'),
-                'OPER_USER_NAME'=>session('name')
-            ]);
-        }
-
-        $img = $this->uploadImage($request,['userusers/']);
-        if (isset($img['images'])) {
-            // 如果存在老的图片，刚将其删除
-            if($user->HEAD_IMG){
-                WaitDeleteFiles::addOne([
-                    'table'=>'userusers',
-                    'id'=>$id,
-                    'path'=>$user->HEAD_IMG
-                ]);
-            }
-
-            $user->save(['HEAD_IMG'=>$img['images'][0]]);
-        }
-
-        //页面点击“保存”或“确认”键后提示成功或失败，自动停留在当前编辑界面
-        $ref = url('UserUsers/edit',array('id'=>$user->ID));
+        // 页面点击“保存”或“确认”键后提示成功或失败，自动停留在当前编辑界面
+        $ref = url('UserUsers/edit', array('id'=>$user->ID));
 
         if ($isNew) {
             $log_oper_Name = '新增康复人员信息';
@@ -1137,6 +940,227 @@ class UserUsers extends Common
         $this->addAdminLog($log_oper_type, $log_oper_Name, $log_content, $user->ID);
 
         $this->success('保存人员资料成功',$ref);
+    }
+
+    private function validUserInput(Request $request) {
+        $id = $request->post('ID',0,'int');
+
+        if ($id > 0) {
+            if (!$this->checkUUid($id)) {
+                $this->error('权限不足');
+            }
+        }
+
+        $mobile = $request->param('MOBILE','','trim');
+
+        $mobile_exist = UserUsersModel::where(function($t) use ($id, $mobile) {
+            $t->where('MOBILE', '=', $mobile);
+            if ($id > 0) {
+                $t->whereRaw('ID!=' . $id);
+            }
+        })->where('ISDEL','=',0)->count();
+
+        if ($mobile_exist) {
+            $this->error('该手机号已经存在');
+        }
+
+        $levelarea = $request->param('levelarea',[]);
+        $levelarea = array_filter($levelarea);
+        $area_info = Subareas::where('CODE12', end($levelarea))->find();
+        if (!$area_info) {
+            $this->error('缺少管辖社区信息');
+        }
+
+        $dmmcids = $request->param('dmmc', [], 'trim');
+        $dmmcids = array_filter($dmmcids);
+        if (empty($dmmcids) || empty($dmmcids[1])) {
+            $this->error('缺少所属禁毒办信息');
+        }
+        $dmmc = NbAuthDept::find(end($dmmcids));
+        if (!$dmmc) {
+            $this->error('缺少所属禁毒办信息');
+        }
+
+        // 检验人员状态相关信息的合法性
+        $this->validStatusRelations($request);
+    }
+
+    private function getUserData(Request $request, $isNew = true) {
+        $user_status_id = $request->param('USER_STATUS_ID',0,'trim');
+        $user_status_name = $request->param('USER_STATUS_NAME', '');
+        $user_sub_status_id = $request->param('USER_SUB_STATUS_ID', 0);
+        $user_sub_status_name = $request->param('USER_SUB_STATUS_NAME', '');
+
+        $utype = $request->param('UTYPE_ID',0,'trim');
+        $utype218 = $request->param('UTYPE_ID_218',0,'trim');
+
+        $domicileplaceids = $request->param('domicileplace');
+
+        $domicileplace = Upareatable::where('UPAREAID','in',$domicileplaceids)->order('UPAREAID','asc')->select()->column('NAME');
+
+        $liveplaceids = $request->param('liveplace');
+        $liveplace = Upareatable::where('UPAREAID','in',$liveplaceids)->order('UPAREAID','asc')->select()->column('NAME');
+
+        $nationality = BaseNationalityType::find($request->param('NATIONALITY_ID','','trim'));
+        $nation = BaseNationType::find($request->param('NATION_ID','','trim'));
+
+        $userStatusRelation = $this->buildStatusRelations($request);
+        $userSubStatusRelation = $this->buildSubStatusRelations($request);
+
+        $jd_start_time = $this->getJdStartTime($request, $user_status_name);
+        $jd_end_time = $this->getJdEndTime($request, $user_status_name, $jd_start_time);
+
+        $subStatusStartTime = $this->getSubStatusStartTime($request, $user_sub_status_name);
+        $subStatusEndTime = $this->getSubStatusEndTime($request, $user_sub_status_name);
+
+        $levelarea = $request->param('levelarea',[]);
+        $levelarea = array_filter($levelarea);
+        $area_info = Subareas::where('CODE12', end($levelarea))->find();
+        $county_id = isset($levelarea[0]) ? $levelarea[0] : 0;
+        $street_id = isset($levelarea[1]) ? $levelarea[1] : 0;
+        $community_id = isset($levelarea[2]) ? $levelarea[2] : 0;
+
+        $dmmcids = $request->param('dmmc', [], 'trim');
+        $dmmcids = array_filter($dmmcids);
+        $dmmc = NbAuthDept::find(end($dmmcids));
+
+        $data = [
+            'STATUS' => 1,
+            'NAME' => $request->param('NAME','','trim'),
+            'ALIAS_NAME' => $request->param('ALIAS_NAME','','trim'),
+            'ID_NUMBER' => $request->param('ID_NUMBER','','trim'),
+            'ID_NUMBER_TYPE' => $request->param('ID_NUMBER_TYPE','','trim'),
+            'MOBILE' => $request->param('MOBILE','','trim'),
+            'GENDER' => $request->param('GENDER','','trim'),
+
+            'JD_START_TIME' => $jd_start_time,
+            'JD_END_TIME' => $jd_end_time,
+            'SUB_STATUS_START_TIME' => $subStatusStartTime,
+            'SUB_STATUS_END_TIME' => $subStatusEndTime,
+            'USER_STATUS_ID' =>$user_status_id,
+            'USER_STATUS_NAME' => $user_status_name,
+            'USER_SUB_STATUS_ID' => $user_sub_status_id,
+            'USER_SUB_STATUS_NAME' => $user_sub_status_name,
+            'USER_STATUS_RELATION' => $userStatusRelation,
+            'USER_SUB_STATUS_RELATION' => $userSubStatusRelation,
+            'DANGER_LEVEL_ID' => $request->param('DANGER_LEVEL_ID','','trim'),
+            'UTYPE_ID' => $utype,
+            'UTYPE_ID_218' => $utype218,
+
+            'NATIONALITY_ID' => $request->param('NATIONALITY_ID','','trim'),
+            'NATION_ID' => $request->param('NATION_ID','','trim'),
+            'HEIGHT' => $request->param('HEIGHT','','trim'),
+            'EDUCATION_ID' => $request->param('EDUCATION_ID','','trim'),
+            'JOB_STATUS_ID' => $request->param('JOB_STATUS_ID','','trim'),
+            'JOB_UNIT' => $request->param('JOB_UNIT','','trim'),
+            'MARITAL_STATUS_ID' => $request->param('MARITAL_STATUS_ID','','trim'),
+
+            'DOMICILE_ADDRESS' => $request->param('DOMICILE_ADDRESS','','trim'),
+            'DOMICILE_POLICE_STATION' => $request->param('DOMICILE_POLICE_STATION','','trim'),
+            'DOMICILE_POLICE_STATION_CODE' => $request->param('DOMICILE_POLICE_STATION_CODE','','trim'),
+
+            'LIVE_ADDRESS' => $request->param('LIVE_ADDRESS','','trim'),
+            'LIVE_POLICE_STATION' => $request->param('LIVE_POLICE_STATION','','trim'),
+            'LIVE_POLICE_STATION_CODE' => $request->param('LIVE_POLICE_STATION_CODE','','trim'),
+
+            'DRUG_TYPE_ID' => $request->param('DRUG_TYPE_ID','','trim'),
+            'NARCOTICS_TYPE_ID' => $request->param('NARCOTICS_TYPE_ID','','trim'),
+
+            'NATIONALITY' => $nationality->NAME,
+            'NATION' => $nation->NAME,
+
+            'EDUCATION' => Opts::getEdu($request->param('EDUCATION_ID','','trim'))['NAME'],
+            'JOB_STATUS' => Opts::getJobStatus($request->param('JOB_STATUS_ID','','trim'))['NAME'],
+            'MARITAL_STATUS' => Opts::getMaritalStatus($request->param('MARITAL_STATUS_ID','','trim'))['NAME'],
+
+            'PROVINCE_ID' => $area_info->PROVICEID,
+            'CITY_ID' => $area_info->CITYID,
+            'COUNTY_ID' => $area_info->COUNTYID,
+            'COUNTY_ID_12' => $county_id,
+            'STREET_ID' => $street_id,
+            'COMMUNITY_ID' => $community_id,
+
+            'DOMICILE_PLACE' => implode(' ',$domicileplace),
+            'DOMICILE_IDS' => implode(',',$domicileplaceids),//new
+
+            'LIVE_PLACE' => implode(' ',$liveplace),
+            'LIVE_IDS' => implode(',',$liveplaceids),//new
+
+            'DRUG_TYPE' => Opts::getNameById($request->param('DRUG_TYPE_ID','','trim'))['NAME'],
+            'NARCOTICS_TYPE' => Opts::getNameById($request->param('NARCOTICS_TYPE_ID','','trim'))['NAME'],
+
+            'MANAGE_POLICE_AREA_CODE' => $dmmc->DEPTCODE,
+            'MANAGE_POLICE_AREA_NAME' => $dmmc->DEPTNAME,
+            'MANAGE_COMMUNITY' => $area_info->NAME,
+            'DMMC_IDS' => implode(',', $dmmcids),//new
+
+            'POLICE_LIABLE_CODE' => $request->param('POLICE_LIABLE_CODE','','trim'),
+            'POLICE_LIABLE_NAME' => $request->param('POLICE_LIABLE_NAME','','trim'),
+            'POLICE_LIABLE_MOBILE' => $request->param('POLICE_LIABLE_MOBILE','','trim'),
+            'JD_ZHUANGAN' => $request->param('JD_ZHUANGAN','','trim'),
+            'JD_ZHUANGAN_MOBILE' => $request->param('JD_ZHUANGAN_MOBILE','','trim'),
+            'JD_REMARKS' => $request->param('JD_REMARKS', '', 'trim')
+        ];
+
+        if ($isNew) {
+            $data['UUCODE'] = (new UserUsersModel())->createNewUUCode();
+            $data['CREATE_USER_ID'] = session('user_id');
+            $data['CREATE_USER_NAME'] = session('name');
+        }
+
+        if ($request->has('PWSD')) {
+            $pwsd = $request->post('PWSD');
+            $stat = Str::random(6);
+            $data['PWSD'] = create_pwd($pwsd,$stat);
+            $data['SALT'] = $stat;
+        }
+
+        $v = new UserUsersVer();
+        if (!$v->check($data)) {
+            $this->error($v->getError());
+        }
+
+        return $data;
+    }
+
+    private function saveUserStatusChangeLog(Request $request, $user, $isNew) {
+        $isNeed = false;
+        $userStatusId = $request->param('USER_STATUS_ID',0,'trim');
+        if (!$isNew) {
+            if ($user->USER_STATUS_ID != $userStatusId) {
+                $isNeed = true;
+            }
+        }
+        if ($isNeed) {
+            $userStatus = create_kv(BaseUserStatus::all()->toArray(), 'ID', 'NAME');
+            $content = '人员状态：' . ($userStatus[$userStatusId] ?? 'error');
+            if (!empty($jd_start_time) && !empty($jd_end_time)) {
+                $content .= "，起止时间:{$jd_start_time}到{$jd_end_time}";
+            }
+            UserChangeLog::addRow([
+                'UUID' => $user->ID,
+                'LOG_TYPE' => 1,
+                'CONTENT' => $content,
+                'OPER_USER_ID' => session('user_id'),
+                'OPER_USER_NAME' => session('name')
+            ]);
+        }
+    }
+
+    private function saveUserHeadImg(Request $request, $user) {
+        $img = $this->uploadImage($request, ['userusers/']);
+        if (isset($img['images'])) {
+            // 如果存在老的图片，刚将其删除
+            if($user->HEAD_IMG){
+                WaitDeleteFiles::addOne([
+                    'table' => 'userusers',
+                    'id' => $user->ID,
+                    'path' => $user->HEAD_IMG
+                ]);
+            }
+
+            $user->save(['HEAD_IMG'=>$img['images'][0]]);
+        }
     }
 
     private function getJdStartTime(Request $request, $user_status_name) {
@@ -1440,14 +1464,14 @@ class UserUsers extends Common
             foreach ($columns_1 as $name) {
                 array_push($row1, [
                     'name' => $name,
-                    'mergeX' => end($columns_1) == $name ? 1 : 5
+                    'mergeX' => end($columns_1) == $name ? 3 : 5
                 ]);
             }
             $row2['offset'] = 3;
             foreach ($columns_2 as $name) {
                 array_push($row2, [
                     'name' => $name,
-                    'mergeX' => 1
+                    'mergeX' => end($columns_2) == $name ? 3 : 1
                 ]);
             }
             $row3['offset'] = 3;
@@ -1480,7 +1504,9 @@ class UserUsers extends Common
             }
         }
         array_push($columns_1, sprintf($column1Format, UserUsersModel::STATISTICS_NAME_TOTAL, $totalUserNum));
-        array_push($columns_2, "整社戒社康期间");
+        array_push($columns_2, "社戒社康中");
+        $columns_3['CORRECT_USER_NUM'] = URINE_CHECK_CORRECT;
+        $columns_3['INCORRECT_USER_NUM'] = URINE_CHECK_INCORRECT;
         $columns_3['TOTAL_FINISHED'] = URINE_CHECK_FINISHED;
         $columns_3['TOTAL_MISSING'] = URINE_CHECK_MISSING;
     }

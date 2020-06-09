@@ -25,7 +25,7 @@ class Apply extends Common{
             }
             return $st;
         })->where('ISDEL','=',0)
-            ->where(function($query)use($request){
+            ->where(function($query)use($request) {
                 if (!$request->User->isTopPower) {
                     $query->whereIn('UUID',$this->getManageUserIds($request->MUID));
                 }

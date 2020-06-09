@@ -44,8 +44,10 @@ define('STATUS_COMMUNITY_RECOVERING', '社区康复中');
 define('URINE_CHECK_YEARS', 3);                         // 尿检年限
 define('URINE_CHECK_RATE_DETOXIFICATION', [12, 6, 4]);  // 社区戒毒尿检频率[第一年：12次，第二年：6次，第三年：4次]
 define('URINE_CHECK_RATE_RECOVERING', [6, 4, 2]);       // 社区康复尿检频率[第一年：6次，第二年：4次，第三年：2次]
-define('URINE_CHECK_FINISHED', '完成');
-define('URINE_CHECK_MISSING', '缺失');
+define('URINE_CHECK_FINISHED', '完成次数');
+define('URINE_CHECK_MISSING', '缺失次数');
+define('URINE_CHECK_CORRECT', '正常人数');
+define('URINE_CHECK_INCORRECT', '异常人数');
 
 
 /**

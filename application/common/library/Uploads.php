@@ -64,7 +64,7 @@ class Uploads{
             'media_type'=>0,
             'type'=>$type,
             'dir'=>self::TYPES[$type],
-            'size_limit'=>5*1024*1024,//5M
+            'size_limit'=>10*1024*1024,//10M
             'ext_limit'=>'jpg,jpeg,png,gif',
             'img_thumb'=>'600',
             'save2db'=>true,

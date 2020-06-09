@@ -138,6 +138,7 @@ Route::get('/manage/recoveryplan','api1/manage.RecoveryPlan/index')->middleware(
 Route::post('/manage/recoveryplan/save','api1/manage.RecoveryPlan/save')->middleware('Api1ManageAuth');
 // 社戒社康协议
 Route::get('/manage/agreement','api1/manage.AgreementAPI/index')->middleware('Api1ManageAuth');
+Route::post('/manage/agreement/save','api1/manage.AgreementAPI/save')->middleware('Api1ManageAuth');
 
 //-----------------------------------------------------//
 //--------------------其他---------------------------//

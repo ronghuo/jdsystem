@@ -58,7 +58,7 @@
                         <td>
                             {if $all[$name] gt 0}
                                 <a href="./index?userStatus={$id}{if isset($area1)}&area1={$area1}{/if}{if isset($area2)}&area2={$area2}{/if}{if isset($area3)}&area3={$area3}{/if}">{$all[$name]}</a>
-                            {else/}{$all[$sname]}
+                            {else/}{$all[$name]}
                             {/if}
                         </td>
                     {/foreach}

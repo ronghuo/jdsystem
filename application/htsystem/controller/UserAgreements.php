@@ -41,7 +41,7 @@ class UserAgreements extends Common {
         return $this->fetch();
     }
 
-    public function create(Request $request,$id = 0){
+    public function create(Request $request,$id = 0) {
         if (!$id) {
             $this->error('访问错误');
         }
@@ -60,14 +60,6 @@ class UserAgreements extends Common {
             return $this->saveAgreement($request, $user);
         }
         $info = [];
-
-        $title = '';
-        if ($user->USER_STATUS_NAME == STATUS_COMMUNITY_DETOXIFICATION) {
-            $title = '社区戒毒协议 ' . $user->JD_START_TIME . ' 至 ' . $user->JD_END_TIME;
-        } else if ($user->USER_STATUS_NAME == STATUS_COMMUNITY_RECOVERING) {
-            $title = '社区康复协议 ' . $user->JD_START_TIME . ' 至 ' . $user->JD_END_TIME;
-        }
-        $info['TITLE'] = $title;
 
         $js = $this->loadJsCss(array('p:ueditor/ueditor', 'agreements_create'), 'js', 'admin');
         $this->assign('footjs', $js);
@@ -89,7 +81,6 @@ class UserAgreements extends Common {
             $dmmc = NbAuthDept::find(end($dmmcids));
         }
         $agreement->UUID = $user->ID;
-        $agreement->TITLE = $request->post('TITLE', '', 'trim');
         $agreement->CONTENT = $request->post('CONTENT', '', 'trim');
         $agreement->ADD_USER_MOBILE = $admin['MOBILE'];
         $agreement->ADD_USER_NAME = $admin['NAME'];
@@ -107,7 +98,7 @@ class UserAgreements extends Common {
             (new AgreementImgs())->saveData($agreement->ID, $images);
         }
 
-        $log_content = '协议标题：' . $agreement->TITLE . '<br/>' . '协议内容：' . $agreement->CONTENT;
+        $log_content = '协议内容：' . $agreement->CONTENT;
         $this->addAdminLog(self::OPER_TYPE_CREATE, '新增社戒社康协议', $log_content, $user->ID);
 
         $this->success('保存成功',url('UserAgreements/index', ['id' => $user->ID]));

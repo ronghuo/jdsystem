@@ -81,7 +81,7 @@ class Decision extends Common {
 
         $res = $this->uploadImages($request, ['decisions/']);
 
-        if ($res && isset($res['images'])) {
+        if ($res && !empty($res['images'])) {
             (new DecisionImgs())->saveData($decision_id, $res['images']);
         }
 

@@ -22,6 +22,16 @@
                     </div>
                     </div>
                     <div class="control-group">
+                        <label class="control-label"> 完成状态 </label>
+                        <div class="controls">
+                            <select name="finishStatus">
+                                <option>全部</option>
+                                <option value="CORRECT" {if $param['finishStatus'] eq 'CORRECT'}selected{/if}>正常</option>
+                                <option value="INCORRECT" {if $param['finishStatus'] eq 'INCORRECT'}selected{/if}>异常</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control-group">
                         <label class="control-label"></label>
                         <div class="controls">
                             <button class="btn btn-success"><i class="icon-search"></i> 搜索</button>

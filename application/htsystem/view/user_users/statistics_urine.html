@@ -43,13 +43,13 @@
                 <th width="60px" rowspan="3" style="vertical-align: middle;">乡镇街道</th>
                 <th width="60px" rowspan="3" style="vertical-align: middle;">村级社区</th>
                 {volist name="columns_1" id="name"}
-                    <th width="{if strlen($name) egt 5}45px{else/}30px{/if}" {if $i lt count($columns_1)}colspan="6"{else/}colspan="2"{/if}>{$name}</th>
+                    <th width="{if strlen($name) egt 5}45px{else/}30px{/if}" {if $i lt count($columns_1)}colspan="6"{else/}colspan="4"{/if}>{$name}</th>
                 {/volist}
                 <th width="60px" rowspan="3" style="vertical-align: middle;">操作</th>
             </tr>
             <tr>
                 {volist name="columns_2" id="name"}
-                <th width="{if strlen($name) egt 5}45px{else/}30px{/if}" colspan="2">{$name}</th>
+                <th width="{if strlen($name) egt 5}45px{else/}30px{/if}" {if $i lt count($columns_2)}colspan="2"{else/}colspan="4"{/if}>{$name}</th>
                 {/volist}
             </tr>
             <tr>
@@ -58,7 +58,7 @@
                 {/volist}
             </tr>
             {empty name="list"}
-            <tr><td colspan="21">木有找到相关的信息</td></tr>
+            <tr><td colspan="23">木有找到相关的信息</td></tr>
             {else/}
             <tr class="total-row">
                 <td>全部</td>
@@ -69,7 +69,12 @@
                         <td>
                             {if $all[$id] gt 0 && 'TOTAL_FINISHED' eq $id}
                                 <a href="../user_urans/index?{if isset($area1)}area1={$area1}{/if}{if isset($area2)}&area2={$area2}{/if}{if isset($area3)}&area3={$area3}{/if}">{$all[$id]}</a>
-                            {else/}{$all[$id]}
+                            {elseif $all[$id] gt 0 and 'CORRECT_USER_NUM' eq $id /}
+                                <a href="../user_urans/howitgoes?finishStatus=CORRECT{if isset($area1)}&area1={$area1}{/if}{if isset($area2)}&area2={$area2}{/if}{if isset($area3)}&area3={$area3}{/if}">{$all[$id]}</a>
+                            {elseif $all[$id] gt 0 && 'INCORRECT_USER_NUM' eq $id /}
+                                <a href="../user_urans/howitgoes?finishStatus=INCORRECT{if isset($area1)}&area1={$area1}{/if}{if isset($area2)}&area2={$area2}{/if}{if isset($area3)}&area3={$area3}{/if}">{$all[$id]}</a>
+                            {else/}
+                                {$all[$id]}
                             {/if}
                         </td>
                     {/foreach}
@@ -86,8 +91,13 @@
                     {foreach name="columns_3" key="id" item="name"}
                         <td>
                             {if $da[$id] gt 0 && 'TOTAL_FINISHED' eq $id}
-                            <a href="../user_urans/index?{if isset($da.COUNTY_ID_12)}area1={$da.COUNTY_ID_12}{/if}{if isset($da.STREET_ID)}&area2={$da.STREET_ID}{/if}{if isset($da.COMMUNITY_ID)}&area3={$da.COMMUNITY_ID}{/if}">{$da[$id]}</a>
-                            {else/}{$da[$id]}
+                                <a href="../user_urans/index?{if isset($da.COUNTY_ID_12)}area1={$da.COUNTY_ID_12}{/if}{if isset($da.STREET_ID)}&area2={$da.STREET_ID}{/if}{if isset($da.COMMUNITY_ID)}&area3={$da.COMMUNITY_ID}{/if}">{$da[$id]}</a>
+                                {elseif $da[$id] gt 0 and 'CORRECT_USER_NUM' eq $id /}
+                                <a href="../user_urans/howitgoes?finishStatus=CORRECT{if isset($da.COUNTY_ID_12)}&area1={$da.COUNTY_ID_12}{/if}{if isset($da.STREET_ID)}&area2={$da.STREET_ID}{/if}{if isset($da.COMMUNITY_ID)}&area3={$da.COMMUNITY_ID}{/if}">{$da[$id]}</a>
+                                {elseif $da[$id] gt 0 && 'INCORRECT_USER_NUM' eq $id /}
+                                <a href="../user_urans/howitgoes?finishStatus=INCORRECT{if isset($da.COUNTY_ID_12)}&area1={$da.COUNTY_ID_12}{/if}{if isset($da.STREET_ID)}&area2={$da.STREET_ID}{/if}{if isset($da.COMMUNITY_ID)}&area3={$da.COMMUNITY_ID}{/if}">{$da[$id]}</a>
+                                {else/}
+                                {$da[$id]}
                             {/if}
                         </td>
                     {/foreach}

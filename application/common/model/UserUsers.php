@@ -294,6 +294,7 @@ class UserUsers extends BaseModel
         $availableStatus = self::getUrineAvailableStatus();
         return self::statistics(function ($subSql, $groupBy) use ($availableStatus) {
             $whereIn = implode(',', array_keys($availableStatus));
+            $shouldNames = $finishedNames = [];
             foreach ($availableStatus as $statusId => $attr) {
                 $userNumName = $attr['finished_name'] . "USER_NUM";
                 $subSql .= "sum(case when USER_STATUS_ID = $statusId then 1 else 0 end) $userNumName,";
@@ -301,19 +302,54 @@ class UserUsers extends BaseModel
                     $year = $i + 1;
                     $finishedName = $attr['finished_name'] . "$year";
                     $missingName = $attr['missing_name'] . "$year";
-                    $checkTimes = $attr['rate'][$i];
-                    $subSql .= "sum(case when USER_STATUS_ID = $statusId then CNT_$year else 0 end) $finishedName,";
-                    $subSql .= "sum(case when USER_STATUS_ID = $statusId then ceil(if(MONTHS > 12*$year, 12, if(MONTHS > 12*$i, MONTHS - 12*$i, 0)) / (12 / $checkTimes)) - CNT_$year else 0 end) $missingName,";
+                    if (!isset($shouldNames[$i])) {
+                        $shouldNames[$i] = "SHOULD_$year";
+                    }
+                    if (!isset($finishedNames[$i])) {
+                        $finishedNames[$i] = "FINISHED_$year";
+                    }
+                    $subSql .= "sum(case when USER_STATUS_ID = $statusId then FINISHED_$year else 0 end) $finishedName,";
+                    $subSql .= "sum(case when USER_STATUS_ID = $statusId then SHOULD_$year - FINISHED_$year else 0 end) $missingName,";
                 }
+            }
+            $shouldNamesStr = implode("+", $shouldNames);
+            $finishedNamesStr = implode("+", $finishedNames);
+            $subSql .= "sum(case when JD_START_TIME IS NOT NULL and $shouldNamesStr = $finishedNamesStr then 1 else 0 end) 'CORRECT_USER_NUM',";
+            $subSql .= "sum(case when JD_START_TIME IS NULL or $shouldNamesStr <> $finishedNamesStr then 1 else 0 end) 'INCORRECT_USER_NUM',";
+            $subSql = substr($subSql, 0, -1);
+            $subSql .= " from (";
+            $subSql .= " select *,";
+            for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
+                $year = $i + 1;
+                $subSql .= "case";
+                foreach ($availableStatus as $statusId => $attr) {
+                    $rate = $attr['rate'];
+                    $checkTimes = $rate[$i];
+                    $subSql .= " when USER_STATUS_ID = $statusId then CEIL(IF(MONTHS > 12*$year, 12, IF(MONTHS > 12*$i, MONTHS - 12*$i, 0)) / (12 / $checkTimes))";
+                }
+                $subSql .= " end SHOULD_$year,";
             }
             $subSql = substr($subSql, 0, -1);
             $subSql .= " from (select USER_STATUS_ID,JD_START_TIME,if(JD_START_TIME is not null, TIMESTAMPDIFF(MONTH, JD_START_TIME, DATE_FORMAT(NOW(),'%Y-%m-%d')) + if(JD_START_TIME > now(), 0, 1), 0) MONTHS,COUNTY_ID_12,STREET_ID,COMMUNITY_ID,";
             for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
                 $year = $i + 1;
-                $subSql .= "(select count(1) from urans where UUID = A.ID and CHECK_TIME >= DATE_ADD(A.JD_START_TIME,INTERVAL $i year) and CHECK_TIME < DATE_ADD(A.JD_START_TIME,INTERVAL ($i + 1) year)) CNT_$year,";
+                $subSql .= "case";
+                foreach ($availableStatus as $statusId => $attr) {
+                    $rate = $attr['rate'];
+                    $checkTimes = $rate[$i];
+                    $subSql .= " when USER_STATUS_ID = $statusId then ";
+                    $interval = 12 / $checkTimes;
+                    for ($n = 0; $n < $checkTimes; $n++) {
+                        $from = $n * $interval + $i * 12;
+                        $to = ($n + 1) * $interval + $i * 12;
+                        $subSql .= "(select if(count(1) >= 1, 1, 0) from urans where UUID = A.ID and ISDEL = 0 and CHECK_TIME >= DATE_ADD(A.JD_START_TIME,INTERVAL $from MONTH) and CHECK_TIME < DATE_ADD(DATE_ADD(A.JD_START_TIME,INTERVAL $to MONTH),INTERVAL 1 DAY))+";
+                    }
+                    $subSql = substr($subSql, 0, -1);
+                }
+                $subSql .= " end FINISHED_$year,";
             }
             $subSql = substr($subSql, 0, strlen($subSql) - 1);
-            $subSql .= " from user_users A where USER_STATUS_ID in ($whereIn) and ISDEL = 0) A";
+            $subSql .= " from user_users A where USER_STATUS_ID in ($whereIn) and ISDEL = 0) A) A";
             $subSql .= "  group by " . implode(',', $groupBy);
             return $subSql;
         }, function ($sql) use ($availableStatus) {
@@ -327,12 +363,16 @@ class UserUsers extends BaseModel
                 $userNumName = $attr['finished_name'] . 'USER_NUM';
                 $sql .= "sum($userNumName) $userNumName,";
             }
-            $sql = substr($sql, 0, -1);
+            $correctUserNumName = "CORRECT_USER_NUM";
+            $incorrectUserNumName = "INCORRECT_USER_NUM";
+            $sql .= "sum($correctUserNumName) $correctUserNumName,";
+            $sql .= "sum($incorrectUserNumName) $incorrectUserNumName";
             return $sql;
         }, function (&$item) use ($availableStatus) {
             $totalFinishedName = "TOTAL_FINISHED";
             $totalMissingName = "TOTAL_MISSING";
-            $item[$totalFinishedName] = $item[$totalMissingName] = 0;
+            $item[$totalFinishedName] = 0;
+            $item[$totalMissingName] = 0;
             foreach ($availableStatus as $attr) {
                 for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
                     $year = $i + 1;
