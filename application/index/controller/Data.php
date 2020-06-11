@@ -786,7 +786,7 @@ class Data
     }
 
     /**
-     * 修复县市区下属单位（禁毒办）信息，保证县市区下各乡镇社区都有一个对应的”禁毒办”，其余非县市区下属乡镇社区都将其隐藏
+     * 修复县市区下属单位（禁毒办）信息，保证县市区下各乡镇街道都有一个对应的”禁毒办”，其余非县市区下属乡镇街道都将其隐藏
      * @param $countyName 县市区名称（如：鹤城区、芷江侗族自治县等）
      */
     public function fixNbAuthDept($countyName) {
@@ -804,6 +804,7 @@ class Data
             ->whereNull('B.ID')
             ->field('A.NAME,A.CODE12')
             ->select();
+        print_r($unhandledDepts);die;
         if (!empty($unhandledDepts)) {
             $newSort = NbAuthDept::where('PARENTDEPTID', $parentDeptId)->max('SORTORDER');
             foreach ($unhandledDepts as $dept) {

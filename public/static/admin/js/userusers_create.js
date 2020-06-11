@@ -190,47 +190,28 @@ $(function () {
             formValid.showSuccess(domicile_police_name);
         }
 
-        // 居住地 areas2
-        var areas2 = $('#areas2'),
-            lv3 = areas2.children('select.lv3').val();
-        if(!lv3){
-            formValid.showErr(areas2,'缺少居住地');
+        // 现居地 areas3
+        var areas3 = $('#areas3'),
+            lv1 = areas3.children('select.lv1').val();
+        if(!lv1){
+            formValid.showErr(areas3,'缺少现居地');
             return false;
         }else{
-            formValid.showSuccess(areas2);
+            formValid.showSuccess(areas3);
         }
 
         if(!checkInputEmpty(live_address)){
-            formValid.showErr(live_address,'缺少居住地详细地址');
+            formValid.showErr(live_address,'缺少现居地详细地址');
             return false;
         }else{
             formValid.showSuccess(live_address);
         }
 
         if(!checkInputEmpty(live_police_name)){
-            formValid.showErr(live_police_name,'缺少居住地派出所名称');
+            formValid.showErr(live_police_name,'缺少现居地派出所名称');
             return false;
         }else{
             formValid.showSuccess(live_police_name);
-        }
-
-        // 所在社区 areas3
-        var areas3 = $('#areas3'),
-            lv1 = areas3.children('select.lv1').val();
-        if(!lv1){
-            formValid.showErr(areas3,'缺少所在社区');
-            return false;
-        }else{
-            formValid.showSuccess(areas3);
-        }
-
-        var areas4 = $('#areas4'),
-            dmmcs = areas4.find('select:not(:first)');
-        if (!$(dmmcs[0]).val()) {
-            formValid.showErr(areas4,'缺少所属禁毒办');
-            return false;
-        }else{
-            formValid.showSuccess(areas4);
         }
 
         if(!checkInputEmpty(jd_zhuangan)){
@@ -320,12 +301,6 @@ var initImageViewer = function() {
     sxgkh.localKey = 'sxgkh';
     sxgkh.init();
 
-    // 解除书
-    var jcs = cloneObj(fileview);
-    jcs.ele = '.jcs-file';
-    jcs.btn = '.jcs-selector';
-    jcs.localKey = 'jcs';
-    jcs.init();
 };
 
 var STATUS_START_TIME = 'JD_START_TIME';
@@ -341,12 +316,12 @@ var ZT_SQJDZ = '社区戒毒中',
     ZT_YSW = '已死亡',
     ZT_CGZ = '出国中',
     ZT_WBDYYJ = '未报到已移交',
-    ZT_WFXXYYJ = '违反协议已移交',
+    ZT_WFXYYYJ = '违反协议已移交',
+    ZT_SHMFXZ = '社会面服刑中',
+    ZT_JDSNWFXFXZ = '戒断三年未复吸服刑中',
     EJZT_QJZ = '请假中',
     EJZT_ZZ = '中止',
-    EJZT_SXGKZ = '双向管控中',
-    EJZT_YJCSQJD = '已解除社区戒毒',
-    EJZT_YJCSQKF = '已解除社区康复';
+    EJZT_SXGKZ = '双向管控中';
 
 
 
@@ -397,8 +372,14 @@ var switchVisibility4StatusRelations = function(status, subStatus, trigger) {
     else if (ZT_WBDYYJ == status) {
         showRelations(status, [STATUS_START_TIME, 'wbdyyjGJS']);
     }
-    else if (ZT_WFXXYYJ == status) {
+    else if (ZT_WFXYYYJ == status) {
         showRelations(status, [STATUS_START_TIME, 'wfxyyyjGJS']);
+    }
+    else if (ZT_SHMFXZ == status) {
+        showRelations(status, [STATUS_START_TIME]);
+    }
+    else if (ZT_JDSNWFXFXZ == status) {
+        showRelations(status, [STATUS_START_TIME]);
     }
     if (subStatus) {
         if (EJZT_QJZ == subStatus) {
@@ -409,12 +390,6 @@ var switchVisibility4StatusRelations = function(status, subStatus, trigger) {
         }
         else if (EJZT_SXGKZ == subStatus) {
             showRelations(subStatus, [SUB_STATUS_START_TIME, 'SXGKH', 'sxgkReason'], true);
-        }
-        else if (EJZT_YJCSQJD == subStatus) {
-            showRelations(subStatus, [SUB_STATUS_START_TIME, 'JCS'], true);
-        }
-        else if (EJZT_YJCSQKF == subStatus) {
-            showRelations(subStatus, [SUB_STATUS_START_TIME, 'JCS'], true);
         }
     }
 };
@@ -493,7 +468,7 @@ var validStatusRelations = function () {
             return false;
         }
     }
-    else if (ZT_WFXXYYJ == status) {
+    else if (ZT_WFXYYYJ == status) {
         if (!nonNullValid(STATUS_START_TIME, '缺少移交时间')) {
             return false;
         }
@@ -507,6 +482,33 @@ var validStatusRelations = function () {
             return false;
         }
         if (isUriEmpty('wfxyyyjYJHZ') && !nonNullValid('wfxyyyjYJHZ', '缺少移交回执')) {
+            return false;
+        }
+    }
+    else if (ZT_WFXYYYJ == status) {
+        if (!nonNullValid(STATUS_START_TIME, '缺少移交时间')) {
+            return false;
+        }
+        if (isUriEmpty('wfxyyyjGJS') && !nonNullValid('wfxyyyjGJS', '缺少告诫书')) {
+            return false;
+        }
+        if (isUriEmpty('wfxyyyjXDJCTZS') && !nonNullValid('wfxyyyjXDJCTZS', '缺少吸毒检测通知书')) {
+            return false;
+        }
+        if (isUriEmpty('wfxyyyjYZWFXYZM') && !nonNullValid('wfxyyyjYZWFXYZM', '缺少严重违反协议证明')) {
+            return false;
+        }
+        if (isUriEmpty('wfxyyyjYJHZ') && !nonNullValid('wfxyyyjYJHZ', '缺少移交回执')) {
+            return false;
+        }
+    }
+    else if (ZT_SHMFXZ == status) {
+        if (!nonNullValid(STATUS_START_TIME, '缺少开始时间')) {
+            return false;
+        }
+    }
+    else if (ZT_JDSNWFXFXZ == status) {
+        if (!nonNullValid(STATUS_START_TIME, '缺少开始时间')) {
             return false;
         }
     }
@@ -542,22 +544,6 @@ var validStatusRelations = function () {
                 return false;
             }
             if (!nonNullValid('sxgkReason', '缺少双向管控原因')) {
-                return false;
-            }
-        }
-        else if (EJZT_YJCSQJD == subStatus) {
-            if (!nonNullValid(SUB_STATUS_START_TIME, '缺少解除时间')) {
-                return false;
-            }
-            if (isUriEmpty('JCS') && !nonNullValid('JCS', '缺少解除书')) {
-                return false;
-            }
-        }
-        else if (EJZT_YJCSQKF == subStatus) {
-            if (!nonNullValid(SUB_STATUS_START_TIME, '缺少解除时间')) {
-                return false;
-            }
-            if (isUriEmpty('JCS') && !nonNullValid('JCS', '缺少解除书')) {
                 return false;
             }
         }

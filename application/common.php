@@ -23,6 +23,7 @@ define('TERMINAL_WEB', 'WEB');  // 后台
 define('MINISTRY_ID', '010000');            // 部
 define('DEFAULT_PROVINCE_ID', '430000');    // 湖南省
 define('DEFAULT_CITY_ID', '431200');        // 怀化市
+define('TOP_MANAGE_DEPT_ID', '10074');      // 怀化市禁毒委员会
 
 /**
  * 权限级别
@@ -126,7 +127,6 @@ function getCurHttpHost(){
 
 function build_http_img_url($v, $field = '')
 {
-//    $host = 'http://' . $_SERVER['HTTP_HOST'];
     $host = getCurHttpHost();
     if ($field) {
         if ($v[$field] && strpos($v[$field], 'http') === false) {
@@ -565,4 +565,16 @@ function number2chinese($num) {
         }
         return $return;
     }
+}
+
+/**
+ * 将6位地区代码转换成12位
+ * @param $code
+ * @return bool|string
+ */
+function convertCodeTo12Chars($code) {
+    if (empty($code)) {
+        return false;
+    }
+    return $code . "000000";
 }

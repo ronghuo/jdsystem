@@ -98,6 +98,8 @@
                 <label class="control-label date-label" status="自愿戒毒中"><span class="error">*</span> 开始时间 </label>
                 <label class="control-label date-label" status="出国中"><span class="error">*</span> 出国时间 </label>
                 <label class="control-label date-label" status="已死亡"><span class="error">*</span> 死亡时间 </label>
+                <label class="control-label date-label" status="社会面服刑中"><span class="error">*</span> 开始时间 </label>
+                <label class="control-label date-label" status="戒断三年未复吸服刑中"><span class="error">*</span> 开始时间 </label>
                 <div class="controls">
                     <input type="date" class="date-member" name="JD_START_TIME" id="jd_start_time" value="{if $info}{$info.JD_START_TIME}{/if}"/>
                     <span class="date-member">-</span>
@@ -224,9 +226,6 @@
                 <label class="control-label date-label" status="请假中"><span class="error">*</span> 起止时间 </label>
                 <label class="control-label date-label" status="中止"><span class="error">*</span> 起止时间 </label>
                 <label class="control-label date-label" status="双向管控中"><span class="error">*</span> 开始时间 </label>
-                <label class="control-label date-label" status="已解除社区戒毒"><span class="error">*</span> 解除时间 </label>
-                <label class="control-label date-label" status="已解除社区康复"><span class="error">*</span> 解除时间 </label>
-                <label class="control-label date-label" status="违反协议已移交"><span class="error">*</span> 移交时间 </label>
                 <div class="controls">
                     <input type="date" class="date-member" name="SUB_STATUS_START_TIME" value="{if $info}{$info.SUB_STATUS_START_TIME}{/if}"/>
                     <span class="date-member">-</span>
@@ -259,21 +258,6 @@
                         <div class=" text-error update"></div>
                         {if $info}
                             <img src="{if $info && isset($info.SXGKH_url)}{$info.SXGKH_url}{else/}/static/images/empty.png{/if}"/>
-                        {/if}
-                    </div>
-                </div>
-            </div>
-            <div class="control-group sub-status-relation">
-                <div class="controls" style="margin-bottom: -20px;">
-                    <div class="mcdoc_upload_box status-file-view-box">
-                        <h6 style="margin-bottom: 10px;"><span class="error">*</span>解除书</h6>
-                        <button type="button" class="btn btn-success jcs-selector">选择图片</button>
-                        <input type="file" name="JCS" accept="image/*" class="jcs-file hide-file-button"/>
-                        <input type="hidden" name="JCS_uri" value="{if $info && isset($info.JCS)}{$info.JCS}{/if}" />
-                        <div class="mt10 ml10 muted">仅允许jpg和png格式，1.5M内</div>
-                        <div class=" text-error update"></div>
-                        {if $info}
-                            <img src="{if $info && isset($info.JCS_url)}{$info.JCS_url}{else/}/static/images/empty.png{/if}"/>
                         {/if}
                     </div>
                 </div>
@@ -408,27 +392,27 @@
             </div>
 
             <div class="control-group">
-                <label class="control-label"><span class="error">*</span> 居住地 </label>
-                <div class="controls" id="areas2">
-                    <select name="liveplace[]" class="lv1" data-value="{if $info}{$info.LIVE_IDS[0]}{/if}"></select>
-                    <select name="liveplace[]" class="lv2" data-value="{if $info}{$info.LIVE_IDS[1]}{/if}"></select>
-                    <select name="liveplace[]" class="lv3" data-value="{if $info}{$info.LIVE_IDS[2]}{/if}"></select>
+                <label class="control-label"><span class="error">*</span> 现居地 </label>
+                <div class="controls" id="areas3">
+                    <select name="levelarea[]" class="lv1" data-value="{if $info}{$info.COUNTY_ID_12}{/if}"></select>
+                    <select name="levelarea[]" class="lv2" data-value="{if $info}{$info.STREET_ID}{/if}"></select>
+                    <select name="levelarea[]" class="lv3" data-value="{if $info}{$info.COMMUNITY_ID}{/if}"></select>
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label"><span class="error">*</span> 居住地详细地址 </label>
+                <label class="control-label"><span class="error">*</span> 现居地详址 </label>
                 <div class="controls">
                     <input type="text" name="LIVE_ADDRESS" id="live_address" value="{if $info}{$info.LIVE_ADDRESS}{/if}" class="input" placeholder=""/>
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label"><span class="error">*</span> 居住地派出所名称 </label>
+                <label class="control-label"><span class="error">*</span> 现居地派出所名称 </label>
                 <div class="controls">
                     <input type="text" name="LIVE_POLICE_STATION" id="live_police_name" value="{if $info}{$info.LIVE_POLICE_STATION}{/if}" class="input" placeholder=""/>
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label"> 居住地派出所代码 </label>
+                <label class="control-label"> 现居地派出所代码 </label>
                 <div class="controls">
                     <input type="text" name="LIVE_POLICE_STATION_CODE" id="live_police_code" value="{if $info}{$info.LIVE_POLICE_STATION_CODE}{/if}" class="input" placeholder=""/>
                 </div>
@@ -458,43 +442,6 @@
                     </select>
                 </div>
             </div>
-
-            {php}/* <div class="control-group">
-                <label class="control-label"><span class="error">*</span> 尿检频率 </label>
-                <div class="controls">
-                    <select name="URAN_RATE">
-                        {foreach name="uran_rates" item="nar" key="uk"}
-
-                        <option value="{$uk}"{if $info&&$info.URAN_RATE==$uk} selected{/if}>{$nar}</option>
-                        {/foreach}
-                    </select>
-                </div>
-            </div> */ {/php}
-
-            <div class="control-group">
-                <label class="control-label"><span class="error">*</span> 所在社区 </label>
-                <div class="controls" id="areas3">
-                    <select name="levelarea[]" class="lv1" data-value="{if $info}{$info.COUNTY_ID_12}{/if}"></select>
-                    <select name="levelarea[]" class="lv2" data-value="{if $info}{$info.STREET_ID}{/if}"></select>
-                    <select name="levelarea[]" class="lv3" data-value="{if $info}{$info.COMMUNITY_ID}{/if}"></select>
-                </div>
-            </div>
-            <div class="control-group">
-                <label class="control-label"><span class="error">*</span> 所属禁毒办</label>
-                <div class="controls" id="areas4">
-                    <select name="dmmc[]" class="lv1" data-value="{$lvlValue}" style="display: none;"></select>
-                    <select name="dmmc[]" class="lv2" data-value="{if $info}{$info.DMMC_IDS[1]}{/if}"></select>
-                    <select name="dmmc[]" class="lv3" data-value="{if $info}{$info.DMMC_IDS[2]}{/if}"></select>
-                    <select name="dmmc[]" class="lv4" data-value="{if $info}{$info.DMMC_IDS[3]}{/if}"></select>
-                </div>
-            </div>
-
-           <!-- <div class="control-group">
-                <label class="control-label"><span class="error">*</span> 管辖警务区代码 </label>
-                <div class="controls">
-                    <input type="text" name="LOG" value="" class="input" placeholder=""/>
-                </div>
-            </div>-->
 
             <div class="control-group">
                 <label class="control-label"> 责任民警警号</label>
@@ -541,11 +488,7 @@
                         <p>&nbsp;</p>
                         {if $info}
                         <div class="qiniu_doc_line">
-
                             <p><img src="{if $info}{$info.HEAD_IMG_URL}{else/}/data/image/default.png{/if}" style="height: 120px;"/> </p>
-                            <!--<input type="hidden" name="HEAD_IMG" class="p_doc" value="{$info.HEAD_IMG}"/>-->
-
-                            <!--<p><a href="javascript:;" class="text-error del_localfile"><i class="icon-trash"></i> 删除</a></p>-->
                         </div>
                         {/if}
                     </div>

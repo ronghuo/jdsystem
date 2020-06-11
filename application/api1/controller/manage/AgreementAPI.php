@@ -31,6 +31,7 @@ class AgreementAPI extends Common {
             ->select()
             ->map(function ($item) {
                 $item->images->map(function($image) {
+                    $image->SRC_PATH = build_http_img_url($image->SRC_PATH);
                     return $image;
                 });
                 return $item;

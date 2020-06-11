@@ -62,7 +62,9 @@ class UserUsers extends Common
         '违反协议未移交' => [],
         '违反协议已移交' => [self::STATUS_START_TIME_NAME => '移交时间', 'wfxyyyjGJS' => '告诫书', 'wfxyyyjXDJCTZS' => '吸毒检测通知书', 'wfxyyyjYZWFXYZM' => '严重违反协议证明', 'wfxyyyjYJHZ' => '移交回执'],
         '社会面' => [],
+        '社会面服刑中' => [self::STATUS_START_TIME_NAME => '服刑开始时间'],
         '戒断三年未复吸' => [],
+        '戒断三年未复吸服刑中' => [self::STATUS_START_TIME_NAME => '服刑开始时间'],
         '出国中' => [self::STATUS_START_TIME_NAME => '出国时间', 'country' => '国家名称'],
         '社戒社康终止' => [self::STATUS_START_TIME_NAME => '终止时间'],
         '羁押拘留中' => [self::STATUS_START_TIME_NAME => '拘留起始时间', self::STATUS_END_TIME_NAME => '拘留截止时间', 'detainPlace' => '拘留地点'],
@@ -75,9 +77,7 @@ class UserUsers extends Common
     const SUB_STATUS_RELATIONS = [
         '请假中' => [self::SUB_STATUS_START_TIME_NAME => '请假起始时间', self::SUB_STATUS_END_TIME_NAME => '请假截止时间'],
         '中止' => [self::SUB_STATUS_START_TIME_NAME => '中止起始时间', self::SUB_STATUS_END_TIME_NAME => '中止截止时间', 'suspendZZCXSM' => '中止程序说明', 'suspendReason' => '终止原因'],
-        '双向管控中' => [self::SUB_STATUS_START_TIME_NAME => '双向管控开始时间', 'SXGKH' => '双向管控函', 'sxgkReason' => '双向管控原因'],
-        '已解除社区戒毒' => [self::SUB_STATUS_START_TIME_NAME => '解除时间', 'JCS' => '解除书'],
-        '已解除社区康复' => [self::SUB_STATUS_START_TIME_NAME => '解除时间', 'JCS' => '解除书']
+        '双向管控中' => [self::SUB_STATUS_START_TIME_NAME => '双向管控开始时间', 'SXGKH' => '双向管控函', 'sxgkReason' => '双向管控原因']
     ];
 
     /**
@@ -895,7 +895,7 @@ class UserUsers extends Common
         $isNew = empty($id);
 
         // 输入校验
-        $this->validUserInput($request);
+        $this->validUserInput($request, $id);
 
         // 获取数据
         $data = $this->getUserData($request, $isNew);
@@ -905,46 +905,33 @@ class UserUsers extends Common
             $user = UserUsersModel::create($data);
             $user->HEAD_IMG = '';
             $id = $user->ID;
+            $isStatusChanged = false;
         } else {
             $user = UserUsersModel::find($id);
+            $isStatusChanged = $user->USER_STATUS_ID != $data['USER_STATUS_ID'];
             $user->save($data);
         }
         if (!$id) {
             $this->error('保存失败');
         }
 
-        // 保存人员状态变化日志
-        $this->saveUserStatusChangeLog($request, $user, $isNew);
+        if ($isStatusChanged) {
+            // 保存人员状态变化日志
+            $this->saveUserStatusChangeLog($id, $data['USER_STATUS_ID']);
+        }
 
         // 保存人员头像信息
         $this->saveUserHeadImg($request, $user);
 
+        // 保存管理员操作日志
+        $this->saveAdminLog($isNew, $data, $user);
+
         // 页面点击“保存”或“确认”键后提示成功或失败，自动停留在当前编辑界面
         $ref = url('UserUsers/edit', array('id'=>$user->ID));
-
-        if ($isNew) {
-            $log_oper_Name = '新增康复人员信息';
-            $log_content = '新增康复人员信息，人员信息如下：' . self::LOG_CONTENT_BREAK;
-            $log_oper_type = self::OPER_TYPE_CREATE;
-        } else {
-            $log_oper_Name = '修改康复人员信息';
-            $log_content = '修改康复人员信息，人员信息如下：' . self::LOG_CONTENT_BREAK;
-            $log_oper_type = self::OPER_TYPE_UPDATE;
-        }
-        foreach ($data as $name => $value) {
-            if (!isset(self::USER_FIELD_NAME_DESC_MAPPER[$name])) {
-                continue;
-            }
-            $log_content .= self::USER_FIELD_NAME_DESC_MAPPER[$name] . '：' . $value . self::LOG_CONTENT_BREAK;
-        }
-        $this->addAdminLog($log_oper_type, $log_oper_Name, $log_content, $user->ID);
-
         $this->success('保存人员资料成功',$ref);
     }
 
-    private function validUserInput(Request $request) {
-        $id = $request->post('ID',0,'int');
-
+    private function validUserInput(Request $request, $id) {
         if ($id > 0) {
             if (!$this->checkUUid($id)) {
                 $this->error('权限不足');
@@ -968,17 +955,7 @@ class UserUsers extends Common
         $levelarea = array_filter($levelarea);
         $area_info = Subareas::where('CODE12', end($levelarea))->find();
         if (!$area_info) {
-            $this->error('缺少管辖社区信息');
-        }
-
-        $dmmcids = $request->param('dmmc', [], 'trim');
-        $dmmcids = array_filter($dmmcids);
-        if (empty($dmmcids) || empty($dmmcids[1])) {
-            $this->error('缺少所属禁毒办信息');
-        }
-        $dmmc = NbAuthDept::find(end($dmmcids));
-        if (!$dmmc) {
-            $this->error('缺少所属禁毒办信息');
+            $this->error('缺少现居地信息');
         }
 
         // 检验人员状态相关信息的合法性
@@ -995,11 +972,7 @@ class UserUsers extends Common
         $utype218 = $request->param('UTYPE_ID_218',0,'trim');
 
         $domicileplaceids = $request->param('domicileplace');
-
         $domicileplace = Upareatable::where('UPAREAID','in',$domicileplaceids)->order('UPAREAID','asc')->select()->column('NAME');
-
-        $liveplaceids = $request->param('liveplace');
-        $liveplace = Upareatable::where('UPAREAID','in',$liveplaceids)->order('UPAREAID','asc')->select()->column('NAME');
 
         $nationality = BaseNationalityType::find($request->param('NATIONALITY_ID','','trim'));
         $nation = BaseNationType::find($request->param('NATION_ID','','trim'));
@@ -1015,14 +988,28 @@ class UserUsers extends Common
 
         $levelarea = $request->param('levelarea',[]);
         $levelarea = array_filter($levelarea);
+
         $area_info = Subareas::where('CODE12', end($levelarea))->find();
-        $county_id = isset($levelarea[0]) ? $levelarea[0] : 0;
+        $province_id = $area_info->PROVICEID;
+        $city_id = $area_info->CITYID;
+        $county_id = $area_info->COUNTYID;
+        $county_id_12 = isset($levelarea[0]) ? $levelarea[0] : 0;
         $street_id = isset($levelarea[1]) ? $levelarea[1] : 0;
         $community_id = isset($levelarea[2]) ? $levelarea[2] : 0;
 
-        $dmmcids = $request->param('dmmc', [], 'trim');
-        $dmmcids = array_filter($dmmcids);
-        $dmmc = NbAuthDept::find(end($dmmcids));
+        // 自动完善现居地省份、城市、县市区信息
+        $liveplaceids = [$province_id, $city_id, $county_id];
+        $liveplace = Upareatable::where('UPAREAID','in',$liveplaceids)->order('UPAREAID','asc')->select()->column('NAME');
+
+        // 自动完善管辖单位（禁毒办工作小组）信息
+        $dmmcs = NbAuthDept::where('ID', TOP_MANAGE_DEPT_ID)
+            ->whereOr(function ($query) use ($county_id_12) {
+                $query->where(['AREACODE' => $county_id_12, 'PARENTDEPTID' => TOP_MANAGE_DEPT_ID]);
+            })
+            ->whereOr(['AREACODE' => $street_id])
+            ->field(['ID', 'DEPTCODE', 'DEPTNAME'])->order(['AREACODE asc'])->select()->toArray();
+        $dmmcids = array_column($dmmcs, 'ID');
+        $dmmc = end($dmmcs);
 
         $data = [
             'STATUS' => 1,
@@ -1073,10 +1060,10 @@ class UserUsers extends Common
             'JOB_STATUS' => Opts::getJobStatus($request->param('JOB_STATUS_ID','','trim'))['NAME'],
             'MARITAL_STATUS' => Opts::getMaritalStatus($request->param('MARITAL_STATUS_ID','','trim'))['NAME'],
 
-            'PROVINCE_ID' => $area_info->PROVICEID,
-            'CITY_ID' => $area_info->CITYID,
-            'COUNTY_ID' => $area_info->COUNTYID,
-            'COUNTY_ID_12' => $county_id,
+            'PROVINCE_ID' => $province_id,
+            'CITY_ID' => $city_id,
+            'COUNTY_ID' => $county_id,
+            'COUNTY_ID_12' => $county_id_12,
             'STREET_ID' => $street_id,
             'COMMUNITY_ID' => $community_id,
 
@@ -1089,8 +1076,8 @@ class UserUsers extends Common
             'DRUG_TYPE' => Opts::getNameById($request->param('DRUG_TYPE_ID','','trim'))['NAME'],
             'NARCOTICS_TYPE' => Opts::getNameById($request->param('NARCOTICS_TYPE_ID','','trim'))['NAME'],
 
-            'MANAGE_POLICE_AREA_CODE' => $dmmc->DEPTCODE,
-            'MANAGE_POLICE_AREA_NAME' => $dmmc->DEPTNAME,
+            'MANAGE_POLICE_AREA_CODE' => $dmmc['DEPTCODE'],
+            'MANAGE_POLICE_AREA_NAME' => $dmmc['DEPTNAME'],
             'MANAGE_COMMUNITY' => $area_info->NAME,
             'DMMC_IDS' => implode(',', $dmmcids),//new
 
@@ -1123,28 +1110,19 @@ class UserUsers extends Common
         return $data;
     }
 
-    private function saveUserStatusChangeLog(Request $request, $user, $isNew) {
-        $isNeed = false;
-        $userStatusId = $request->param('USER_STATUS_ID',0,'trim');
-        if (!$isNew) {
-            if ($user->USER_STATUS_ID != $userStatusId) {
-                $isNeed = true;
-            }
+    private function saveUserStatusChangeLog($userId, $userStatusId) {
+        $userStatus = create_kv(BaseUserStatus::all()->toArray(), 'ID', 'NAME');
+        $content = '人员状态：' . ($userStatus[$userStatusId] ?? 'error');
+        if (!empty($jd_start_time) && !empty($jd_end_time)) {
+            $content .= "，起止时间:{$jd_start_time}到{$jd_end_time}";
         }
-        if ($isNeed) {
-            $userStatus = create_kv(BaseUserStatus::all()->toArray(), 'ID', 'NAME');
-            $content = '人员状态：' . ($userStatus[$userStatusId] ?? 'error');
-            if (!empty($jd_start_time) && !empty($jd_end_time)) {
-                $content .= "，起止时间:{$jd_start_time}到{$jd_end_time}";
-            }
-            UserChangeLog::addRow([
-                'UUID' => $user->ID,
-                'LOG_TYPE' => 1,
-                'CONTENT' => $content,
-                'OPER_USER_ID' => session('user_id'),
-                'OPER_USER_NAME' => session('name')
-            ]);
-        }
+        UserChangeLog::addRow([
+            'UUID' => $userId,
+            'LOG_TYPE' => 1,
+            'CONTENT' => $content,
+            'OPER_USER_ID' => session('user_id'),
+            'OPER_USER_NAME' => session('name')
+        ]);
     }
 
     private function saveUserHeadImg(Request $request, $user) {
@@ -1161,6 +1139,25 @@ class UserUsers extends Common
 
             $user->save(['HEAD_IMG'=>$img['images'][0]]);
         }
+    }
+
+    private function saveAdminLog($isNew, $data, $user) {
+        if ($isNew) {
+            $log_oper_Name = '新增康复人员信息';
+            $log_content = '新增康复人员信息，人员信息如下：' . self::LOG_CONTENT_BREAK;
+            $log_oper_type = self::OPER_TYPE_CREATE;
+        } else {
+            $log_oper_Name = '修改康复人员信息';
+            $log_content = '修改康复人员信息，人员信息如下：' . self::LOG_CONTENT_BREAK;
+            $log_oper_type = self::OPER_TYPE_UPDATE;
+        }
+        foreach ($data as $name => $value) {
+            if (!isset(self::USER_FIELD_NAME_DESC_MAPPER[$name])) {
+                continue;
+            }
+            $log_content .= self::USER_FIELD_NAME_DESC_MAPPER[$name] . '：' . $value . self::LOG_CONTENT_BREAK;
+        }
+        $this->addAdminLog($log_oper_type, $log_oper_Name, $log_content, $user->ID);
     }
 
     private function getJdStartTime(Request $request, $user_status_name) {
@@ -1284,7 +1281,7 @@ class UserUsers extends Common
                 $statusRelation[$name] = $request->param($name . self::URI_FLAG);
             }
         }
-        return json_encode($statusRelation);
+        return empty($statusRelation) ? '' : json_encode($statusRelation);
     }
 
     private function buildSubStatusRelations(Request $request) {
@@ -1314,7 +1311,7 @@ class UserUsers extends Common
                 $subStatusRelation[$name] = $request->param($name . self::URI_FLAG);
             }
         }
-        return json_encode($subStatusRelation);
+        return empty($subStatusRelation) ? '' : json_encode($subStatusRelation);
     }
 
     public function logList($id = 0) {
