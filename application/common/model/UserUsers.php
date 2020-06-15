@@ -330,7 +330,7 @@ class UserUsers extends BaseModel
                 $subSql .= " end SHOULD_$year,";
             }
             $subSql = substr($subSql, 0, -1);
-            $subSql .= " from (select USER_STATUS_ID,JD_START_TIME,if(JD_START_TIME is not null, TIMESTAMPDIFF(MONTH, JD_START_TIME, DATE_FORMAT(NOW(),'%Y-%m-%d')) + if(JD_START_TIME > now(), 0, 1), 0) MONTHS,COUNTY_ID_12,STREET_ID,COMMUNITY_ID,";
+            $subSql .= " from (select USER_STATUS_ID,JD_START_TIME,if(JD_START_TIME is not null, TIMESTAMPDIFF(MONTH, DATE_FORMAT(JD_START_TIME,'%Y-%m-01'), DATE_FORMAT(DATE_ADD(NOW(),INTERVAL 1 MONTH),'%Y-%m-01')), 0) MONTHS,COUNTY_ID_12,STREET_ID,COMMUNITY_ID,";
             for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
                 $year = $i + 1;
                 $subSql .= "case";
@@ -342,7 +342,7 @@ class UserUsers extends BaseModel
                     for ($n = 0; $n < $checkTimes; $n++) {
                         $from = $n * $interval + $i * 12;
                         $to = ($n + 1) * $interval + $i * 12;
-                        $subSql .= "(select if(count(1) >= 1, 1, 0) from urans where UUID = A.ID and ISDEL = 0 and CHECK_TIME >= DATE_ADD(A.JD_START_TIME,INTERVAL $from MONTH) and CHECK_TIME < DATE_ADD(DATE_ADD(A.JD_START_TIME,INTERVAL $to MONTH),INTERVAL 1 DAY))+";
+                        $subSql .= "(select if(count(1) >= 1, 1, 0) from urans where UUID = A.ID and ISDEL = 0 and CHECK_TIME >= DATE_FORMAT(DATE_ADD(A.JD_START_TIME,INTERVAL $from MONTH), '%Y-%m-01') and CHECK_TIME < DATE_FORMAT(DATE_ADD(A.JD_START_TIME,INTERVAL $to MONTH), '%Y-%m-01'))+";
                     }
                     $subSql = substr($subSql, 0, -1);
                 }

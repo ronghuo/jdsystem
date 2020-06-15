@@ -92,8 +92,7 @@ class UserUsers extends Common
         'wfxyyyjYZWFXYZM',
         'wfxyyyjYJHZ',
         'suspendZZCXSM',
-        'SXGKH',
-        'JCS'
+        'SXGKH'
     ];
 
     /**

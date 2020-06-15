@@ -1,7 +1,7 @@
 .status-file-view-box {
     width: 150px;
     min-width: 150px;
-    height: 280px;
+    height: 220px;
     display: inline-block;
     vertical-align: top;
 }
@@ -26,4 +26,10 @@
 }
 .date-member {
     display: none;
+}
+.status-file-view-title {
+    margin-bottom: 10px;
+}
+.wrap {
+    display: block !important;
 }

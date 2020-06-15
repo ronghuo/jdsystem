@@ -301,6 +301,11 @@ var initImageViewer = function() {
     sxgkh.localKey = 'sxgkh';
     sxgkh.init();
 
+    $('.file-view-add').bind('click', function () {
+        $newObj = $(this).parent().clone(true, true);
+        $newObj.insertAfter($(this).parent());
+    });
+
 };
 
 var STATUS_START_TIME = 'JD_START_TIME';
@@ -397,12 +402,12 @@ var switchVisibility4StatusRelations = function(status, subStatus, trigger) {
 var validStatusRelations = function () {
     var status = $('#ustatus').children('option:selected').text();
     if (ZT_SQJDZ == status) {
-        if (!nonNullValid(STATUS_START_TIME, '缺少开始时间')) {
+        if (!nonNullValid(STATUS_START_TIME, '缺少协议开始时间')) {
             return false;
         }
     }
     else if (ZT_SQKFZ == status) {
-        if (!nonNullValid(STATUS_START_TIME, '缺少开始时间')) {
+        if (!nonNullValid(STATUS_START_TIME, '缺少协议开始时间')) {
             return false;
         }
     }

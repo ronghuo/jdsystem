@@ -27,7 +27,7 @@ class UserUrans extends Common
         $data = $this->doSearch($uuid);
         $list = $data['query']
             ->order('CHECK_TIME', 'desc')
-            ->paginate(self::PAGE_SIZE, false, ['query'=>request()->param(),]);
+            ->paginate(self::PAGE_SIZE, false, ['query'=>request()->param()]);
 
         $js = $this->loadJsCss(array('p:cate/jquery.cate', 'userurans_index'), 'js', 'admin');
         $this->assign('footjs', $js);
@@ -46,12 +46,14 @@ class UserUrans extends Common
 
         $is_so = false;
         $query = Urans::alias('A')
-            ->where('ISDEL',0)
+            ->leftJoin('user_users B', 'A.UUID = B.ID')
+            ->where('A.ISDEL',0)
             ->with([
                 'uuser' => function($query){
                     return $query->field('ID,NAME');
                 }
-            ]);
+            ])
+            ->field(['A.ID', 'A.URAN_CODE', 'A.UUID', 'A.UNIT_NAME', 'A.RESULT', 'A.CHECK_TIME']);
 
         $fields = ['UUID', 'UNIT_NAME', 'URAN_CODE'];
         $param['keywords'] = input('get.keywords','');
@@ -61,7 +63,10 @@ class UserUrans extends Common
         }
 
         if (!empty($param['keywords'])) {
-            $query->where(implode('|', $fields), 'like', '%'. $param['keywords'] .'%');
+            $query->where(function ($query) use ($fields, $param) {
+                $query->where(implode('|', $fields), 'like', '%'. $param['keywords'] .'%');
+                $query->whereOr('B.NAME', 'like', "%" . $param['keywords']. "%");
+            });
             $is_so = true;
         }
 
@@ -99,22 +104,18 @@ class UserUrans extends Common
         $param['a1'] = input('area1', '');
         $param['a2'] = input('area2', '');
         $param['a3'] = input('area3', '');
-        if ($param['a1'] > 0) {
-            $code12 = strlen($param['a1'])==6 ? $param['a1'].'000000' : $param['a1'];
-            $code6 = substr($param['a1'], 0, 6);
-            $query->whereIn('COUNTY_ID', [$code6, $code12]);
-            $is_so = true;
-        }
-        if ($param['a2'] > 0) {
-            $query->where('STREET_ID', $param['a2']);
-            $is_so = true;
-        }
         if ($param['a3'] > 0) {
-            $query->where('COMMUNITY_ID', $param['a3']);
+            $query->where('B.COMMUNITY_ID', $param['a3']);
             $is_so = true;
         }
-
-//        echo $query->fetchSql()->select();die;
+        else if ($param['a2'] > 0) {
+            $query->where('B.STREET_ID', $param['a2']);
+            $is_so = true;
+        }
+        else if ($param['a1'] > 0) {
+            $query->where('B.COUNTY_ID', $param['a3']);
+            $is_so = true;
+        }
 
         $soids = [];
 
@@ -278,7 +279,7 @@ class UserUrans extends Common
             $subSql .= " end SHOULD_$year,";
         }
         $subSql = substr($subSql, 0, -1);
-        $subSql .= " from (select ID,`NAME`,USER_STATUS_ID,USER_STATUS_NAME,JD_START_TIME,if(JD_START_TIME is not null, TIMESTAMPDIFF(MONTH, JD_START_TIME, DATE_FORMAT(now(),'%Y-%m-%d')) + if(JD_START_TIME > now(), 0, 1), 0) MONTHS,";
+        $subSql .= " from (select ID,`NAME`,USER_STATUS_ID,USER_STATUS_NAME,JD_START_TIME,if(JD_START_TIME is not null, TIMESTAMPDIFF(MONTH, DATE_FORMAT(JD_START_TIME,'%Y-%m-01'), DATE_FORMAT(DATE_ADD(NOW(),INTERVAL 1 MONTH),'%Y-%m-01')), 0) MONTHS,";
         $subSql .= "COUNTY_ID_12,STREET_ID,COMMUNITY_ID,concat_ws(' ', (select `NAME` from subareas where CODE12 = COUNTY_ID_12),(select `NAME` from subareas where CODE12 = STREET_ID),(select `NAME` from subareas where CODE12 = COMMUNITY_ID)) AREA,";
 
         $shouldNames = $finishedNames = [];
@@ -298,12 +299,13 @@ class UserUrans extends Common
                 for ($n = 0; $n < $checkTimes; $n++) {
                     $from = $n * $interval + $i * 12;
                     $to = ($n + 1) * $interval + $i * 12;
-                    $subSql .= "(select if(count(1) >= 1, 1, 0) from urans where UUID = A.ID and ISDEL = 0 and CHECK_TIME >= DATE_ADD(A.JD_START_TIME,INTERVAL $from MONTH) and CHECK_TIME < DATE_ADD(DATE_ADD(A.JD_START_TIME,INTERVAL $to MONTH),INTERVAL 1 DAY))+";
+                    $subSql .= "(select if(count(1) >= 1, 1, 0) from urans where UUID = A.ID and ISDEL = 0 and CHECK_TIME >= DATE_FORMAT(DATE_ADD(A.JD_START_TIME,INTERVAL $from MONTH), '%Y-%m-01') and CHECK_TIME < DATE_FORMAT(DATE_ADD(A.JD_START_TIME,INTERVAL $to MONTH), '%Y-%m-01'))+";
                 }
                 $subSql = substr($subSql, 0, -1);
             }
             $subSql .= " end FINISHED_$year,";
         }
+        echo $subSql;die;
         $subSql = substr($subSql, 0, -1);
         $subSql .= " from user_users A where USER_STATUS_ID in ($whereIn) and ISDEL = 0";
 
@@ -397,7 +399,7 @@ class UserUrans extends Common
 
         $js = $this->loadJsCss(array('p:cate/jquery.cate', 'userurans_howitgoes'), 'js', 'admin');
         $this->assign('footjs', $js);
-        $this->assign('is_so', $is_so);
+        $this->assign('is_so', empty($is_so) ? false : true);
         $this->assign('param', [
             'area1' => $where['COUNTY_ID_12'],
             'area2' => $where['STREET_ID'],

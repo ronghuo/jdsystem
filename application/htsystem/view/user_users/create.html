@@ -88,8 +88,8 @@
                 </div>
             </div>
             <div class="control-group status-relation">
-                <label class="control-label date-label" status="社区戒毒中"><span class="error">*</span> 开始时间 </label>
-                <label class="control-label date-label" status="社区康复中"><span class="error">*</span> 开始时间 </label>
+                <label class="control-label date-label" status="社区戒毒中"><span class="error">*</span> 协议开始时间 </label>
+                <label class="control-label date-label" status="社区康复中"><span class="error">*</span> 协议开始时间 </label>
                 <label class="control-label date-label" status="强制戒毒中"><span class="error">*</span> 起止时间 </label>
                 <label class="control-label date-label" status="社戒社康终止"><span class="error">*</span> 终止时间 </label>
                 <label class="control-label date-label" status="羁押拘留中"><span class="error">*</span> 起止时间 </label>
@@ -127,36 +127,34 @@
             <div class="control-group status-relation">
                 <div class="controls" style="margin-bottom: -20px;">
                     <div class="mcdoc_upload_box status-file-view-box">
-                        <h6 style="margin-bottom: 10px;"><span class="error">*</span>告诫书</h6>
+                        <h6 class="status-file-view-title"><span class="error">*</span>告诫书</h6>
                         <button type="button" class="btn btn-success wbdyyj-gjs-selector">选择图片</button>
                         <input type="file" name="wbdyyjGJS" accept="image/*" class="wbdyyj-gjs-file hide-file-button"/>
                         <input type="hidden" name="wbdyyjGJS_uri" value="{if $info && isset($info.wbdyyjGJS)}{$info.wbdyyjGJS}{/if}" />
-                        <div class="mt10 ml10 muted">仅允许jpg和png格式，1.5M内</div>
                         <div class=" text-error update"></div>
-                        {if $info}
-                            <img src="{if $info && isset($info.wbdyyjGJS_url)}{$info.wbdyyjGJS_url}{else/}/static/images/empty.png{/if}"/>
+                        {if $info && isset($info.wbdyyjGJS_url)}
+                            <img src="{$info.wbdyyjGJS_url}"/>
                         {/if}
                     </div>
                     <div class="mcdoc_upload_box status-file-view-box">
-                        <h6 style="margin-bottom: 10px;"><span class="error">*</span>逾期未报到证明</h6>
+                        <h6 class="status-file-view-title"><span class="error">*</span>逾期未报到证明</h6>
                         <button type="button" class="btn btn-success wbdyyj-yqwbdzm-selector">选择图片</button>
                         <input type="file" name="wbdyyjYQWBDZM" accept="image/*" class="wbdyyj-yqwbdzm-file hide-file-button"/>
                         <input type="hidden" name="wbdyyjYQWBDZM_uri" value="{if $info && isset($info.wbdyyjYQWBDZM)}{$info.wbdyyjYQWBDZM}{/if}" />
-                        <div class="mt10 ml10 muted">仅允许jpg和png格式，1.5M内</div>
                         <div class=" text-error update"></div>
-                        {if $info}
-                            <img src="{if $info && isset($info.wbdyyjYQWBDZM_url)}{$info.wbdyyjYQWBDZM_url}{else/}/static/images/empty.png{/if}"/>
+                        {if $info && isset($info.wbdyyjYQWBDZM_url)}
+                            <img src="{$info.wbdyyjYQWBDZM_url}"/>
                         {/if}
                     </div>
                     <div class="mcdoc_upload_box status-file-view-box">
-                        <h6 style="margin-bottom: 10px;"><span class="error">*</span>移交回执</h6>
+                        <h6 class="status-file-view-title"><span class="error">*</span>移交回执</h6>
+                        <a href="javascript:void(0);" class="btn btn-primary mini pull-right file-view-add"><i class="icon-plus"></i></a>
                         <button type="button" class="btn btn-success wbdyyj-yjhz-selector">选择图片</button>
-                        <input type="file" name="wbdyyjYJHZ" accept="image/*" class="wbdyyj-yjhz-file hide-file-button"/>
+                        <input type="file" name="wbdyyjYJHZ[]" accept="image/*" class="wbdyyj-yjhz-file hide-file-button"/>
                         <input type="hidden" name="wbdyyjYJHZ_uri" value="{if $info && isset($info.wbdyyjYJHZ)}{$info.wbdyyjYJHZ}{/if}" />
-                        <div class="mt10 ml10 muted">仅允许jpg和png格式，1.5M内</div>
                         <div class=" text-error update"></div>
-                        {if $info}
-                            <img src="{if $info && isset($info.wbdyyjYJHZ_url)}{$info.wbdyyjYJHZ_url}{else/}/static/images/empty.png{/if}"/>
+                        {if $info && isset($info.wbdyyjYJHZ_url)}
+                            <img src="{$info.wbdyyjYJHZ_url}"/>
                         {/if}
                     </div>
                 </div>
@@ -164,47 +162,43 @@
             <div class="control-group status-relation">
                 <div class="controls" style="margin-bottom: -20px;">
                     <div class="mcdoc_upload_box status-file-view-box">
-                        <h6 style="margin-bottom: 10px;"><span class="error">*</span>告诫书</h6>
+                        <h6 class="status-file-view-title"><span class="error">*</span>告诫书</h6>
                         <button type="button" class="btn btn-success wfxyyyj-gjs-selector">选择图片</button>
                         <input type="file" name="wfxyyyjGJS" accept="image/*" class="wfxyyyj-gjs-file hide-file-button" />
                         <input type="hidden" name="wfxyyyjGJS_uri" value="{if $info && isset($info.wfxyyyjGJS)}{$info.wfxyyyjGJS}{/if}" />
-                        <div class="mt10 ml10 muted">仅允许jpg和png格式，1.5M内</div>
                         <div class=" text-error update"></div>
-                        {if $info}
-                            <img src="{if $info && isset($info.wfxyyyjGJS_url)}{$info.wfxyyyjGJS_url}{else/}/static/images/empty.png{/if}" />
+                        {if $info && isset($info.wfxyyyjGJS_url)}
+                            <img src="{$info.wfxyyyjGJS_url}" />
                         {/if}
                     </div>
                     <div class="mcdoc_upload_box status-file-view-box">
-                        <h6 style="margin-bottom: 10px;"><span class="error">*</span>吸毒检测通知书</h6>
+                        <h6 class="status-file-view-title"><span class="error">*</span>吸毒检测通知书</h6>
                         <button type="button" class="btn btn-success wfxyyyj-xdjctzs-selector">选择图片</button>
                         <input type="file" name="wfxyyyjXDJCTZS" accept="image/*" class="wfxyyyj-xdjctzs-file hide-file-button"/>
                         <input type="hidden" name="wfxyyyjXDJCTZS_uri" value="{if $info && isset($info.wfxyyyjXDJCTZS)}{$info.wfxyyyjXDJCTZS}{/if}" />
-                        <div class="mt10 ml10 muted">仅允许jpg和png格式，1.5M内</div>
                         <div class=" text-error update"></div>
-                        {if $info}
-                            <img src="{if $info && isset($info.wfxyyyjXDJCTZS_url)}{$info.wfxyyyjXDJCTZS_url}{else/}/static/images/empty.png{/if}"/>
+                        {if $info && isset($info.wfxyyyjXDJCTZS_url)}
+                            <img src="{$info.wfxyyyjXDJCTZS_url}"/>
                         {/if}
                     </div>
                     <div class="mcdoc_upload_box status-file-view-box">
-                        <h6 style="margin-bottom: 10px;"><span class="error">*</span>严重违反协议证明</h6>
+                        <h6 class="status-file-view-title"><span class="error">*</span>严重违反协议证明</h6>
                         <button type="button" class="btn btn-success wfxyyyj-yzwfxyzm-selector">选择图片</button>
                         <input type="file" name="wfxyyyjYZWFXYZM" accept="image/*" class="wfxyyyj-yzwfxyzm-file hide-file-button"/>
                         <input type="hidden" name="wfxyyyjYZWFXYZM_uri" value="{if $info && isset($info.wfxyyyjYZWFXYZM)}{$info.wfxyyyjYZWFXYZM}{/if}" />
-                        <div class="mt10 ml10 muted">仅允许jpg和png格式，1.5M内</div>
                         <div class=" text-error update"></div>
-                        {if $info}
-                            <img src="{if $info && isset($info.wfxyyyjYZWFXYZM_url)}{$info.wfxyyyjYZWFXYZM_url}{else/}/static/images/empty.png{/if}"/>
+                        {if $info && isset($info.wfxyyyjYZWFXYZM_url)}
+                            <img src="{$info.wfxyyyjYZWFXYZM_url}"/>
                         {/if}
                     </div>
                     <div class="mcdoc_upload_box status-file-view-box">
-                        <h6 style="margin-bottom: 10px;"><span class="error">*</span>移交回执</h6>
+                        <h6 class="status-file-view-title"><span class="error">*</span>移交回执</h6>
                         <button type="button" class="btn btn-success wfxyyyj-yjhz-selector">选择图片</button>
                         <input type="file" name="wfxyyyjYJHZ" accept="image/*" class="wfxyyyj-yjhz-file hide-file-button"/>
                         <input type="hidden" name="wfxyyyjYJHZ_uri" value="{if $info && isset($info.wfxyyyjYJHZ)}{$info.wfxyyyjYJHZ}{/if}" />
-                        <div class="mt10 ml10 muted">仅允许jpg和png格式，1.5M内</div>
                         <div class=" text-error update"></div>
-                        {if $info}
-                            <img src="{if $info && isset($info.wfxyyyjYJHZ_url)}{$info.wfxyyyjYJHZ_url}{else/}/static/images/empty.png{/if}"/>
+                        {if $info && isset($info.wfxyyyjYJHZ_url)}
+                            <img src="{$info.wfxyyyjYJHZ_url}" />
                         {/if}
                     </div>
                 </div>
@@ -235,7 +229,7 @@
             <div class="control-group sub-status-relation">
                 <div class="controls" style="margin-bottom: -20px;">
                     <div class="mcdoc_upload_box status-file-view-box">
-                        <h6 style="margin-bottom: 10px;"><span class="error">*</span>中止程序说明</h6>
+                        <h6 class="status-file-view-title"><span class="error">*</span>中止程序说明</h6>
                         <button type="button" class="btn btn-success suspend-cxsm-selector">选择图片</button>
                         <input type="file" name="suspendZZCXSM" accept="image/*" class="suspend-cxsm-file hide-file-button"/>
                         <input type="hidden" name="suspendZZCXSM_uri" value="{if $info && isset($info.suspendZZCXSM)}{$info.suspendZZCXSM}{/if}" />
@@ -250,7 +244,7 @@
             <div class="control-group sub-status-relation">
                 <div class="controls" style="margin-bottom: -20px;">
                     <div class="mcdoc_upload_box status-file-view-box">
-                        <h6 style="margin-bottom: 10px;"><span class="error">*</span>双向管控函</h6>
+                        <h6 class="status-file-view-title"><span class="error">*</span>双向管控函</h6>
                         <button type="button" class="btn btn-success sxgkh-selector">选择图片</button>
                         <input type="file" name="SXGKH" accept="image/*" class="sxgkh-file hide-file-button"/>
                         <input type="hidden" name="SXGKH_uri" value="{if $info && isset($info.SXGKH)}{$info.SXGKH}{/if}" />
