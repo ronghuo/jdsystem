@@ -160,7 +160,7 @@ class Uran extends Common {
         $dmmid = $request->param('DMM_ID',0,'int');
         $dmm = NbAuthDept::find($dmmid);
 
-        if(!$dmm){
+        if (!$dmm) {
             return $this->fail('登记单位信息有误');
         }
 
@@ -169,21 +169,19 @@ class Uran extends Common {
         $code = $ur->createNewUUCode();
 
         $data = [
-            'URAN_CODE'=>$code,
-            'UUID'=> $request->param('UUID','','int'),
-            'CHECK_TIME'=> $request->param('CHECK_TIME','','trim'),
-            'PROVINCE_ID'=>$request->param('PROVINCE_ID',0,'int'),
-            'CITY_ID'=>$request->param('CITY_ID',0,'int'),
-            'COUNTY_ID'=>$request->param('COUNTY_ID',0,'int'),
+            'URAN_CODE' => $code,
+            'UUID' => $request->param('UUID','','int'),
+            'CHECK_TIME' => $request->param('CHECK_TIME','','trim'),
+            'PROVINCE_ID' => $request->param('PROVINCE_ID',0,'int'),
+            'CITY_ID' => $request->param('CITY_ID',0,'int'),
+            'COUNTY_ID' => $request->param('COUNTY_ID',0,'int'),
             'COUNTY_NAME' => $request->param('COUNTY_NAME', '', 'trim'),
-            'STREET_ID'=>$request->param('STREET_ID',0,'int'),
-            'COMMUNITY_ID'=>$request->param('COMMUNITY_ID',0,'int'),
-            'ADDRESS'=>$request->param('ADDRESS','','trim'),
-            'UMID'=>$request->MUID,
-            'DMM_ID'=>$dmm->ID,
-            'UNIT_NAME'=>$dmm->DEPTNAME,
-            'RESULT'=>$request->param('RESULT','','trim'),
-            'REMARK'=>$request->param('REMARK','','trim'),
+            'ADDRESS' => $request->param('ADDRESS','','trim'),
+            'UMID' => $request->MUID,
+            'DMM_ID' => $dmm->ID,
+            'UNIT_NAME' => $dmm->DEPTNAME,
+            'RESULT' => $request->param('RESULT','','trim'),
+            'REMARK' => $request->param('REMARK','','trim'),
             'CHECK_TYPE' => $request->param('CHECK_TYPE', 0, 'int')
         ];
         $v = new UransVer();
@@ -196,6 +194,53 @@ class Uran extends Common {
             return $this->fail('尿检信息保存失败');
         }
 
+        $res = $this->uploadImages($request,['urans/']);
+
+        if($res && isset($res['images'])){
+            (new UranImgs())->saveData($uran_id,$res['images']);
+        }
+
+        return $this->ok('提交尿检信息成功');
+    }
+
+    public function edit(Request $request) {
+        $dmmid = $request->param('DMM_ID',0,'int');
+        $dmm = NbAuthDept::find($dmmid);
+        if (!$dmm) {
+            return $this->fail('登记单位信息有误');
+        }
+
+        $urineId = $request->param('ID');
+
+        $ur = new Urans();
+
+        $code = $ur->createNewUUCode();
+
+        $data = [
+            'URAN_CODE' => $code,
+            'UUID' => $request->param('UUID','','int'),
+            'CHECK_TIME' => $request->param('CHECK_TIME','','trim'),
+            'PROVINCE_ID' => $request->param('PROVINCE_ID',0,'int'),
+            'CITY_ID' => $request->param('CITY_ID',0,'int'),
+            'COUNTY_ID' => $request->param('COUNTY_ID',0,'int'),
+            'COUNTY_NAME' => $request->param('COUNTY_NAME', '', 'trim'),
+            'ADDRESS' => $request->param('ADDRESS','','trim'),
+            'UMID' => $request->MUID,
+            'DMM_ID' => $dmm->ID,
+            'UNIT_NAME' => $dmm->DEPTNAME,
+            'RESULT' => $request->param('RESULT','','trim'),
+            'REMARK' => $request->param('REMARK','','trim'),
+            'CHECK_TYPE' => $request->param('CHECK_TYPE', 0, 'int')
+        ];
+        $v = new UransVer();
+        if (!$v->check($data)) {
+            return $this->fail($v->getError());
+        }
+
+        $uran_id = $ur->insertGetId($data);
+        if(!$uran_id){
+            return $this->fail('尿检信息保存失败');
+        }
 
         $res = $this->uploadImages($request,['urans/']);
 
@@ -203,9 +248,7 @@ class Uran extends Common {
             (new UranImgs())->saveData($uran_id,$res['images']);
         }
 
-
         return $this->ok('提交尿检信息成功');
-
     }
 
 }

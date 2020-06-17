@@ -228,6 +228,12 @@ $(function () {
             formValid.showSuccess(jd_zhuangan_mobile);
         }
 
+        $('.status-file-view-box :file').each(function () {
+            if ($(this).val() == '') {
+                $(this).attr('disabled', true);
+            }
+        })
+
         return true;
     });
 });
@@ -238,74 +244,133 @@ $(function () {
 var initImageViewer = function() {
     fileview.init();
 
+    var statusFileViews = [];
+
     // 未报到已移交-告诫书
     var wbdyyjGjs = cloneObj(fileview);
     wbdyyjGjs.ele = '.wbdyyj-gjs-file';
     wbdyyjGjs.btn = '.wbdyyj-gjs-selector';
     wbdyyjGjs.localKey = 'wbdyyjGjs';
-    wbdyyjGjs.init();
+    statusFileViews.push(wbdyyjGjs);
 
     // 未报到已移交-逾期未报到证明
     var wbdyyjYqwbdzm = cloneObj(fileview);
     wbdyyjYqwbdzm.ele = '.wbdyyj-yqwbdzm-file';
     wbdyyjYqwbdzm.btn = '.wbdyyj-yqwbdzm-selector';
     wbdyyjYqwbdzm.localKey = 'wbdyyjYqwbdzm';
-    wbdyyjYqwbdzm.init();
+    statusFileViews.push(wbdyyjYqwbdzm);
 
     // 未报到已移交-移交回执
-    var wbdyyjYjhz = cloneObj(fileview);
-    wbdyyjYjhz.ele = '.wbdyyj-yjhz-file';
-    wbdyyjYjhz.btn = '.wbdyyj-yjhz-selector';
-    wbdyyjYjhz.localKey = 'wbdyyjYjhz';
-    wbdyyjYjhz.init();
+    $(":file[id^='wbdyyj-yjhz-file']").each(function (i) {
+        var wbdyyjYjhz = cloneObj(fileview);
+        wbdyyjYjhz.ele = '#wbdyyj-yjhz-file' + '_' + (i + 1);
+        wbdyyjYjhz.btn = '#wbdyyj-yjhz-selector' + '_' + (i + 1);
+        wbdyyjYjhz.localKey = 'wbdyyjYjhz';
+        $(this).parent().children('.file-view-add').bind('click', fileviewAdd);
+        $(this).parent().children('.file-view-remove').bind('click', fileviewRemove);
+        statusFileViews.push(wbdyyjYjhz);
+    });
 
     // 违反协议已移交-告诫书
     var wfxyyyjGjs = cloneObj(fileview);
     wfxyyyjGjs.ele = '.wfxyyyj-gjs-file';
     wfxyyyjGjs.btn = '.wfxyyyj-gjs-selector';
     wfxyyyjGjs.localKey = 'wfxyyyjGjs';
-    wfxyyyjGjs.init();
+    statusFileViews.push(wfxyyyjGjs);
 
     // 违反协议已移交-吸毒检测通知书
     var wfxyyyjXdjctzs = cloneObj(fileview);
     wfxyyyjXdjctzs.ele = '.wfxyyyj-xdjctzs-file';
     wfxyyyjXdjctzs.btn = '.wfxyyyj-xdjctzs-selector';
     wfxyyyjXdjctzs.localKey = 'wfxyyyjXdjctzs';
-    wfxyyyjXdjctzs.init();
+    statusFileViews.push(wfxyyyjXdjctzs);
 
     // 违反协议已移交-严重违反协议证明
     var wfxyyyjYzwfxyzm = cloneObj(fileview);
     wfxyyyjYzwfxyzm.ele = '.wfxyyyj-yzwfxyzm-file';
     wfxyyyjYzwfxyzm.btn = '.wfxyyyj-yzwfxyzm-selector';
     wfxyyyjYzwfxyzm.localKey = 'wfxyyyjYzwfxyzm';
-    wfxyyyjYzwfxyzm.init();
+    statusFileViews.push(wfxyyyjYzwfxyzm);
 
     // 违反协议已移交-移交回执
-    var wfxyyyjYjhz = cloneObj(fileview);
-    wfxyyyjYjhz.ele = '.wfxyyyj-yjhz-file';
-    wfxyyyjYjhz.btn = '.wfxyyyj-yjhz-selector';
-    wfxyyyjYjhz.localKey = 'wfxyyyjYjhz';
-    wfxyyyjYjhz.init();
+    $(":file[id^='wfxyyyj-yjhz-file']").each(function (i) {
+        var wfxyyyjYjhz = cloneObj(fileview);
+        wfxyyyjYjhz.ele = '#wfxyyyj-yjhz-file' + '_' + (i + 1);
+        wfxyyyjYjhz.btn = '#wfxyyyj-yjhz-selector' + '_' + (i + 1);
+        wfxyyyjYjhz.localKey = 'wfxyyyjYjhz';
+        $(this).parent().children('.file-view-add').bind('click', fileviewAdd);
+        $(this).parent().children('.file-view-remove').bind('click', fileviewRemove);
+        statusFileViews.push(wfxyyyjYjhz);
+    });
 
     // 关于中止社区戒毒（康复）程序说明
     var suspendCxsm = cloneObj(fileview);
     suspendCxsm.ele = '.suspend-cxsm-file';
     suspendCxsm.btn = '.suspend-cxsm-selector';
     suspendCxsm.localKey = 'suspendCxsm';
-    suspendCxsm.init();
+    statusFileViews.push(suspendCxsm);
 
     // 双向管控函
     var sxgkh = cloneObj(fileview);
     sxgkh.ele = '.sxgkh-file';
     sxgkh.btn = '.sxgkh-selector';
     sxgkh.localKey = 'sxgkh';
-    sxgkh.init();
+    statusFileViews.push(sxgkh);
 
-    $('.file-view-add').bind('click', function () {
-        $newObj = $(this).parent().clone(true, true);
-        $newObj.insertAfter($(this).parent());
+    for (var i = 0; i < statusFileViews.length; i++) {
+        statusFileViews[i].onChange = function () {
+            $(this.ele).siblings(":hidden[name*='_uri']").val("");
+        }
+        statusFileViews[i].init();
+    }
+};
+
+var resetFileView = function ($obj) {
+    $obj.children('.file-view-add').addClass('hide');
+    var $btnRemove = $obj.children('.file-view-remove');
+    $btnRemove.removeClass('hide');
+    $btnRemove.bind('click', fileviewRemove);
+
+    var $file = $obj.children(':file');
+    var fileId = $file.attr('id').split('_')[0];
+    var $siblings = $(":file[id^=" + fileId + "]");
+    $file.val("");
+    $file.attr('id', fileId + "_" + $siblings.length);
+
+    var $btn = $obj.children('button');
+    var btnId = $btn.attr('id').split('_')[0];
+    $btn.attr('id', btnId + "_" + $siblings.length);
+
+    $obj.children('.update').text("");
+    $obj.children(':hidden').val("");
+    $obj.children('.error').remove();
+    $obj.children('img').remove();
+    var newFileView = cloneObj(fileview);
+    newFileView.ele = "#" + $file.attr('id');
+    newFileView.btn = "#" + $btn.attr('id');
+    newFileView.localKey = $file.attr('id');
+    newFileView.init();
+}
+
+var fileviewAdd = function () {
+    var $siblings = $(":file[id^=" + $(this).parent().children(':file').attr('id').split('_')[0] + "]");
+    if ($siblings.length >= 3) {
+        layeralert("超出最大文件数量限制");
+        return;
+    }
+    var $newObj = $(this).parent().clone();
+    $newObj.appendTo($(this).parent().parent());
+    resetFileView($newObj);
+};
+
+var fileviewRemove = function () {
+    var $self = $(this);
+    layerconfirm('确定要删除吗？', 2, '确认', function () {
+        $self.parent().remove();
+        layer.closeAll();
+    }, function () {
+        layer.closeAll();
     });
-
 };
 
 var STATUS_START_TIME = 'JD_START_TIME';
@@ -333,16 +398,16 @@ var ZT_SQJDZ = '社区戒毒中',
 var switchVisibility4StatusRelations = function(status, subStatus, trigger) {
     if (trigger == 'primary') {
         $('.status-relation,.sub-status-relation').hide();
-        $('.status-relation,.sub-status-relation').find(':input').each(function () {
-            $(this).val('');
+        $('.status-relation,.sub-status-relation').find(':input:not([type=hidden])').each(function () {
+            $(this).val("");
             formValid.hideErr($(this));
             formValid.hideSuccess($(this));
         });
     }
     else if (trigger == 'secondary') {
         $('.sub-status-relation').hide();
-        $('.sub-status-relation :input').each(function () {
-            $(this).val('');
+        $('.sub-status-relation :input:not([type=hidden])').each(function () {
+            $(this).val("");
             formValid.hideErr($(this));
             formValid.hideSuccess($(this));
         });
@@ -463,30 +528,13 @@ var validStatusRelations = function () {
         if (!nonNullValid(STATUS_START_TIME, '缺少移交时间')) {
             return false;
         }
-        if (isUriEmpty('wbdyyjGJS') && !nonNullValid('wbdyyjGJS', '缺少告诫书')) {
+        if (isUriEmpty('wbdyyjGJS_uri') && !nonNullValid('wbdyyjGJS', '缺少告诫书')) {
             return false;
         }
-        if (isUriEmpty('wbdyyjYQWBDZM') && !nonNullValid('wbdyyjYQWBDZM', '缺少逾期未报到证明')) {
+        if (isUriEmpty('wbdyyjYQWBDZM_uri') && !nonNullValid('wbdyyjYQWBDZM', '缺少逾期未报到证明')) {
             return false;
         }
-        if (isUriEmpty('wbdyyjYJHZ') && !nonNullValid('wbdyyjYJHZ', '缺少移交回执')) {
-            return false;
-        }
-    }
-    else if (ZT_WFXYYYJ == status) {
-        if (!nonNullValid(STATUS_START_TIME, '缺少移交时间')) {
-            return false;
-        }
-        if (isUriEmpty('wfxyyyjGJS') && !nonNullValid('wfxyyyjGJS', '缺少告诫书')) {
-            return false;
-        }
-        if (isUriEmpty('wfxyyyjXDJCTZS') && !nonNullValid('wfxyyyjXDJCTZS', '缺少吸毒检测通知书')) {
-            return false;
-        }
-        if (isUriEmpty('wfxyyyjYZWFXYZM') && !nonNullValid('wfxyyyjYZWFXYZM', '缺少严重违反协议证明')) {
-            return false;
-        }
-        if (isUriEmpty('wfxyyyjYJHZ') && !nonNullValid('wfxyyyjYJHZ', '缺少移交回执')) {
+        if (!checkInputAndUri('wbdyyjYJHZ[]', 'wbdyyjYJHZ_uri[]', '缺少移交回执')) {
             return false;
         }
     }
@@ -494,16 +542,16 @@ var validStatusRelations = function () {
         if (!nonNullValid(STATUS_START_TIME, '缺少移交时间')) {
             return false;
         }
-        if (isUriEmpty('wfxyyyjGJS') && !nonNullValid('wfxyyyjGJS', '缺少告诫书')) {
+        if (isUriEmpty('wfxyyyjGJS_uri') && !nonNullValid('wfxyyyjGJS', '缺少告诫书')) {
             return false;
         }
-        if (isUriEmpty('wfxyyyjXDJCTZS') && !nonNullValid('wfxyyyjXDJCTZS', '缺少吸毒检测通知书')) {
+        if (isUriEmpty('wfxyyyjXDJCTZS_uri') && !nonNullValid('wfxyyyjXDJCTZS', '缺少吸毒检测通知书')) {
             return false;
         }
-        if (isUriEmpty('wfxyyyjYZWFXYZM') && !nonNullValid('wfxyyyjYZWFXYZM', '缺少严重违反协议证明')) {
+        if (isUriEmpty('wfxyyyjYZWFXYZM_uri') && !nonNullValid('wfxyyyjYZWFXYZM', '缺少严重违反协议证明')) {
             return false;
         }
-        if (isUriEmpty('wfxyyyjYJHZ') && !nonNullValid('wfxyyyjYJHZ', '缺少移交回执')) {
+        if (isUriEmpty('wfxyyyjYJHZ_uri') && !nonNullValid('wfxyyyjYJHZ', '缺少移交回执')) {
             return false;
         }
     }
@@ -534,7 +582,7 @@ var validStatusRelations = function () {
             if (!nonNullValid(SUB_STATUS_END_TIME, '缺少截止时间')) {
                 return false;
             }
-            if (isUriEmpty('suspendZZCXSM') && !nonNullValid('suspendZZCXSM', '缺少中止程序说明')) {
+            if (isUriEmpty('suspendZZCXSM_uri') && !nonNullValid('suspendZZCXSM', '缺少中止程序说明')) {
                 return false;
             }
             if (!nonNullValid('suspendReason', '缺少中止原因')) {
@@ -545,7 +593,7 @@ var validStatusRelations = function () {
             if (!nonNullValid(SUB_STATUS_START_TIME, '缺少开始时间')) {
                 return false;
             }
-            if (isUriEmpty('SXGKH') && !nonNullValid('SXGKH', '缺少双向管控函')) {
+            if (isUriEmpty('SXGKH_uri') && !nonNullValid('SXGKH', '缺少双向管控函')) {
                 return false;
             }
             if (!nonNullValid('sxgkReason', '缺少双向管控原因')) {
@@ -557,31 +605,57 @@ var validStatusRelations = function () {
 };
 
 var getObjByName = function (name) {
-    return $(':input[name=' + name + ']');
+    return $(":input[name='" + name + "']");
 };
 
 var nonNullValid = function (inputName, errMsg, inputType) {
-    var obj = getObjByName(inputName);
-    if (!obj) {
+    var inputs = getObjByName(inputName);
+    if (!inputs) {
         return false;
     }
     var result = true;
-    if (!inputType || 'text' == inputType) {
-        result = checkInputEmpty(obj);
-    }
-    else if ('select' == inputType) {
-        result = checkSelectEmpty(obj);
-    }
-    if (!result) {
-        formValid.showErr(obj, errMsg);
-    } else {
-        formValid.showSuccess(obj);
+    for (var i = 0; i < inputs.length; i++) {
+        var input = $(inputs[i]);
+        if (!inputType || 'text' == inputType) {
+            result = checkInputEmpty(input);
+        }
+        else if ('select' == inputType) {
+            result = checkSelectEmpty(input);
+        }
+        if (!result) {
+            formValid.showErr(input, errMsg);
+            break;
+        } else {
+            formValid.showSuccess(input);
+        }
     }
     return result;
 };
 
+var checkInputAndUri = function (inputName, uriName, errMsg) {
+    $inputs = getObjByName(inputName);
+    $uris = getObjByName(uriName);
+    if ($inputs.length != $uris.length) {
+        return false;
+    }
+    for (var i = 0; i < $inputs.length; i++) {
+        $uri = $($uris[i]);
+        if (checkInputEmpty($uri)) {
+            continue;
+        }
+        $input = $($inputs[i]);
+        if (!checkInputEmpty($input)) {
+            formValid.showErr($input, errMsg);
+            return false;
+        } else {
+            formValid.showSuccess($input);
+        }
+    }
+    return true;
+}
+
 var isUriEmpty = function (inputName) {
-    var obj = getObjByName(inputName + '_uri');
+    var obj = getObjByName(inputName);
     if (!obj) {
         return true;
     }

@@ -305,7 +305,6 @@ class UserUrans extends Common
             }
             $subSql .= " end FINISHED_$year,";
         }
-        echo $subSql;die;
         $subSql = substr($subSql, 0, -1);
         $subSql .= " from user_users A where USER_STATUS_ID in ($whereIn) and ISDEL = 0";
 

@@ -809,6 +809,7 @@ var gotop = {
 var fileview = {
     ele: '.jdfileinput',
     btn: '.jdselectimg',
+    onChange: null,
     allowExts: '-image/png-image/jpg-image/jpeg',
     localKey: 'selectFile',
 
@@ -838,7 +839,10 @@ var fileview = {
                 'name': file.name
             })
             var update = $(this).closest('.mcdoc_upload_box').children('.update');
-            update.html('已选新图片：'+file.name)
+            update.html('已选新图片：'+file.name);
+            if (self.onChange && (typeof self.onChange) == 'function') {
+                self.onChange();
+            }
         });
     },
     saveSelected:function(obj){

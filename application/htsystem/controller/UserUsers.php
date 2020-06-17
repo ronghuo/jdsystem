@@ -400,18 +400,34 @@ class UserUsers extends Common
             if (!empty($statusRelation)) {
                 foreach (json_decode($statusRelation) as $name => $value) {
                     if (in_array($name, self::STATUS_FILE_RELATIONS)) {
-                        $info[$name . '_url'] = build_http_img_url($value);
+                        if (is_array($value)) {
+                            $urls = [];
+                            foreach ($value as $item) {
+                                $urls[] = build_http_img_url($item);
+                            }
+                            $info[$name . '_url'] = $urls;
+                        } else {
+                            $info[$name . '_url'] = [build_http_img_url($value)];
+                        }
                     }
-                    $info[$name] = $value;
+                    $info[$name] = is_array($value) ? $value : [$value];
                 }
             }
             $subStatusRelation = $info->USER_SUB_STATUS_RELATION;
             if (!empty($subStatusRelation)) {
                 foreach (json_decode($subStatusRelation) as $name => $value) {
                     if (in_array($name, self::STATUS_FILE_RELATIONS)) {
-                        $info[$name . '_url'] = build_http_img_url($value);
+                        if (is_array($value)) {
+                            $urls = [];
+                            foreach ($value as $item) {
+                                $urls[] = build_http_img_url($item);
+                            }
+                            $info[$name . '_url'] = $urls;
+                        } else {
+                            $info[$name . '_url'] = [build_http_img_url($value)];
+                        }
                     }
-                    $info[$name] = $value;
+                    $info[$name] = is_array($value) ? $value : [$value];
                 }
             }
         }
@@ -1270,14 +1286,27 @@ class UserUsers extends Common
                 continue;
             }
             // 文件类型依赖
+            $statusRelation[$name] = $request->param($name . self::URI_FLAG);
+            if (is_array($statusRelation[$name])) {
+                $statusRelation[$name] = array_filter($statusRelation[$name]);
+            }
+
             if (!empty($_FILES[$name]['tmp_name'])) {
                 $result = $this->uploadImage($request, ['userusers', 'status/'], [$name]);
                 if (empty($result) || empty($result['images'])) {
                     continue;
                 }
-                $statusRelation[$name] = $result['images'][0];
-            } else {
-                $statusRelation[$name] = $request->param($name . self::URI_FLAG);
+                $images = $result['images'];
+                // 可能存在既包含已上传文件有包含新上传文件
+                if (!empty($statusRelation[$name])) {
+                    if (is_array($statusRelation[$name])) {
+                        $statusRelation[$name] = array_merge($statusRelation[$name], $images);
+                    } else {
+                        $statusRelation[$name] = array_merge([$statusRelation[$name]], $images);
+                    }
+                } else {
+                    $statusRelation[$name] = $images;
+                }
             }
         }
         return empty($statusRelation) ? '' : json_encode($statusRelation);

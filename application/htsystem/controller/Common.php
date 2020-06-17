@@ -338,13 +338,17 @@ class Common extends Controller
                     continue;
                 }
 
-                $save_path = './uploads/' . implode('/', $dir);
-                $info = $file->validate(['size' => 5 * 1024 * 1024, 'ext' => 'jpg,jpeg,png,gif'])->move($save_path);
-                if ($info) {
-                    $save_files[] = $save_path . $info->getSaveName();
-                } else {
-                    // 上传失败获取错误信息
-                    $errors[] = $file->getError();
+                $files = is_array($file) ? $file : [$file];
+
+                foreach ($files as $file) {
+                    $save_path = './uploads/' . implode('/', $dir);
+                    $info = $file->validate(['size' => 10 * 1024 * 1024, 'ext' => 'jpg,jpeg,png,gif'])->move($save_path);
+                    if ($info) {
+                        $save_files[] = $save_path . $info->getSaveName();
+                    } else {
+                        // 上传失败获取错误信息
+                        $errors[] = $file->getError();
+                    }
                 }
             }
             return ['images'=>$save_files,'errors'=>$errors];
