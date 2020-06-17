@@ -970,7 +970,7 @@ class UserUsers extends Common
         $levelarea = array_filter($levelarea);
         $area_info = Subareas::where('CODE12', end($levelarea))->find();
         if (!$area_info) {
-            $this->error('缺少现居地信息');
+            $this->error('缺少所属辖区信息');
         }
 
         // 检验人员状态相关信息的合法性
@@ -988,6 +988,9 @@ class UserUsers extends Common
 
         $domicileplaceids = $request->param('domicileplace');
         $domicileplace = Upareatable::where('UPAREAID','in',$domicileplaceids)->order('UPAREAID','asc')->select()->column('NAME');
+
+        $liveplaceids = $request->param('liveplace');
+        $liveplace = Upareatable::where('UPAREAID','in',$liveplaceids)->order('UPAREAID','asc')->select()->column('NAME');
 
         $nationality = BaseNationalityType::find($request->param('NATIONALITY_ID','','trim'));
         $nation = BaseNationType::find($request->param('NATION_ID','','trim'));
@@ -1013,8 +1016,8 @@ class UserUsers extends Common
         $community_id = isset($levelarea[2]) ? $levelarea[2] : 0;
 
         // 自动完善现居地省份、城市、县市区信息
-        $liveplaceids = [$province_id, $city_id, $county_id];
-        $liveplace = Upareatable::where('UPAREAID','in',$liveplaceids)->order('UPAREAID','asc')->select()->column('NAME');
+//        $liveplaceids = [$province_id, $city_id, $county_id];
+//        $liveplace = Upareatable::where('UPAREAID','in',$liveplaceids)->order('UPAREAID','asc')->select()->column('NAME');
 
         // 自动完善管辖单位（禁毒办工作小组）信息
         $dmmcs = NbAuthDept::where('ID', TOP_MANAGE_DEPT_ID)
@@ -1151,7 +1154,6 @@ class UserUsers extends Common
                     'path' => $user->HEAD_IMG
                 ]);
             }
-
             $user->save(['HEAD_IMG'=>$img['images'][0]]);
         }
     }
@@ -1314,7 +1316,7 @@ class UserUsers extends Common
 
     private function buildSubStatusRelations(Request $request) {
         $subStatusName = $request->param('USER_SUB_STATUS_NAME');
-        if (empty($subStatusName)) {
+        if (empty($subStatusName) || !isset(self::SUB_STATUS_RELATIONS[$subStatusName])) {
             return '';
         }
         $relations = self::SUB_STATUS_RELATIONS[$subStatusName];

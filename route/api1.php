@@ -98,6 +98,8 @@ Route::post('/manage/search/byareas','api1/manage.Search/uuserByAreas')->middlew
 Route::get('/manage/urans','api1/manage.Uran/index')->middleware('Api1ManageAuth');
 Route::get('/manage/uran/notify','api1/manage.Uran/notify')->middleware('Api1ManageAuth');
 Route::post('/manage/uran/save','api1/manage.Uran/save')->middleware('Api1ManageAuth');
+Route::post('/manage/uran/edit','api1/manage.Uran/edit')->middleware('Api1ManageAuth');
+Route::post('/manage/uran/deletepicture','api1/manage.Uran/deletePicture')->middleware('Api1ManageAuth');
 //请假
 Route::get('/manage/holidays/:status','api1/manage.Holiday/index')->middleware('Api1ManageAuth');
 Route::get('/manage/holiday/:id','api1/manage.Holiday/info')->middleware('Api1ManageAuth');

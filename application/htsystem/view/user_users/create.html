@@ -409,17 +409,16 @@
                     <input type="text" name="DOMICILE_POLICE_STATION_CODE" id="domicile_police_code" value="{if $info}{$info.DOMICILE_POLICE_STATION_CODE}{/if}" class="input" placeholder=""/>
                 </div>
             </div>
-
             <div class="control-group">
                 <label class="control-label"><span class="error">*</span> 现居地 </label>
-                <div class="controls" id="areas3">
-                    <select name="levelarea[]" class="lv1" data-value="{if $info}{$info.COUNTY_ID_12}{/if}"></select>
-                    <select name="levelarea[]" class="lv2" data-value="{if $info}{$info.STREET_ID}{/if}"></select>
-                    <select name="levelarea[]" class="lv3" data-value="{if $info}{$info.COMMUNITY_ID}{/if}"></select>
+                <div class="controls" id="areas2">
+                    <select name="liveplace[]" class="lv1" data-value="{if $info}{$info.LIVE_IDS[0]}{/if}"></select>
+                    <select name="liveplace[]" class="lv2" data-value="{if $info}{$info.LIVE_IDS[1]}{/if}"></select>
+                    <select name="liveplace[]" class="lv3" data-value="{if $info}{$info.LIVE_IDS[2]}{/if}"></select>
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label"><span class="error">*</span> 现居地详址 </label>
+                <label class="control-label"><span class="error">*</span> 现居地详细地址 </label>
                 <div class="controls">
                     <input type="text" name="LIVE_ADDRESS" id="live_address" value="{if $info}{$info.LIVE_ADDRESS}{/if}" class="input" placeholder=""/>
                 </div>
@@ -434,6 +433,15 @@
                 <label class="control-label"> 现居地派出所代码 </label>
                 <div class="controls">
                     <input type="text" name="LIVE_POLICE_STATION_CODE" id="live_police_code" value="{if $info}{$info.LIVE_POLICE_STATION_CODE}{/if}" class="input" placeholder=""/>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 所属辖区 </label>
+                <div class="controls" id="areas3">
+                    <select name="levelarea[]" class="lv1" data-value="{if $info}{$info.COUNTY_ID_12}{/if}"></select>
+                    <select name="levelarea[]" class="lv2" data-value="{if $info}{$info.STREET_ID}{/if}"></select>
+                    <select name="levelarea[]" class="lv3" data-value="{if $info}{$info.COMMUNITY_ID}{/if}"></select>
                 </div>
             </div>
 

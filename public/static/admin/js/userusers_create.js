@@ -190,14 +190,14 @@ $(function () {
             formValid.showSuccess(domicile_police_name);
         }
 
-        // 现居地 areas3
-        var areas3 = $('#areas3'),
-            lv1 = areas3.children('select.lv1').val();
-        if(!lv1){
-            formValid.showErr(areas3,'缺少现居地');
+        // 现居地 areas2
+        var areas2 = $('#areas2'),
+            lv3 = areas2.children('select.lv3').val();
+        if(!lv3){
+            formValid.showErr(areas2,'缺少现居地');
             return false;
         }else{
-            formValid.showSuccess(areas3);
+            formValid.showSuccess(areas2);
         }
 
         if(!checkInputEmpty(live_address)){
@@ -212,6 +212,16 @@ $(function () {
             return false;
         }else{
             formValid.showSuccess(live_police_name);
+        }
+
+        // 所属辖区 areas3
+        var areas3 = $('#areas3'),
+            lv1 = areas3.children('select.lv1').val();
+        if(!lv1){
+            formValid.showErr(areas3,'缺少所属辖区');
+            return false;
+        }else{
+            formValid.showSuccess(areas3);
         }
 
         if(!checkInputEmpty(jd_zhuangan)){

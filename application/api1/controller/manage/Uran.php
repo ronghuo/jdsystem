@@ -7,6 +7,7 @@
 namespace app\api1\controller\manage;
 
 use app\api1\controller\Common;
+use app\common\model\WaitDeleteFiles;
 use app\common\validate\UransVer;
 use Carbon\Carbon;
 use think\Request;
@@ -185,7 +186,7 @@ class Uran extends Common {
             'CHECK_TYPE' => $request->param('CHECK_TYPE', 0, 'int')
         ];
         $v = new UransVer();
-        if (!$v->check($data)) {
+        if (!$v->scene("add")->check($data)) {
             return $this->fail($v->getError());
         }
 
@@ -210,15 +211,16 @@ class Uran extends Common {
             return $this->fail('登记单位信息有误');
         }
 
-        $urineId = $request->param('ID');
-
-        $ur = new Urans();
-
-        $code = $ur->createNewUUCode();
+        $urineId = $request->param('ID',0,'int');
+        if (empty($urineId)) {
+            return $this->fail('缺少尿检记录ID');
+        }
+        $urine = Urans::find($urineId);
+        if (empty($urine)) {
+            return $this->fail('尿检记录已删除或不存在');
+        }
 
         $data = [
-            'URAN_CODE' => $code,
-            'UUID' => $request->param('UUID','','int'),
             'CHECK_TIME' => $request->param('CHECK_TIME','','trim'),
             'PROVINCE_ID' => $request->param('PROVINCE_ID',0,'int'),
             'CITY_ID' => $request->param('CITY_ID',0,'int'),
@@ -233,22 +235,36 @@ class Uran extends Common {
             'CHECK_TYPE' => $request->param('CHECK_TYPE', 0, 'int')
         ];
         $v = new UransVer();
-        if (!$v->check($data)) {
+        if (!$v->scene("edit")->check($data)) {
             return $this->fail($v->getError());
         }
 
-        $uran_id = $ur->insertGetId($data);
-        if(!$uran_id){
-            return $this->fail('尿检信息保存失败');
-        }
+        $urine->save($data);
 
-        $res = $this->uploadImages($request,['urans/']);
-
-        if($res && isset($res['images'])){
-            (new UranImgs())->saveData($uran_id,$res['images']);
+        $res = $this->uploadImages($request, ['urans/']);
+        if ($res && isset($res['images'])) {
+            (new UranImgs())->saveData($urineId, $res['images']);
         }
 
         return $this->ok('提交尿检信息成功');
+    }
+
+    public function deletePicture(Request $request) {
+        $id = $request->param('PICTURE_ID', 0, 'int');
+        if (empty($id)) {
+            return $this->fail('尿检图片不存在');
+        }
+        $img = UranImgs::find($id);
+        if (empty($img)) {
+            return $this->fail('尿检图片不存在');
+        }
+        WaitDeleteFiles::addOne([
+            'table' => 'urans',
+            'id' => $img->URAN_ID,
+            'path' => $img->SRC_PATH
+        ]);
+        $img->delete();
+        return $this->ok('尿检图片删除成功');
     }
 
 }
