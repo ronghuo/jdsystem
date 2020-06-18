@@ -9,7 +9,7 @@ namespace app\api1\controller\uuser;
 use app\api1\controller\Common;
 use think\Request;
 use app\common\model\UserUsers;
-use app\common\library\Ulogs;
+use app\common\library\AppLogHelper;
 use app\common\library\Jpush;
 
 class Login extends Common{
@@ -59,7 +59,7 @@ class Login extends Common{
         ],config('app.jwt_api_uuser_key'));
 
 
-        Ulogs::uUser($request,$info['ID'],Ulogs::UUSER_LOGIN);
+        AppLogHelper::uUser($request,$info['ID'],AppLogHelper::ACTION_ID_U_LOGIN);
 
 
         return $this->ok('登录成功',[
@@ -112,7 +112,7 @@ class Login extends Common{
         ],config('app.jwt_api_uuser_key'));
 
 
-        Ulogs::uUser($request,$info['ID'],Ulogs::UUSER_LOGIN);
+        AppLogHelper::uUser($request,$info['ID'],AppLogHelper::ACTION_ID_U_LOGIN);
 
         cache($cache_key,null);
         

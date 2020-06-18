@@ -7,6 +7,7 @@
 namespace app\api1\controller\manage;
 
 use app\api1\controller\Common;
+use app\common\library\AppLogHelper;
 use app\common\model\WaitDeleteFiles;
 use app\common\validate\UransVer;
 use Carbon\Carbon;
@@ -67,6 +68,11 @@ class Uran extends Common {
                 return $t;
             });
 
+        AppLogHelper::logManager($request, AppLogHelper::ACTION_ID_M_URINE_QUERY, "", [
+            'page' => $page,
+            'userid' => $user_id,
+            'id' => $uran_id
+        ]);
 
         return $this->ok('',[
             'list'=>!empty($list) ? $list->toArray() : []
@@ -197,9 +203,12 @@ class Uran extends Common {
 
         $res = $this->uploadImages($request,['urans/']);
 
-        if($res && isset($res['images'])){
+        if($res && isset($res['images'])) {
             (new UranImgs())->saveData($uran_id,$res['images']);
+            $data['IMAGES'] = $res['images'];
         }
+
+        AppLogHelper::logManager($request, AppLogHelper::ACTION_ID_M_URINE_ADD, $data['UUID'], $data);
 
         return $this->ok('提交尿检信息成功');
     }
@@ -244,7 +253,10 @@ class Uran extends Common {
         $res = $this->uploadImages($request, ['urans/']);
         if ($res && isset($res['images'])) {
             (new UranImgs())->saveData($urineId, $res['images']);
+            $data['IMAGES'] = $res['images'];
         }
+
+        AppLogHelper::logManager($request, AppLogHelper::ACTION_ID_M_URINE_EDIT, $urine->UUID, $data);
 
         return $this->ok('提交尿检信息成功');
     }
@@ -264,6 +276,10 @@ class Uran extends Common {
             'path' => $img->SRC_PATH
         ]);
         $img->delete();
+
+        AppLogHelper::logManager($request, AppLogHelper::ACTION_ID_M_URINE_DELETE_PICTURE, "", [
+            'PICTURE_ID' => $id
+        ]);
         return $this->ok('尿检图片删除成功');
     }
 

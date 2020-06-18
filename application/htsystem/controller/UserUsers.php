@@ -409,8 +409,10 @@ class UserUsers extends Common
                         } else {
                             $info[$name . '_url'] = [build_http_img_url($value)];
                         }
+                        $info[$name] = is_array($value) ? $value : [$value];
+                    } else {
+                        $info[$name] = $value;
                     }
-                    $info[$name] = is_array($value) ? $value : [$value];
                 }
             }
             $subStatusRelation = $info->USER_SUB_STATUS_RELATION;
@@ -454,7 +456,6 @@ class UserUsers extends Common
         $this->assign('user_sub_status', $opts['user_sub_status']);
         $this->assign('danger_level',$opts['danger_level']);
         $this->assign('lvlValue', $lv1Value);
-
         return $this->fetch('create');
     }
 
@@ -1014,10 +1015,6 @@ class UserUsers extends Common
         $county_id_12 = isset($levelarea[0]) ? $levelarea[0] : 0;
         $street_id = isset($levelarea[1]) ? $levelarea[1] : 0;
         $community_id = isset($levelarea[2]) ? $levelarea[2] : 0;
-
-        // 自动完善现居地省份、城市、县市区信息
-//        $liveplaceids = [$province_id, $city_id, $county_id];
-//        $liveplace = Upareatable::where('UPAREAID','in',$liveplaceids)->order('UPAREAID','asc')->select()->column('NAME');
 
         // 自动完善管辖单位（禁毒办工作小组）信息
         $dmmcs = NbAuthDept::where('ID', TOP_MANAGE_DEPT_ID)

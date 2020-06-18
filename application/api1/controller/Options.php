@@ -83,7 +83,7 @@ class Options extends Common
     public function all_areas(Request $request, $return_array = false) {
         $cache_key = config('app.api_keys.areas');
         $trees = cache($cache_key);
-        if(!$trees){
+        if (!$trees) {
             $list = Upareatable::field('UPAREAID as ID,NAME,PID')
                 ->where('UPAREAID', '<>', MINISTRY_ID)
                 ->where('FLAG', 0)->all()->toArray();

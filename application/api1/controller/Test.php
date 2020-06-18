@@ -7,7 +7,7 @@
 namespace app\api1\controller;
 
 use think\Request;
-use app\common\library\Ulogs;
+use app\common\library\AppLogHelper;
 
 class Test extends Common {
 
@@ -45,7 +45,7 @@ class Test extends Common {
     public function t3(Request $request){
 
 //        print_r($request);exit;
-        Ulogs::uUser($request,1,Ulogs::UUSER_LOGIN);
+        AppLogHelper::uUser($request,1,AppLogHelper::ACTION_ID_U_LOGIN);
     }
 
     public function t4(){

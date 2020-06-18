@@ -7,9 +7,10 @@
 namespace app\api1\controller\manage;
 
 use app\api1\controller\Common;
+use Firebase\JWT\JWT;
 use think\Request;
 use app\common\model\UserManagers;
-use app\common\library\Ulogs;
+use app\common\library\AppLogHelper;
 use app\common\library\Jpush;
 
 
@@ -50,18 +51,21 @@ class Login extends Common{
         $info->HEAD_IMG = $info->HEAD_IMG_URL;
         $info->GENDER_TEXT = $info->gender_text;
 
-        $token = \Firebase\JWT\JWT::encode([
+        $token = JWT::encode([
             'user_id'=>$info['ID'],
             'iat'=>time()
-        ],config('app.jwt_api_muser_key'));
+        ], config('app.jwt_api_muser_key'));
 
-        Ulogs::mUser($request,$info['ID'],Ulogs::MUSER_LOGIN);
+        AppLogHelper::logManager($request,AppLogHelper::ACTION_ID_M_LOGIN, $info['ID'], [
+            'MOBILE' => $mobile,
+            'PWSD' => $pwsd
+        ], AppLogHelper::TARGET_TYPE_MANAGER);
 
 
         return $this->ok('登录成功',[
-            'user'=>$info->toArray(),
-            'token'=>$token,
-            'push_alias'=>Jpush::createManageAlias($info->ID),
+            'user' => $info->toArray(),
+            'token' => $token,
+            'push_alias' => Jpush::createManageAlias($info->ID),
         ]);
 
     }
@@ -75,15 +79,13 @@ class Login extends Common{
             return $this->fail('请输入手机号和验证码');
         }
 
-        $cache_key = config('app.api_keys.mlogin_sms').$mobile;
+        $cache_key = config('app.api_keys.mlogin_sms') . $mobile;
         $sms_code = cache($cache_key);
         if($vcode != '123456'){
             if(!$sms_code || $sms_code != $vcode){
                 return $this->fail('验证码不正确');
             }
         }
-
-
 
         $info = UserManagers::where('MOBILE', $mobile)->where('ISDEL', 0)->find();
         if(!$info){
@@ -104,7 +106,7 @@ class Login extends Common{
             'iat'=>time()
         ],config('app.jwt_api_muser_key'));
 
-        Ulogs::mUser($request,$info['ID'],Ulogs::MUSER_LOGIN);
+        AppLogHelper::logManager($request,AppLogHelper::ACTION_ID_M_LOGIN, $info['ID'], "", AppLogHelper::TARGET_TYPE_MANAGER);
 
         cache($cache_key,null);
         return $this->ok('登录成功',[

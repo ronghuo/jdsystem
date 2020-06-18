@@ -168,8 +168,8 @@ $(function () {
         }
         // 户籍地 areas1
         var areas1 = $('#areas1'),
-            lv3 = areas1.children('select.lv3').val();
-        if(!lv3){
+            lv1 = areas1.children('select.lv1').val();
+        if(!lv1){
             formValid.showErr(areas1,'缺少户籍地');
             return false;
         }else{
@@ -192,8 +192,8 @@ $(function () {
 
         // 现居地 areas2
         var areas2 = $('#areas2'),
-            lv3 = areas2.children('select.lv3').val();
-        if(!lv3){
+            lv1 = areas2.children('select.lv1').val();
+        if(!lv1){
             formValid.showErr(areas2,'缺少现居地');
             return false;
         }else{
@@ -238,6 +238,7 @@ $(function () {
             formValid.showSuccess(jd_zhuangan_mobile);
         }
 
+        // 这个环节很关键，能有效防止空文件框作为数据被提交到后台导致有值的文件框上传失败
         $('.status-file-view-box :file').each(function () {
             if ($(this).val() == '') {
                 $(this).attr('disabled', true);

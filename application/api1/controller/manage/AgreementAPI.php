@@ -7,6 +7,7 @@
 namespace app\api1\controller\manage;
 
 use app\api1\controller\Common;
+use app\common\library\AppLogHelper;
 use app\common\model\Agreement;
 use app\common\model\AgreementImgs;
 use app\common\model\NbAuthDept;
@@ -18,11 +19,11 @@ class AgreementAPI extends Common {
 
     public function index(Request $request) {
 
-        $list = Agreement::where(function($query) use($request) {
+        $uuid = $request->param('UUID', 0, 'int');
+        $list = Agreement::where(function($query) use($request, $uuid) {
                 if (!$request->User->isTopPower) {
                     $query->whereIn('UUID', $this->getManageUserIds($request->MUID));
                 }
-                $uuid = $request->param('UUID', 0, 'int');
                 if ($uuid > 0) {
                     $query->where('UUID', $uuid);
                 }
@@ -36,6 +37,10 @@ class AgreementAPI extends Common {
                 });
                 return $item;
             });
+
+        AppLogHelper::logManager($request, AppLogHelper::ACTION_ID_M_AGREEMENT_QUERY, $uuid, [
+            'UUID' => $uuid
+        ]);
 
         return $this->ok('',[
             'list' => !empty($list) ? $list->toArray() : []
@@ -75,7 +80,10 @@ class AgreementAPI extends Common {
 
         if ($res && !empty($res['images'])) {
             (new AgreementImgs())->saveData($agreement_id, $res['images']);
+            $data['IMAGES'] = $res['images'];
         }
+
+        AppLogHelper::logManager($request, AppLogHelper::ACTION_ID_M_AGREEMENT_ADD, $data['UUID'], $data);
 
         return $this->ok('社戒社康协议保存成功');
     }
