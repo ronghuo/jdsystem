@@ -40,7 +40,6 @@ class Login extends Common{
             return $this->fail('账号异常');
         }
 
-
         $input_pwsd = create_pwd($pwsd,$info->SALT);
         if($input_pwsd !== $info->PWSD){
             return $this->fail('手机号或密码不正确');
@@ -56,6 +55,7 @@ class Login extends Common{
             'iat'=>time()
         ], config('app.jwt_api_muser_key'));
 
+        $request->User = $info;
         AppLogHelper::logManager($request,AppLogHelper::ACTION_ID_M_LOGIN, $info['ID'], [
             'MOBILE' => $mobile,
             'PWSD' => $pwsd
@@ -96,16 +96,16 @@ class Login extends Common{
             return $this->fail('账号异常');
         }
 
-
         $info->HEAD_IMG_URL = build_http_img_url($info->HEAD_IMG);
         $info->HEAD_IMG = $info->HEAD_IMG_URL;
         $info->GENDER_TEXT = $info->gender_text;
 
-        $token = \Firebase\JWT\JWT::encode([
+        $token = JWT::encode([
             'user_id'=>$info['ID'],
             'iat'=>time()
         ],config('app.jwt_api_muser_key'));
 
+        $request->User = $info;
         AppLogHelper::logManager($request,AppLogHelper::ACTION_ID_M_LOGIN, $info['ID'], "", AppLogHelper::TARGET_TYPE_MANAGER);
 
         cache($cache_key,null);

@@ -7,6 +7,7 @@
 namespace app\api1\controller\manage;
 
 use app\api1\controller\Common;
+use app\common\library\AppLogHelper;
 use app\common\model\DecisionImgs;
 use app\common\model\NbAuthDept;
 use app\common\model\UserDecisions;
@@ -42,6 +43,11 @@ class Decision extends Common {
                 });
                 return $t;
             });
+
+        AppLogHelper::logManager($request, AppLogHelper::ACTION_ID_M_DECISION_QUERY, $user_id, [
+            'ID' => $decision_id,
+            'UUID' => $user_id
+        ]);
 
         return $this->ok('',[
             'list' => !empty($list) ? $list->toArray() : []
@@ -83,7 +89,10 @@ class Decision extends Common {
 
         if ($res && !empty($res['images'])) {
             (new DecisionImgs())->saveData($decision_id, $res['images']);
+            $data['IMAGES'] = $res['images'];
         }
+
+        AppLogHelper::logManager($request, AppLogHelper::ACTION_ID_M_DECISION_ADD, $data['UUID'], $data);
 
         return $this->ok('决定书信息保存成功');
     }

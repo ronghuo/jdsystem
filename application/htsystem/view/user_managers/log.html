@@ -28,7 +28,7 @@
 
                     <div class="control-group">
                         <div class="controls">
-                            <input type="text" name="keywords" class="input" value="{$keywords}" placeholder="功能模块"/>
+                            <input type="text" name="keywords" class="input" style="width: 300px;" value="{$keywords}" placeholder="管理人员 / 操作ID / 操作名称 / 操作对象名称"/>
                         </div>
                     </div>
 
@@ -52,23 +52,28 @@
         <table class="stat-table responsive table table-stats table-striped table-bordered">
             <tbody>
             <tr>
-                <th>管理人员ID</th>
-                <th>功能模块</th>
-                <th>设备IP</th>
-                <th>GPS纬度</th>
-                <th>GPS经度</th>
+                <th>管理人员</th>
+                <th>操作ID</th>
+                <th>操作名称</th>
+                <th>操作类型</th>
+                <th>操作条件</th>
+                <th>操作对象类型</th>
+                <th>操作对象名称</th>
                 <th>操作时间</th>
             </tr>
             {empty name="list"}
             <tr><td colspan="7">木有找到相关的信息</td></tr>
             {else/}
-            {foreach name="list" item="da"}
+            {foreach name="list" item="da" key="index"}
+            <input type="hidden" id="content_{$index}" value="{$da.LOG_ACTION_CONTENT}" />
             <tr>
-                <td>{$da.UMID}</td>
+                <td>{$da.UM_NAME}</td>
+                <td>{$da.LOG_ACTION_ID}</td>
                 <td>{$da.LOG_ACTION}</td>
-                <td>{$da.LOG_IP}</td>
-                <td>{$da.GPS_LAT}</td>
-                <td>{$da.GPS_LONG}</td>
+                <td>{$da.LOG_ACTION_TYPE}</td>
+                <td><a id="contentViewer_{$index}" href="javascript:void(0);">查看</a></td>
+                <td>{$da.TARGET_TYPE}</td>
+                <td>{$da.TARGET_NAME}</td>
                 <td>{$da.ADD_TIME}</td>
             </tr>
             {/foreach}

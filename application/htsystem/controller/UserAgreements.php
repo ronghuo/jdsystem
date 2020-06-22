@@ -99,7 +99,7 @@ class UserAgreements extends Common {
         }
 
         $log_content = '协议内容：' . $agreement->CONTENT;
-        $this->addAdminLog(self::OPER_TYPE_CREATE, '新增社戒社康协议', $log_content, $user->ID);
+        $this->logAdmin(self::OPER_TYPE_CREATE, '新增社戒社康协议', $log_content, $user->ID);
 
         $this->success('保存成功',url('UserAgreements/index', ['id' => $user->ID]));
     }
@@ -125,7 +125,7 @@ class UserAgreements extends Common {
 
         AgreementImgs::where('AGREEMENT_ID', $agreementId)->delete();
 
-        $this->addAdminLog(self::OPER_TYPE_DELETE, '删除社戒社康协议', '社戒社康协议删除成功', $uuid);
+        $this->logAdmin(self::OPER_TYPE_DELETE, '删除社戒社康协议', '社戒社康协议删除成功', $uuid);
 
         $this->success('删除成功');
     }

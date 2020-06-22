@@ -36,12 +36,12 @@ class Common extends Controller
     public function getManageUserIds($umid){
         $cache_key = 'power:'.$umid;
         $ids = cache($cache_key);
-        if($ids){
+        if ($ids) {
             return $ids;
         }
 
         $areas = (new UserManagerPower())->getPowerSettings($umid);
-        if(!$areas){
+        if (!$areas) {
             return [];
         }
         $ids = (new UserUsers())->getUserIdsByAreas($areas);

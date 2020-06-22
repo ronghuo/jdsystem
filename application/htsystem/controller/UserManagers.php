@@ -950,6 +950,37 @@ class UserManagers extends Common
             'query' => request()->param(),
         ]);
 
+        $typeMapping = [
+            '00' => '登录',
+            '01' => '查询',
+            '02' => '新增',
+            '03' => '修改',
+            '04' => '删除'
+        ];
+        $targetMapping = [
+            'USER' => '康复人员',
+            'MANAGER' => '管理人员'
+        ];
+        foreach ($list as &$item) {
+            if (!empty($item->LOG_ACTION_CONTENT)) {
+                $attrs = json_decode($item->LOG_ACTION_CONTENT);
+                $content = '';
+                foreach ($attrs as $name => $value) {
+                    if (is_array($value)) {
+                        $value = implode(',', $value);
+                    }
+                    $content .= "$name : $value<br/>";
+                }
+                $item->LOG_ACTION_CONTENT = $content;
+            }
+            $typeCode = substr($item->LOG_ACTION_ID, -2, 2);
+            $item->LOG_ACTION_TYPE = empty($typeMapping[$typeCode]) ? '未知' : $typeMapping[$typeCode];
+
+            if (!empty($item->TARGET_TYPE)) {
+                $item->TARGET_TYPE = $targetMapping[$item->TARGET_TYPE];
+            }
+        }
+
         $js = $this->loadJsCss(array('p:cate/jquery.cate','usermanagers_log'), 'js', 'admin');
         $this->assign('footjs', $js);
 
@@ -963,51 +994,52 @@ class UserManagers extends Common
         return $this->fetch('log');
     }
 
-    protected function getLogData($id) {
-
-        if (empty($id)) {
-            $this->error("访问错误");
-        }
+    protected function getLogData($id = 0) {
 
         $is_so = false;
 
-        $query = UserManagerLogsModel::where('UMID', $id)->order('ADD_TIME DESC');
+        $query = UserManagerLogsModel::alias('A')
+            ->leftJoin('user_users B', "A.TARGET_TYPE = 'USER' and A.TARGET_ID = B.ID")
+            ->field(['A.ID', 'A.UMID', 'A.UM_NAME', 'A.LOG_ACTION_ID', 'A.LOG_ACTION', 'A.TARGET_TYPE', 'A.LOG_ACTION_CONTENT', 'A.LOG_IP', 'A.ADD_TIME', 'B.NAME TARGET_NAME']);
 
+        if (!empty($id)) {
+            $query->where('UMID', $id);
+        }
         $operBeginTime = input('get.oper_begin_time', '');
         $operEndTime = input('get.oper_end_time', '');
         if (!empty($operBeginTime) && empty($operEndTime)) {
-
             $query->whereTime('ADD_TIME', '>=', Carbon::parse($operBeginTime)->startOfDay()->toDateTimeString());
             $is_so = true;
-
-        } elseif (empty($operBeginTime) && !empty($operEndTime)) {
-
+        }
+        elseif (empty($operBeginTime) && !empty($operEndTime)) {
             $query->whereTime('ADD_TIME', '<=', Carbon::parse($operEndTime)->endOfDay()->toDateTimeString());
             $is_so = true;
-
-        } elseif (!empty($operBeginTime) && !empty($operEndTime)) {
-
+        }
+        elseif (!empty($operBeginTime) && !empty($operEndTime)) {
             $query->whereTime('ADD_TIME', 'between', [
                 Carbon::parse($operBeginTime)->startOfDay()->toDateTimeString(),
                 Carbon::parse($operEndTime)->endOfDay()->toDateTimeString()
             ]);
             $is_so = true;
-
         }
         $param = [
             'oper_begin_time' => $operBeginTime,
             'oper_end_time' => $operEndTime
         ];
 
-        $fields = ['log_action'];
         $keywords = input('get.keywords','');
         if(!empty($keywords)){
-            foreach ($fields as $field) {
-                $query->where(strtoupper($field), 'like', '%'. $keywords .'%');
-            }
+            $query->where(function ($query) use ($keywords) {
+                $fields = ['A.LOG_ACTION_ID', 'A.LOG_ACTION', 'A.UM_NAME', 'B.NAME'];
+                foreach ($fields as $field) {
+                    $query->whereOr(strtoupper($field), 'like', '%'. $keywords .'%');
+                }
+            });
             $is_so = true;
         }
         $param['keywords'] = $keywords;
+
+        $query->order('A.ADD_TIME DESC');
 
         return ['query' => $query, 'param' => $param, 'is_so' => $is_so];
     }

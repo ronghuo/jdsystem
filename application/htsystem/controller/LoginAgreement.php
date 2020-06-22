@@ -92,7 +92,7 @@ class LoginAgreement extends Common {
 
         AgreementImgs::where('AGREEMENT_ID', $agreementId)->delete();
 
-        $this->addAdminLog(self::OPER_TYPE_DELETE, '删除社戒社康协议', '社戒社康协议删除成功', $uuid);
+        $this->logAdmin(self::OPER_TYPE_DELETE, '删除社戒社康协议', '社戒社康协议删除成功', $uuid);
 
         $this->success('删除成功');
     }

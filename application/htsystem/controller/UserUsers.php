@@ -214,7 +214,7 @@ class UserUsers extends Common
         $this->assign('estimate', $params['estimate']);
         $this->assign('estimate_list', UserUsersModel::ESTIMATE_DANGER_LEVEL_LIST);
 
-        $this->addAdminLog(self::OPER_TYPE_QUERY, '康复人员列表');
+        $this->logAdmin(self::OPER_TYPE_QUERY, '康复人员列表');
 
         return $this->fetch('index');
     }
@@ -619,7 +619,7 @@ class UserUsers extends Common
             $info->SALT = $stat;
             $info->save();
 
-            $this->addAdminLog(self::OPER_TYPE_UPDATE, '修改康复人员密码', '密码修改成功', $id);
+            $this->logAdmin(self::OPER_TYPE_UPDATE, '修改康复人员密码', '密码修改成功', $id);
 
             $this->jsalert('修改密码成功',7);
             return ;
@@ -884,7 +884,7 @@ class UserUsers extends Common
             'OPER_USER_NAME' => session('name')
         ]);
 
-        $this->addAdminLog(self::OPER_TYPE_UPDATE, '指派康复人员', $admin_log_content, $uid);
+        $this->logAdmin(self::OPER_TYPE_UPDATE, '指派康复人员', $admin_log_content, $uid);
 
         $this->jsalert($actName.'成功',3);
     }
@@ -1171,7 +1171,7 @@ class UserUsers extends Common
             }
             $log_content .= self::USER_FIELD_NAME_DESC_MAPPER[$name] . '：' . $value . self::LOG_CONTENT_BREAK;
         }
-        $this->addAdminLog($log_oper_type, $log_oper_Name, $log_content, $user->ID);
+        $this->logAdmin($log_oper_type, $log_oper_Name, $log_content, $user->ID);
     }
 
     private function getJdStartTime(Request $request, $user_status_name) {
@@ -1695,7 +1695,7 @@ class UserUsers extends Common
             'JD_START_TIME' => $startTime,
             'JD_END_TIME' => date('Y-m-d', strtotime('+3 year', strtotime($startTime)))
         ]);
-        $this->addAdminLog(self::OPER_TYPE_UPDATE, '设置康复人员社戒社康时间', '设置成功', $id);
+        $this->logAdmin(self::OPER_TYPE_UPDATE, '设置康复人员社戒社康时间', '设置成功', $id);
 
         $this->jsalert('社戒社康时间设置成功',4, $request->param('ref', '', 'trim'));
     }

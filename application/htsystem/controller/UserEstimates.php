@@ -110,7 +110,7 @@ class UserEstimates extends Common {
         }
 
         $log_content = '风险评估详情如下：<br/>' . '标题：' . $estimate->TITLE . '<br/>风险级别：' . $estimate->DANGER_LEVEL_ID . '<br/>内容：' . $estimate->CONTENT;
-        $this->addAdminLog(
+        $this->logAdmin(
             $isNew ? self::OPER_TYPE_CREATE : self::OPER_TYPE_UPDATE,
             $isNew ? '新增风险评估' : '修改风险评估',
             $log_content,
@@ -139,7 +139,7 @@ class UserEstimates extends Common {
         }
         $estimate->delete();
 
-        $this->addAdminLog(self::OPER_TYPE_DELETE, '删除风险评估', '风险评估删除成功', $uuid);
+        $this->logAdmin(self::OPER_TYPE_DELETE, '删除风险评估', '风险评估删除成功', $uuid);
 
         $this->success('删除成功');
     }

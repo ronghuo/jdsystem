@@ -6,6 +6,7 @@
  */
 namespace app\api1\controller\manage;
 
+use app\common\library\AppLogHelper;
 use app\common\model\NbAuthDept;
 use Carbon\Carbon;
 use app\api1\controller\Common;
@@ -21,7 +22,7 @@ class MHelper extends Common{
 
     protected $need_times = 2;
 
-    public function index(Request $request){
+    public function index(Request $request) {
 
         // 处理年，月搜索
 
@@ -182,6 +183,12 @@ class MHelper extends Common{
                 return $t;
             });
 
+        AppLogHelper::logManager($request, AppLogHelper::ACTION_ID_M_HELP_DIARY_QUERY, $uuid, [
+            'page' => $page,
+            'ID' => $diaryId,
+            'UUID' => $uuid
+        ]);
+
         return $this->ok('ok',[
             //'debug'=>
             'list'=>$list->toArray()
@@ -271,6 +278,7 @@ class MHelper extends Common{
             (new HelperDiaryImgs())->saveData($hd_id,$res['images']);
         }
 
+        AppLogHelper::logManager($request, AppLogHelper::ACTION_ID_M_HELP_DIARY_ADD, $data['UUID'], $data);
 
         return $this->ok('记录保存成功');
     }

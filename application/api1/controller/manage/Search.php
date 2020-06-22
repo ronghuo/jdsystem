@@ -7,6 +7,7 @@
 namespace app\api1\controller\manage;
 
 use app\api1\controller\Common;
+use app\common\library\AppLogHelper;
 use think\Request;
 use app\common\model\UserUsers;
 use think\Collection;
@@ -20,16 +21,20 @@ class Search extends Common{
 
     public function uuserByAreas(Request $request) {
 
+        $params = [];
         $query = UserUsers::field('ID,NAME,HEAD_IMG,USER_STATUS_ID,USER_STATUS_NAME')
             ->where('STATUS','=',1)
             ->where('ISDEL','=',0)
-            ->where(function($query) use ($request){
+            ->where(function($query) use ($request, $params){
                 if (!$request->User->isTopPower) {
                     $query->whereIn('ID', $this->getManageUserIds($request->MUID));
                 }
                 $countyId = $request->param('COUNTY_ID',0,'int');
                 $streetId = $request->param('STREET_ID',0,'int');
                 $communityId = $request->param('COMMUNITY_ID',0,'int');
+                $params['COUNTY_ID_12'] = $countyId;
+                $params['STREET_ID'] = $streetId;
+                $params['COMMUNITY_ID'] = $communityId;
 
                 if (!empty($communityId)) {
                     $query->where('COMMUNITY_ID', $communityId);
@@ -44,14 +49,17 @@ class Search extends Common{
 
         $keywords = $request->param('KEYWORDS', '', 'trim');
         if (!empty($keywords)) {
+            $params['KEYWORDS'] = $keywords;
             $query->whereLike('NAME|ID_NUMBER', "%$keywords%");
         }
 
         // 加上当前人员的管辖范围条件
-        $list = $query->select()->map(function($t){
-                $t->HEAD_IMG_URL = build_http_img_url($t->HEAD_IMG);
-                return $t;
-            });
+        $list = $query->select()->map(function($t) {
+            $t->HEAD_IMG_URL = build_http_img_url($t->HEAD_IMG);
+            return $t;
+        });
+
+        AppLogHelper::logManager($request, AppLogHelper::ACTION_ID_M_SEARCH_BY_AREA, "", $params);
 
         return $this->ok('',[
             'list'=>!$list ? [] : $list->toArray()
@@ -60,7 +68,7 @@ class Search extends Common{
 
     public function uuserByName(Request $request){
         $name = $request->param('NAME','','trim');
-        if(!$name){
+        if (!$name) {
             return $this->fail('请输入要搜索的姓名');
         }
         // 加上当前人员的管辖范围条件
@@ -128,7 +136,7 @@ class Search extends Common{
         ]);
     }
 
-    public function updateUuser(Request $request){
+    public function updateUuser(Request $request) {
         $id = $request->param('id',0,'int');
         if(!$id){
             return $this->fail('缺少参数');
@@ -141,7 +149,7 @@ class Search extends Common{
         $info = UserUsers::where('ISDEL','=',0)
             ->whereIn('ID',$this->getManageUserIds($request->MUID))
             ->find($id);
-        if($info){
+        if ($info){
 
 
             Collection::make($request->post())->each(function($t,$k) use ($allow_fields,&$update){

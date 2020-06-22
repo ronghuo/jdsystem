@@ -98,7 +98,7 @@ class UserDecisions extends Common {
         }
 
         $log_content = '决定书内容：' . $decision->CONTENT;
-        $this->addAdminLog(self::OPER_TYPE_CREATE,'新增决定书', $log_content, $user->ID);
+        $this->logAdmin(self::OPER_TYPE_CREATE,'新增决定书', $log_content, $user->ID);
 
         $this->success('保存成功', url('UserDecisions/index', ['id' => $user->ID]));
     }
@@ -124,7 +124,7 @@ class UserDecisions extends Common {
 
         DecisionImgs::where('USER_DECISIONS_ID', $decisionId)->delete();
 
-        $this->addAdminLog(self::OPER_TYPE_DELETE, '删除决定书', '决定书删除成功', $uuid);
+        $this->logAdmin(self::OPER_TYPE_DELETE, '删除决定书', '决定书删除成功', $uuid);
 
         $this->success('删除成功');
     }

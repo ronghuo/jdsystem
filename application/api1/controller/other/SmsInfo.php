@@ -14,7 +14,7 @@ use think\Request;
 class SmsInfo extends Common {
 
     public function index() {
-        $list = SmsInfoModel::order('addtime asc')->all();
+        $list = SmsInfoModel::order('addtime desc')->all();
         return $this->ok('ok', ['list' => $list]);
     }
 

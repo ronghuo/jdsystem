@@ -211,7 +211,7 @@ class UserRecoveryPlan extends Common {
             }
             $log_content .= self::RECOVERY_PLAN_FIELD_NAME_DESC_MAPPER[$name] . '：' . $value . self::LOG_CONTENT_BREAK;
         }
-        $this->addAdminLog($log_oper_type, $log_oper_Name, $log_content, $uuid);
+        $this->logAdmin($log_oper_type, $log_oper_Name, $log_content, $uuid);
 
 
         $this->success('保存成功.', url('UserRecoveryPlan/index', ['uuid' => $uuid]));
@@ -253,7 +253,7 @@ class UserRecoveryPlan extends Common {
         }
         $this->assign('plan', $plan);
 
-        $this->addAdminLog(self::OPER_TYPE_QUERY, '打印康复计划', '康复计划打印成功', $uuid);
+        $this->logAdmin(self::OPER_TYPE_QUERY, '打印康复计划', '康复计划打印成功', $uuid);
 
         return $this->fetch('print');
     }
@@ -277,7 +277,7 @@ class UserRecoveryPlan extends Common {
         }
         $recoveryPlan->delete();
 
-        $this->addAdminLog(self::OPER_TYPE_DELETE, '删除康复计划', '康复计划删除成功', $uuid);
+        $this->logAdmin(self::OPER_TYPE_DELETE, '删除康复计划', '康复计划删除成功', $uuid);
 
         $this->success('删除成功');
     }

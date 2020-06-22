@@ -518,7 +518,7 @@ class Common extends Controller
         );
     }
 
-    protected function addAdminLog($operType, $operName = '', $content = '', $targetId = '') {
+    protected function logAdmin($operType, $operName = '', $content = '', $targetId = '') {
         $request = request();
         $log = new AdminLogs();
         $log->USER_ID = session('user_id');

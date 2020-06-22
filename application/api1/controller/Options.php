@@ -249,8 +249,6 @@ class Options extends Common
             if($pid==0){
                 $trees = $trees[0]['SUB'];
             }
-
-
             cache($cache_key,$trees,3600);
         }
 

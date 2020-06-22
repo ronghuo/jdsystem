@@ -113,7 +113,7 @@ class UserUrans extends Common
             $is_so = true;
         }
         else if ($param['a1'] > 0) {
-            $query->where('B.COUNTY_ID', $param['a3']);
+            $query->where('B.COUNTY_ID_12', $param['a1']);
             $is_so = true;
         }
 
@@ -209,7 +209,7 @@ class UserUrans extends Common
         $info->DEL_TIME = Carbon::now()->toDateTimeString();
         $info->save();
 
-        $this->addAdminLog(self::OPER_TYPE_DELETE, '删除尿检报告事项', '尿检报告事项删除成功', $info->UUID);
+        $this->logAdmin(self::OPER_TYPE_DELETE, '删除尿检报告事项', '尿检报告事项删除成功', $info->UUID);
 
         $this->success('删除成功');
     }
@@ -248,7 +248,7 @@ class UserUrans extends Common
         $emptyRows = 15 - count($testList);
         $this->assign('emptyRows', $emptyRows > 0 ? $emptyRows : 0);
 
-        $this->addAdminLog(self::OPER_TYPE_QUERY, '打印尿检报告记录表', '尿检报告记录表打印成功', $user->ID);
+        $this->logAdmin(self::OPER_TYPE_QUERY, '打印尿检报告记录表', '尿检报告记录表打印成功', $user->ID);
 
         return $this->fetch('print');
     }

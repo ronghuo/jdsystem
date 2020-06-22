@@ -7,6 +7,7 @@
 namespace app\api1\controller\manage;
 
 use app\api1\controller\Common;
+use app\common\library\AppLogHelper;
 use app\common\model\NbAuthDept;
 use app\common\model\UserRecoveryPlan;
 use app\common\validate\UserRecoveryPlanVer;
@@ -35,6 +36,11 @@ class RecoveryPlan extends Common {
             ->order('CREATE_TIME','DESC')
             ->page($page,self::PAGE_SIZE)
             ->select();
+
+        AppLogHelper::logManager($request, AppLogHelper::ACTION_ID_M_RECOVERY_PLAN_QUERY, $user_id, [
+            'ID' => $plan_id,
+            'UUID' => $user_id
+        ]);
 
         return $this->ok('',[
             'list' => !empty($list) ? $list->toArray() : []
@@ -89,6 +95,8 @@ class RecoveryPlan extends Common {
         if (!$plan_id) {
             return $this->fail('康复计划信息保存失败');
         }
+
+        AppLogHelper::logManager($request, AppLogHelper::ACTION_ID_M_RECOVERY_PLAN_ADD, $data['UUID'], $data);
 
         return $this->ok('康复计划信息保存成功');
     }
