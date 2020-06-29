@@ -1,0 +1,79 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span3"><h3 class="page-header">安保排查模板列表</h3></div>
+                    <div class="span9">
+                        <a href="javascript:history.back();" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                        <a href="{:url('TroubleshootingTemplate/create')}" class="btn btn-primary pull-right"><i class="icon-plus"></i>新增模板</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row-fluid">
+
+            <div class="controls ml0">
+                <form class="form-horizontal">
+                    <div class="">搜索查询</div>
+                    <div class="control-group">
+                        <div class="controls">
+                            <input type="text" name="keywords" style="width: 300px;" class="input" value="{$keywords}" placeholder="模板名称 / 备注"/>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label"></label>
+                        <div class="controls">
+                            <button class="btn btn-success"><i class="icon-search"></i> 搜索</button>
+                            {if $is_so}
+                                <a id="btnClear" href="./" class="btn btn-warning"><i class="icon-trash"></i> 清空搜索</a>
+                            {/if}
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+            <p class="align-c text-info">总记录： {$total} 条</p>
+            <hr/>
+        </div>
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+            <tr>
+                <th>模板ID</th>
+                <th>模板名称</th>
+                <th>创建时间</th>
+                <th>是否有效</th>
+                <th>备注</th>
+                <th>操作</th>
+            </tr>
+            {empty name="list"}
+            <tr><td colspan="6">木有找到相关的信息</td></tr>
+            {else/}
+            {foreach name="list" item="da"}
+            <tr>
+                <td>{$da.ID}</td>
+                <td>{$da.NAME}</td>
+                <td>{$da.CREATE_TIME}</td>
+                <td>{$da.EFFECTIVE}</td>
+                <td>{$da.REMARK}</td>
+                <td>
+                    <a href="javascript:void(0);" data-href="{:url('TroubleshootingTemplate/delete', ['ID' => $da.ID])}" class="btn mini btn-danger" onclick="deldata(this);"><i class="icon-trash"></i>删除</a>
+                </td>
+            </tr>
+            {/foreach}
+            {/empty}
+            </tbody>
+
+        </table>
+
+        <div class="row-fluid">
+            <div class="span6"><div class="dataTables_info"></div></div>
+            <div class="span6"><div class="dataTables_paginate paging_bootstrap pagination">
+                {$list|raw}
+            </div></div>
+        </div>
+    </div>
+</div>

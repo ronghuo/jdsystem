@@ -279,7 +279,7 @@ class UserUrans extends Common
             $subSql .= " end SHOULD_$year,";
         }
         $subSql = substr($subSql, 0, -1);
-        $subSql .= " from (select ID,`NAME`,USER_STATUS_ID,USER_STATUS_NAME,JD_START_TIME,if(JD_START_TIME is not null, TIMESTAMPDIFF(MONTH, DATE_FORMAT(JD_START_TIME,'%Y-%m-01'), DATE_FORMAT(DATE_ADD(NOW(),INTERVAL 1 MONTH),'%Y-%m-01')), 0) MONTHS,";
+        $subSql .= " from (select ID,`NAME`,USER_STATUS_ID,USER_STATUS_NAME,JD_START_TIME,if(JD_START_TIME is not null, TIMESTAMPDIFF(MONTH, JD_START_TIME, DATE_FORMAT(now(),'%Y-%m-%d')) + if(JD_START_TIME > now(), 0, 1), 0) MONTHS,";
         $subSql .= "COUNTY_ID_12,STREET_ID,COMMUNITY_ID,concat_ws(' ', (select `NAME` from subareas where CODE12 = COUNTY_ID_12),(select `NAME` from subareas where CODE12 = STREET_ID),(select `NAME` from subareas where CODE12 = COMMUNITY_ID)) AREA,";
 
         $shouldNames = $finishedNames = [];
@@ -299,7 +299,7 @@ class UserUrans extends Common
                 for ($n = 0; $n < $checkTimes; $n++) {
                     $from = $n * $interval + $i * 12;
                     $to = ($n + 1) * $interval + $i * 12;
-                    $subSql .= "(select if(count(1) >= 1, 1, 0) from urans where UUID = A.ID and ISDEL = 0 and CHECK_TIME >= DATE_FORMAT(DATE_ADD(A.JD_START_TIME,INTERVAL $from MONTH), '%Y-%m-01') and CHECK_TIME < DATE_FORMAT(DATE_ADD(A.JD_START_TIME,INTERVAL $to MONTH), '%Y-%m-01'))+";
+                    $subSql .= "(select if(count(1) >= 1, 1, 0) from urans where UUID = A.ID and ISDEL = 0 and CHECK_TIME >= DATE_ADD(A.JD_START_TIME,INTERVAL $from MONTH) and CHECK_TIME < DATE_ADD(DATE_ADD(A.JD_START_TIME,INTERVAL $to MONTH),INTERVAL 1 DAY))+";
                 }
                 $subSql = substr($subSql, 0, -1);
             }

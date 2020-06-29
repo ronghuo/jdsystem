@@ -50,6 +50,12 @@ define('URINE_CHECK_MISSING', '缺失次数');
 define('URINE_CHECK_CORRECT', '正常人数');
 define('URINE_CHECK_INCORRECT', '异常人数');
 
+/**
+ * 是否有效
+ */
+define('EFFECTIVE', 'Y');
+define('INEFFECTIVE', 'N');
+
 
 /**
  * 创建无限分类树

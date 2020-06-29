@@ -428,8 +428,10 @@ class UserUsers extends Common
                         } else {
                             $info[$name . '_url'] = [build_http_img_url($value)];
                         }
+                        $info[$name] = is_array($value) ? $value : [$value];
+                    } else {
+                        $info[$name] = $value;
                     }
-                    $info[$name] = is_array($value) ? $value : [$value];
                 }
             }
         }
@@ -944,7 +946,7 @@ class UserUsers extends Common
 
         // 页面点击“保存”或“确认”键后提示成功或失败，自动停留在当前编辑界面
         $ref = url('UserUsers/edit', array('id'=>$user->ID));
-        $this->success('保存人员资料成功',$ref);
+        $this->success('保存人员资料成功', $ref);
     }
 
     private function validUserInput(Request $request, $id) {

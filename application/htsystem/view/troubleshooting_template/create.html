@@ -1,0 +1,40 @@
+<div class="main-wrapper">
+    <div class="container-fluid">
+        <div class="row-fluid ">
+            <div class="span12">
+                <div class="primary-head">
+
+                    <div class="span3"><h3 class="page-header">安保排查模板</h3></div>
+                    <div class="span9">
+                        <a href="{:url('TroubleshootingTemplate/index')}" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form class="form-horizontal left-align" method="post" action="{:url('TroubleshootingTemplate/create')}">
+
+            <div class="control-group">
+                <label class="control-label"><span class="error">*</span> 名称</label>
+                <div class="controls">
+                    <input type="text" name="NAME" value="{if isset($info)}{$info.NAME}{/if}" class="input" placeholder="请输入模板名称" />
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label"> 备注</label>
+                <div class="controls"><textarea class="span8 ml0" name="REMARK" rows="20" style="height: 200px;" placeholder="">{if isset($info)}{$info.REMARK}{/if}</textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-primary" id="subbtn">保存资料</button>
+                <a href="javascript:history.back();" class="btn"><i class="icon-reply"></i> 取消</a>
+            </div>
+        </form>
+
+    </div>
+</div><!-- 主体 end-->
+<script type="text/javascript">
+    var ed_url = "{:url('Ueditor/index')}";
+    var decisionUeditorConfig = ['insertimage', 'cleardoc'];
+</script>
