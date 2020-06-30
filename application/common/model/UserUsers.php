@@ -309,13 +309,23 @@ class UserUsers extends BaseModel
                         $finishedNames[$i] = "FINISHED_$year";
                     }
                     $subSql .= "sum(case when USER_STATUS_ID = $statusId then FINISHED_$year else 0 end) $finishedName,";
-                    $subSql .= "sum(case when USER_STATUS_ID = $statusId then SHOULD_$year - FINISHED_$year else 0 end) $missingName,";
+                    $subSql .= "sum(case when USER_STATUS_ID = $statusId then if(SHOULD_$year >= FINISHED_$year, SHOULD_$year - FINISHED_$year, 0) else 0 end) $missingName,";
                 }
             }
-            $shouldNamesStr = implode("+", $shouldNames);
-            $finishedNamesStr = implode("+", $finishedNames);
-            $subSql .= "sum(case when JD_START_TIME IS NOT NULL and $shouldNamesStr = $finishedNamesStr then 1 else 0 end) 'CORRECT_USER_NUM',";
-            $subSql .= "sum(case when JD_START_TIME IS NULL or $shouldNamesStr <> $finishedNamesStr then 1 else 0 end) 'INCORRECT_USER_NUM',";
+            $correctCondition = "(";
+            $incorrectCondition = "(";
+            for ($i = 0; $i < count($shouldNames); $i++) {
+                $correctCondition .= "$shouldNames[$i] <= $finishedNames[$i]";
+                $incorrectCondition .= "$shouldNames[$i] > $finishedNames[$i]";
+                if ($i < count($shouldNames) - 1) {
+                    $correctCondition .= " and ";
+                    $incorrectCondition .= " or ";
+                }
+            }
+            $correctCondition .= ")";
+            $incorrectCondition .= ")";
+            $subSql .= "sum(case when JD_START_TIME IS NOT NULL and $correctCondition then 1 else 0 end) 'CORRECT_USER_NUM',";
+            $subSql .= "sum(case when JD_START_TIME IS NULL or $incorrectCondition then 1 else 0 end) 'INCORRECT_USER_NUM',";
             $subSql = substr($subSql, 0, -1);
             $subSql .= " from (";
             $subSql .= " select *,";
@@ -325,12 +335,12 @@ class UserUsers extends BaseModel
                 foreach ($availableStatus as $statusId => $attr) {
                     $rate = $attr['rate'];
                     $checkTimes = $rate[$i];
-                    $subSql .= " when USER_STATUS_ID = $statusId then CEIL(IF(MONTHS > 12*$year, 12, IF(MONTHS > 12*$i, MONTHS - 12*$i, 0)) / (12 / $checkTimes))";
+                    $subSql .= " when USER_STATUS_ID = $statusId then FLOOR(IF(MONTHS > 12*$year, 12, IF(MONTHS > 12*$i, MONTHS - 12*$i, 0)) / (12 / $checkTimes))";
                 }
                 $subSql .= " end SHOULD_$year,";
             }
             $subSql = substr($subSql, 0, -1);
-            $subSql .= " from (select USER_STATUS_ID,JD_START_TIME,if(JD_START_TIME is not null, TIMESTAMPDIFF(MONTH, JD_START_TIME, DATE_FORMAT(NOW(),'%Y-%m-%d')) + if(JD_START_TIME > now(), 0, 1), 0) MONTHS,COUNTY_ID_12,STREET_ID,COMMUNITY_ID,";
+            $subSql .= " from (select USER_STATUS_ID,JD_START_TIME,if(JD_START_TIME is not null, TIMESTAMPDIFF(MONTH, JD_START_TIME, DATE_FORMAT(NOW(),'%Y-%m-%d')), 0) MONTHS,COUNTY_ID_12,STREET_ID,COMMUNITY_ID,";
             for ($i = 0; $i < URINE_CHECK_YEARS; $i++) {
                 $year = $i + 1;
                 $subSql .= "case";

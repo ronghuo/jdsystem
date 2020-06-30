@@ -53,6 +53,32 @@ class TroubleshootingTemplate extends Common
         return $this->fetch();
     }
 
+    public function modify(Request $request) {
+        $id = $request->param('ID');
+        if (empty($id)) {
+            $this->error('非法操作');
+        }
+        $info = TroubleshootingTemplateModel::find($id);
+        if (empty($info)) {
+            $this->error("模板已删除或不存在");
+        }
+        if ($request->isPost()) {
+            $data = [
+                'NAME' => $request->param('NAME'),
+                'REMARK' => $request->param('REMARK'),
+                'UPDATE_USER_ID' => session('user_id'),
+                'UPDATE_USER_NAME' => session('name'),
+                'UPDATE_TIME' => Carbon::now()
+            ];
+            $info->save($data);
+            return $this->success('安保排查模板修改成功', url('TroubleshootingTemplate/index'));
+        }
+        $js = $this->loadJsCss(array('troubleshooting_template_create'), 'js', 'admin');
+        $this->assign('footjs', $js);
+        $this->assign('info', $info);
+        return $this->fetch('create');
+    }
+
     public function delete(Request $request) {
         $id = $request->param('ID');
         if (empty($id)) {

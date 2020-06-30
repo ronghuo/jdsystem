@@ -61,6 +61,7 @@
                 <td>{$da.REMARK}</td>
                 <td>
                     <a href="javascript:void(0);" data-href="{:url('TroubleshootingTemplate/delete', ['ID' => $da.ID])}" class="btn mini btn-danger" onclick="deldata(this);"><i class="icon-trash"></i>删除</a>
+                    <a href="{:url('TroubleshootingTemplate/modify')}?ID={$da.ID}" class="btn mini btn-primary"><i class="icon-edit"></i>修改</a>
                 </td>
             </tr>
             {/foreach}

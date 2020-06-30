@@ -11,8 +11,10 @@
                 </div>
             </div>
         </div>
-        <form class="form-horizontal left-align" method="post" action="{:url('TroubleshootingTemplate/create')}">
-
+        <form class="form-horizontal left-align" method="post" action="{if isset($info)}{:url('TroubleshootingTemplate/modify')}{else/}{:url('TroubleshootingTemplate/create')}{/if}">
+            {if isset($info)}
+                <input type="hidden" name="ID" value="{$info.ID}" />
+            {/if}
             <div class="control-group">
                 <label class="control-label"><span class="error">*</span> 名称</label>
                 <div class="controls">
@@ -33,8 +35,4 @@
         </form>
 
     </div>
-</div><!-- 主体 end-->
-<script type="text/javascript">
-    var ed_url = "{:url('Ueditor/index')}";
-    var decisionUeditorConfig = ['insertimage', 'cleardoc'];
-</script>
+</div>

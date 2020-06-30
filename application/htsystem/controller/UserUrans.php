@@ -48,6 +48,7 @@ class UserUrans extends Common
         $query = Urans::alias('A')
             ->leftJoin('user_users B', 'A.UUID = B.ID')
             ->where('A.ISDEL',0)
+            ->where('B.ISDEL', 0)
             ->with([
                 'uuser' => function($query){
                     return $query->field('ID,NAME');
@@ -117,9 +118,7 @@ class UserUrans extends Common
             $is_so = true;
         }
 
-        $soids = [];
-
-        $query->where(function ($query) use($soids, $is_so) {
+        $query->where(function ($query) {
             $muids = $this->getManageUUids();
             if ($muids != 'all') {
                 $query->whereIn('UUID', $muids);
@@ -274,12 +273,12 @@ class UserUrans extends Common
             $subSql .= "case";
             foreach ($fitStatusIds as $statusId => $checkTimesList) {
                 $checkTimes = $checkTimesList[$i];
-                $subSql .= " when USER_STATUS_ID = $statusId then CEIL(IF(MONTHS > 12*$year, 12, IF(MONTHS > 12*$i, MONTHS - 12*$i, 0)) / (12 / $checkTimes))";
+                $subSql .= " when USER_STATUS_ID = $statusId then FLOOR(IF(MONTHS > 12*$year, 12, IF(MONTHS > 12*$i, MONTHS - 12*$i, 0)) / (12 / $checkTimes))";
             }
             $subSql .= " end SHOULD_$year,";
         }
         $subSql = substr($subSql, 0, -1);
-        $subSql .= " from (select ID,`NAME`,USER_STATUS_ID,USER_STATUS_NAME,JD_START_TIME,if(JD_START_TIME is not null, TIMESTAMPDIFF(MONTH, JD_START_TIME, DATE_FORMAT(now(),'%Y-%m-%d')) + if(JD_START_TIME > now(), 0, 1), 0) MONTHS,";
+        $subSql .= " from (select ID,`NAME`,USER_STATUS_ID,USER_STATUS_NAME,JD_START_TIME,if(JD_START_TIME is not null, TIMESTAMPDIFF(MONTH, JD_START_TIME, DATE_FORMAT(now(),'%Y-%m-%d')), 0) MONTHS,";
         $subSql .= "COUNTY_ID_12,STREET_ID,COMMUNITY_ID,concat_ws(' ', (select `NAME` from subareas where CODE12 = COUNTY_ID_12),(select `NAME` from subareas where CODE12 = STREET_ID),(select `NAME` from subareas where CODE12 = COMMUNITY_ID)) AREA,";
 
         $shouldNames = $finishedNames = [];
@@ -364,7 +363,7 @@ class UserUrans extends Common
             $missingName = "MISSING_$year";
             $sql .= "FINISHED_$year $finishedName,case";
             foreach ($fitStatusIds as $statusId => $checkTimesList) {
-                $sql .= " when USER_STATUS_ID = $statusId then SHOULD_$year - FINISHED_$year";
+                $sql .= " when USER_STATUS_ID = $statusId then if(SHOULD_$year >= FINISHED_$year, SHOULD_$year - FINISHED_$year, 0)";
             }
             $sql .= " end $missingName,";
         }
@@ -414,11 +413,23 @@ class UserUrans extends Common
 
     private function setWhere($sql, $finishStatus, $shouldNames, $finishedNames) {
         if (!empty($finishStatus)) {
+            $correctCondition = "(";
+            $incorrectCondition = "(";
+            for ($i = 0; $i < count($shouldNames); $i++) {
+                $correctCondition .= "$shouldNames[$i] <= $finishedNames[$i]";
+                $incorrectCondition .= "$shouldNames[$i] > $finishedNames[$i]";
+                if ($i < count($shouldNames) - 1) {
+                    $correctCondition .= " and ";
+                    $incorrectCondition .= " or ";
+                }
+            }
+            $correctCondition .= ")";
+            $incorrectCondition .= ")";
             if ($finishStatus == 'CORRECT') {
-                $sql .= " and JD_START_TIME IS NOT NULL and " . implode("+", $shouldNames) . "=" . implode("+", $finishedNames);
+                $sql .= " and JD_START_TIME IS NOT NULL and $correctCondition";
             }
             elseif ($finishStatus == 'INCORRECT') {
-                $sql .= " and JD_START_TIME IS NULL or " . implode("+", $shouldNames) . "<>" . implode("+", $finishedNames);
+                $sql .= " and JD_START_TIME IS NULL or $incorrectCondition";
             }
         }
         return $sql;
