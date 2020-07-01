@@ -4,10 +4,10 @@
             <div class="span12">
                 <div class="primary-head">
 
-                    <div class="span3"><h3 class="page-header">安保排查模板列表</h3></div>
-                    <div class="span9">
+                    <div class="span3" style="width: 25%;"><h3 class="page-header">安保排查模板字段列表</h3></div>
+                    <div class="span9" style="width: 70%;">
                         <a href="javascript:history.back();" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
-                        <a href="{:url('TroubleshootingTemplate/create')}" class="btn btn-primary pull-right"><i class="icon-plus"></i>新增模板</a>
+                        <a href="{:url('TroubleshootingTemplateField/create')}" class="btn btn-primary pull-right"><i class="icon-plus"></i>新增模板字段</a>
                     </div>
                 </div>
             </div>
@@ -20,7 +20,17 @@
                     <div class="">搜索查询</div>
                     <div class="control-group">
                         <div class="controls">
-                            <input type="text" name="keywords" style="width: 300px;" class="input" value="{$keywords}" placeholder="模板名称 / 备注"/>
+                            <select name="TEMPLATE_ID">
+                                <option value="">请选择</option>
+                                {foreach name="templateList" key="ID" item="NAME"}
+                                    <option value="{$ID}" {if $templateId eq $ID}selected{/if}>{$NAME}</option>
+                                {/foreach}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="controls">
+                            <input type="text" name="keywords" class="input" value="{$keywords}" placeholder="字段代码 / 字段名称 / 字段备注"/>
                         </div>
                     </div>
                     <div class="control-group">
@@ -42,30 +52,30 @@
         <table class="stat-table responsive table table-stats table-striped table-bordered">
             <tbody>
             <tr>
-                <th>模板ID</th>
                 <th>模板名称</th>
-                <th>创建时间</th>
-                <th>是否有效</th>
-                <th>模板字段</th>
-                <th>备注</th>
+                <th>字段代码</th>
+                <th>字段名称</th>
+                <th>控件类型</th>
+                <th>是否可为空</th>
+                <th>字段排序号</th>
+                <th>字段描述</th>
                 <th>操作</th>
             </tr>
             {empty name="list"}
-            <tr><td colspan="6">木有找到相关的信息</td></tr>
+            <tr><td colspan="7">木有找到相关的信息</td></tr>
             {else/}
             {foreach name="list" item="da"}
             <tr>
-                <td>{$da.ID}</td>
+                <td>{$da.template.NAME}</td>
+                <td>{$da.CODE}</td>
                 <td>{$da.NAME}</td>
-                <td>{$da.CREATE_TIME}</td>
-                <td>{$da.EFFECTIVE}</td>
+                <td>{$da.WIDGET}</td>
+                <td>{$da.NULLABLE}</td>
+                <td>{$da.SORT}</td>
+                <td>{$da.DESC}</td>
                 <td>
-                    <a href="{:url('TroubleshootingTemplateField/index')}?TEMPLATE_ID={$da.ID}" class="btn mini btn-success">查看</a>
-                </td>
-                <td>{$da.REMARK}</td>
-                <td>
-                    <a href="javascript:void(0);" data-href="{:url('TroubleshootingTemplate/delete', ['ID' => $da.ID])}" class="btn mini btn-danger" onclick="deldata(this);"><i class="icon-trash"></i>删除</a>
-                    <a href="{:url('TroubleshootingTemplate/modify')}?ID={$da.ID}" class="btn mini btn-primary"><i class="icon-edit"></i>修改</a>
+                    <a href="javascript:void(0);" data-href="{:url('TroubleshootingTemplateField/delete', ['ID' => $da.ID])}" class="btn mini btn-danger" onclick="deldata(this);"><i class="icon-trash"></i>删除</a>
+                    <a href="{:url('TroubleshootingTemplateField/modify')}?ID={$da.ID}" class="btn mini btn-primary"><i class="icon-edit"></i>修改</a>
                 </td>
             </tr>
             {/foreach}

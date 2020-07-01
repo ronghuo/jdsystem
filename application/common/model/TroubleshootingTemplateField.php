@@ -9,4 +9,8 @@ class TroubleshootingTemplateField extends BaseModel
 
     public $table = 'troubleshoot_template_field';
 
+    public function template(){
+        return $this->belongsTo('TroubleshootingTemplate','TEMPLATE_ID','ID');
+    }
+
 }
