@@ -60,29 +60,25 @@ class Uploads{
         $type = $request->param('type',0,'int');
 
         $config = [
-            'field_name'=>'images',
-            'media_type'=>0,
-            'type'=>$type,
-            'dir'=>self::TYPES[$type],
-            'size_limit'=>10*1024*1024,//10M
-            'ext_limit'=>'jpg,jpeg,png,gif',
-            'img_thumb'=>'600',
-            'save2db'=>true,
-            'save_path'=>rtrim($save_path,'/')
+            'field_name' => 'images',
+            'media_type' => 0,
+            'type' => $type,
+            'dir' => self::TYPES[$type],
+            'size_limit' => 10*1024*1024,//10M
+            'ext_limit' => 'jpg,jpeg,png,gif',
+            'img_thumb' => '600',
+            'save2db' => true,
+            'save_path' => rtrim($save_path,'/')
         ];
 
-        return $this->uploadFile($request,$config);
+        return $this->uploadFile($request, $config);
     }
 
     protected function uploadFile(Request $request,$config=[]){
         $files = [];
         try{
             $files = $request->file($config['field_name']);
-//            Mylog::write([
-//                '_files'=>$files,
-//                '$_FILES'=>$_FILES
-//            ],'error_upload');
-            if(empty($files)){
+            if (empty($files)) {
                 return [
                     'success'=>false,
                     $config['field_name']=> [],
@@ -101,9 +97,9 @@ class Uploads{
                 $save_path = './uploads/'.$config['dir'];
             }
 
-            foreach($files as $file){
+            foreach($files as $file) {
                 // 移动到框架应用根目录/uploads/ 目录下
-                $info = $file->validate(['size'=>$config['size_limit'],'ext'=>$config['ext_limit']])->move( $save_path);
+                $info = $file->rule('buildUploadFileName')->validate(['size'=>$config['size_limit'],'ext'=>$config['ext_limit']])->move($save_path);
                 if($info){
                     // 成功上传后 获取上传信息
                     // 输出 jpg
@@ -121,8 +117,8 @@ class Uploads{
                 }
             }
 
-            if(!empty($save_files) && isset($config['save2db']) && $config['save2db']){
-                $this->saveToDb($save_files,$config['type'],$config['media_type']);
+            if (!empty($save_files) && isset($config['save2db']) && $config['save2db']) {
+                $this->saveToDb($save_files, $config['type'],$config['media_type']);
             }
 
 

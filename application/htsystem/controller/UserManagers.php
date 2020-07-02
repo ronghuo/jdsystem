@@ -967,7 +967,7 @@ class UserManagers extends Common
                 $content = '';
                 foreach ($attrs as $name => $value) {
                     if (is_array($value)) {
-                        $value = implode(',', $value);
+                        $value = implode(',<br/>', $value);
                     }
                     $content .= "$name : $value<br/>";
                 }
@@ -1008,15 +1008,15 @@ class UserManagers extends Common
         $operBeginTime = input('get.oper_begin_time', '');
         $operEndTime = input('get.oper_end_time', '');
         if (!empty($operBeginTime) && empty($operEndTime)) {
-            $query->whereTime('ADD_TIME', '>=', Carbon::parse($operBeginTime)->startOfDay()->toDateTimeString());
+            $query->whereTime('A.ADD_TIME', '>=', Carbon::parse($operBeginTime)->startOfDay()->toDateTimeString());
             $is_so = true;
         }
         elseif (empty($operBeginTime) && !empty($operEndTime)) {
-            $query->whereTime('ADD_TIME', '<=', Carbon::parse($operEndTime)->endOfDay()->toDateTimeString());
+            $query->whereTime('A.ADD_TIME', '<=', Carbon::parse($operEndTime)->endOfDay()->toDateTimeString());
             $is_so = true;
         }
         elseif (!empty($operBeginTime) && !empty($operEndTime)) {
-            $query->whereTime('ADD_TIME', 'between', [
+            $query->whereTime('A.ADD_TIME', 'between', [
                 Carbon::parse($operBeginTime)->startOfDay()->toDateTimeString(),
                 Carbon::parse($operEndTime)->endOfDay()->toDateTimeString()
             ]);

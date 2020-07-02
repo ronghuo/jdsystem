@@ -584,3 +584,11 @@ function convertCodeTo12Chars($code) {
     }
     return $code . "000000";
 }
+
+/**
+ * 自定义上传文件命名规则（防止默认命名规则带来的重名问题）
+ * @return string 文件名
+ */
+function buildUploadFileName() {
+    return date('Ymd') . DIRECTORY_SEPARATOR . md5(microtime(true).uniqid(rand(0, PHP_INT_MAX), true));
+}

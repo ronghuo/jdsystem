@@ -98,7 +98,7 @@ class Common extends Controller
 
         $res = (new Uploads())->images($request, $save_path);
 
-        if(empty($res['save_files'])){
+        if (empty($res['save_files'])) {
             return false;
         }
 

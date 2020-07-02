@@ -342,7 +342,7 @@ class Common extends Controller
 
                 foreach ($files as $file) {
                     $save_path = './uploads/' . implode('/', $dir);
-                    $info = $file->validate(['size' => 10 * 1024 * 1024, 'ext' => 'jpg,jpeg,png,gif'])->move($save_path);
+                    $info = $file->rule('buildUploadFileName')->validate(['size' => 10 * 1024 * 1024, 'ext' => 'jpg,jpeg,png,gif'])->move($save_path);
                     if ($info) {
                         $save_files[] = $save_path . $info->getSaveName();
                     } else {
