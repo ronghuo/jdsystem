@@ -28,6 +28,7 @@ class UserAgreements extends Common {
 
         $list = Agreement::where('UUID', $user->ID)->order('ADD_TIME DESC')->select()->map(function ($item) {
             $item->images->map(function ($image) {
+                $image->SRC_PATH = build_http_img_url($image->SRC_PATH);
                 return $image;
             });
             return $item;

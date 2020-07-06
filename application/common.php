@@ -56,6 +56,12 @@ define('URINE_CHECK_INCORRECT', '异常人数');
 define('EFFECTIVE', 'Y');
 define('INEFFECTIVE', 'N');
 
+/**
+ * 是否
+ */
+define('WHETHER_YES', 'Y');
+define('WHETHER_NO', 'N');
+
 
 /**
  * 创建无限分类树

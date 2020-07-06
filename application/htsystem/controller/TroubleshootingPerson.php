@@ -2,11 +2,13 @@
 
 namespace app\htsystem\controller;
 
+use app\common\model\TroubleshootingPersonExtension;
 use app\common\validate\TroubleshootTemplateFieldVer;
 use Carbon\Carbon;
 use think\Request;
 use app\common\model\TroubleshootingTemplateField as TroubleshootingTemplateFieldModel;
 use app\common\model\TroubleshootingTemplate as TroubleshootingTemplateModel;
+use app\common\model\TroubleshootingPerson as TroubleshootingPersonModel;
 
 class TroubleshootingPerson extends Common
 {
@@ -22,36 +24,120 @@ class TroubleshootingPerson extends Common
     public function index(Request $request) {
         $is_so = false;
         $templateId = $request->param('TEMPLATE_ID', '', 'int');
+        $executeStatus = $request->param('EXECUTE_STATUS', '', 'trim');
         $keywords = $request->param('keywords', '', 'trim');
-        $query = TroubleshootingTemplateFieldModel::where('EFFECTIVE', EFFECTIVE);
+        $queryFields = [
+            'A.ID',
+            'A.NAME',
+            'A.ID_CODE',
+            'A.DOMICILE_PROVINCE_NAME',
+            'A.DOMICILE_CITY_NAME',
+            'A.DOMICILE_COUNTY_NAME',
+            'A.DOMICILE_STREET_NAME',
+            'A.DOMICILE_COMMUNITY_NAME',
+            'A.DOMICILE_ADDRESS',
+            'A.EXECUTOR_MOBILE',
+            'A.EXECUTOR_NAME',
+            'A.EXECUTE_TIME',
+            'A.EXECUTE_STATUS',
+            'A.REMARK',
+            'B.NAME TEMPLATE_NAME'
+        ];
+        $query = TroubleshootingPersonModel::alias('A')
+            ->leftJoin('troubleshoot_template B', 'A.TEMPLATE_ID = B.ID')
+            ->where('A.EFFECTIVE', EFFECTIVE)
+            ->where('B.EFFECTIVE', EFFECTIVE)
+            ->field($queryFields);
         if (!empty($templateId)) {
             $is_so = true;
-            $query->where('TEMPLATE_ID', $templateId);
+            $query->where('B.ID', $templateId);
+        }
+        if (!empty($executeStatus)) {
+            $is_so = true;
+            $query->where('A.EXECUTE_STATUS', $executeStatus);
         }
         if (!empty($keywords)) {
             $is_so = true;
-            $fields = ['CODE', 'NAME', 'DESC'];
+            $fields = ['A.NAME', 'A.ID_CODE', 'A.REMARK'];
             $query->whereLike(implode('|', $fields), "%$keywords%");
         }
-        $rows = $query->with([
-            'template' => function($query) {
-                return $query->field('ID, NAME');
-            }
-        ])->paginate(self::PAGE_SIZE, false, [
+        $rows = $query->paginate(self::PAGE_SIZE, false, [
             'query' => request()->param()
         ])->each(function($item) {
-            $item->NULLABLE = $item->NULLABLE == 'Y' ? '是' : '否';
-            $item->WIDGET = in_array($item->WIDGET, array_keys(self::WIDGET_LIST)) ? self::WIDGET_LIST[$item->WIDGET] : '其它';
+            $item->DOMICILE_PLACE = $item->DOMICILE_PROVINCE_NAME . $item->DOMICILE_CITY_NAME . $item->DOMICILE_COUNTY_NAME
+                . $item->DOMICILE_STREET_NAME . $item->DOMICILE_COMMUNITY_NAME . $item->DOMICILE_ADDRESS;
+            $item->EXECUTE_STATUS = in_array($item->EXECUTE_STATUS, array_keys(TroubleshootingPersonModel::EXECUTE_STATUS_LIST)) ? TroubleshootingPersonModel::EXECUTE_STATUS_LIST[$item->EXECUTE_STATUS] : '未知';
             return $item;
         });
         $templateList = $this->getTemplateList();
         $this->assign('templateList', $templateList);
+        $this->assign('executeStatusList', TroubleshootingPersonModel::EXECUTE_STATUS_LIST);
         $this->assign('list', $rows);
         $this->assign('page', $rows->render());
         $this->assign('total', $rows->total());
         $this->assign('is_so', $is_so);
         $this->assign('keywords', $keywords);
         $this->assign('templateId', $templateId);
+        $this->assign('executeStatus', $executeStatus);
+        $js = $this->loadJsCss(array('troubleshooting_person_index'), 'js', 'admin');
+        $this->assign('footjs', $js);
+        return $this->fetch();
+    }
+
+    public function read(Request $request) {
+        $id = $request->param('ID');
+        if (empty($id)) {
+            $this->error('非法操作');
+        }
+        $queryFields = [
+            'A.ID',
+            'A.NAME',
+            'A.ID_CODE',
+            'A.DOMICILE_PROVINCE_NAME',
+            'A.DOMICILE_CITY_NAME',
+            'A.DOMICILE_COUNTY_NAME',
+            'A.DOMICILE_STREET_NAME',
+            'A.DOMICILE_COMMUNITY_NAME',
+            'A.DOMICILE_ADDRESS',
+            'A.EXECUTOR_MOBILE',
+            'A.EXECUTOR_NAME',
+            'A.EXECUTE_TIME',
+            'A.EXECUTE_STATUS',
+            'A.CREATE_USER_NAME',
+            'A.CREATE_TIME',
+            'A.UPDATE_USER_NAME',
+            'A.UPDATE_TIME',
+            'A.REMARK',
+            'B.NAME TEMPLATE_NAME'
+        ];
+        $info = TroubleshootingPersonModel::alias('A')
+            ->leftJoin('troubleshoot_template B', 'A.TEMPLATE_ID = B.ID')
+            ->where('A.EFFECTIVE', EFFECTIVE)
+            ->where('B.EFFECTIVE', EFFECTIVE)
+            ->field($queryFields)
+            ->find();
+        if (empty($info)) {
+            $this->error("排查人员信息已删除或不存在");
+        }
+        $queryFields = [
+            'A.ID',
+            'A.FIELD_ID',
+            'B.NAME FIELD_NAME',
+            'A.FIELD_VALUE'
+        ];
+        $extension = TroubleshootingPersonExtension::alias('A')
+            ->leftJoin('troubleshoot_template_field B', 'A.FIELD_ID = B.ID')
+            ->where('A.PERSON_ID', $id)
+            ->where('B.EFFECTIVE', EFFECTIVE)
+            ->field($queryFields)
+            ->select();
+        $info->extension = $extension;
+
+        $info->DOMICILE_PLACE = $info->DOMICILE_PROVINCE_NAME . $info->DOMICILE_CITY_NAME . $info->DOMICILE_COUNTY_NAME
+            . $info->DOMICILE_STREET_NAME . $info->DOMICILE_COMMUNITY_NAME . $info->DOMICILE_ADDRESS;
+        $info->EXECUTE_STATUS = in_array($info->EXECUTE_STATUS, array_keys(TroubleshootingPersonModel::EXECUTE_STATUS_LIST)) ? TroubleshootingPersonModel::EXECUTE_STATUS_LIST[$info->EXECUTE_STATUS] : '未知';
+
+        $this->assign('info', $info);
         return $this->fetch();
     }
 
@@ -161,13 +247,13 @@ class TroubleshootingPerson extends Common
         if (empty($id)) {
             $this->error("非法操作");
         }
-        $info = TroubleshootingTemplateFieldModel::find($id);
+        $info = TroubleshootingPersonModel::find($id);
         if (empty($info)) {
-            $this->error("字段已删除或不存在");
+            $this->error("排查人员信息已删除或不存在");
         }
         $info->EFFECTIVE = INEFFECTIVE;
         $info->save();
-        $this->success('安保排查模板删除成功');
+        $this->success('安保排查人员信息删除成功');
     }
 
 }

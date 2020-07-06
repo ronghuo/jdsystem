@@ -7,7 +7,7 @@
                     <div class="span3" style="width: 25%;"><h3 class="page-header">安保排查人员列表</h3></div>
                     <div class="span9" style="width: 70%;">
                         <a href="javascript:history.back();" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
-                        <a href="{:url('TroubleshootingTemplateField/create')}" class="btn btn-primary pull-right"><i class="icon-plus"></i>新增模板字段</a>
+                        <!--<a href="{:url('TroubleshootingTemplateField/create')}" class="btn btn-primary pull-right"><i class="icon-plus"></i>新增模板字段</a>-->
                     </div>
                 </div>
             </div>
@@ -19,6 +19,7 @@
                 <form class="form-horizontal">
                     <div class="">搜索查询</div>
                     <div class="control-group">
+                        <label class="control-label">所属模板</label>
                         <div class="controls">
                             <select name="TEMPLATE_ID">
                                 <option value="">请选择</option>
@@ -29,8 +30,20 @@
                         </div>
                     </div>
                     <div class="control-group">
+                        <label class="control-label">排查状态</label>
                         <div class="controls">
-                            <input type="text" name="keywords" class="input" value="{$keywords}" placeholder="字段代码 / 字段名称 / 字段备注"/>
+                            <select name="EXECUTE_STATUS">
+                                <option value="">请选择</option>
+                                {foreach name="executeStatusList" key="ID" item="NAME"}
+                                    <option value="{$ID}" {if $executeStatus eq $ID}selected{/if}>{$NAME}</option>
+                                {/foreach}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">关键字</label>
+                        <div class="controls">
+                            <input type="text" name="keywords" class="input" value="{$keywords}" placeholder="被排查人员姓名（身份证号码）/ 备注"/>
                         </div>
                     </div>
                     <div class="control-group">
@@ -53,12 +66,12 @@
             <tbody>
             <tr>
                 <th>所属模板</th>
-                <th>被排除人员姓名</th>
-                <th>被排除人员身份证号码</th>
-                <th>被排除人员户籍地</th>
+                <th>被排查人员姓名</th>
+                <th>被排查人员身份证号码</th>
+                <th>被排查人员户籍地</th>
                 <th>排查状态</th>
                 <th>排查专干姓名</th>
-                <th>排查专干手机号码</th>
+                <th>排查时间</th>
                 <th>备注</th>
                 <th>操作</th>
             </tr>
@@ -73,12 +86,11 @@
                 <td>{$da.DOMICILE_PLACE}</td>
                 <td>{$da.EXECUTE_STATUS}</td>
                 <td>{$da.EXECUTOR_NAME}</td>
-                <td>{$da.EXECUTOR_MOBILE}</td>
                 <td>{$da.EXECUTE_TIME}</td>
                 <td>{$da.REMARK}</td>
                 <td>
-                    <a href="javascript:void(0);" data-href="{:url('TroubleshootingTemplateField/delete', ['ID' => $da.ID])}" class="btn mini btn-danger" onclick="deldata(this);"><i class="icon-trash"></i>删除</a>
-                    <a href="{:url('TroubleshootingTemplateField/modify')}?ID={$da.ID}" class="btn mini btn-primary"><i class="icon-edit"></i>修改</a>
+                    <a href="javascript:void(0);" data-href="{:url('TroubleshootingPerson/delete', ['ID' => $da.ID])}" class="btn mini btn-danger" onclick="deldata(this);"><i class="icon-trash"></i>删除</a>
+                    <a href="javascript:void(0);" data-url="{:url('TroubleshootingPerson/read', ['ID' => $da.ID])}"  class="btn mini btn-success" id="reader_{$da.ID}"><i class="icon-info-sign"></i>详情</a>
                 </td>
             </tr>
             {/foreach}

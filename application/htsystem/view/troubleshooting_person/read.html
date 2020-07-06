@@ -1,0 +1,32 @@
+{__NOLAYOUT__}
+{include file="common/layerheader"/}
+<div class="container">
+
+    <div class="row-fluid">
+        <table class="stat-table responsive table table-stats table-striped table-bordered">
+            <tbody>
+            <tr><td>所属模板</td><td>{$info.TEMPLATE_NAME}</td></tr>
+            <tr><td>被排除人员姓名</td><td>{$info.NAME}</td></tr>
+            <tr><td>被排除人员身份证号码</td><td>{$info.ID_CODE}</td></tr>
+            <tr><td>被排查人员户籍地</td><td>{$info.DOMICILE_PLACE}</td></tr>
+            {if isset($info.extension)}
+                {foreach name="info.extension" item="item"}
+                    <tr><td>{$item.FIELD_NAME}</td><td>{$item.FIELD_VALUE}</td></tr>
+                {/foreach}
+            {/if}
+
+            <tr><td>排查专干姓名</td><td>{$info.EXECUTOR_NAME}</td></tr>
+            <tr><td>排查专干手机号码</td><td>{$info.EXECUTOR_NAME}</td></tr>
+            <tr><td>排查状态</td><td>{$info.EXECUTE_STATUS}</td></tr>
+            <tr><td>排查时间</td><td>{$info.EXECUTE_TIME}</td></tr>
+
+            <tr><td>管理员（创建）姓名</td><td>{$info.CREATE_USER_NAME}</td></tr>
+            <tr><td>创建时间</td><td>{$info.CREATE_TIME}</td></tr>
+            <tr><td>管理员（最后更新）姓名</td><td>{$info.UPDATE_USER_NAME}</td></tr>
+            <tr><td>最后更新时间</td><td>{$info.UPDATE_TIME}</td></tr>
+            <tr><td>备注</td><td>{$info.REMARK}</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{include file="common/layerfooter"/}

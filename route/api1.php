@@ -141,6 +141,9 @@ Route::post('/manage/recoveryplan/save','api1/manage.RecoveryPlan/save')->middle
 // 社戒社康协议
 Route::get('/manage/agreement','api1/manage.AgreementAPI/index')->middleware('Api1ManageAuth');
 Route::post('/manage/agreement/save','api1/manage.AgreementAPI/save')->middleware('Api1ManageAuth');
+// 安保排查
+Route::get('/manage/troubleshooting/template_list','api1/manage.Troubleshooting/getTemplateList')->middleware('Api1ManageAuth');
+Route::get('/manage/troubleshooting/template_field_list','api1/manage.Troubleshooting/getTemplateFieldList')->middleware('Api1ManageAuth');
 
 //-----------------------------------------------------//
 //--------------------其他---------------------------//

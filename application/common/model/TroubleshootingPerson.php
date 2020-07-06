@@ -9,4 +9,12 @@ class TroubleshootingPerson extends BaseModel
 
     public $table = 'troubleshoot_person';
 
+    const EXECUTE_STATUS_LIST = [
+        'UNHANDLED' => '未排查',
+        'HANDLED' => '已排查'
+    ];
+
+    const EXECUTE_STATUS_UNHANDLED = '未排查';
+    const EXECUTE_STATUS_HANDLED = '已排查';
+
 }
