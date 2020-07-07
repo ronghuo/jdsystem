@@ -15,13 +15,13 @@ class Uploads{
     const TYPES = [0=>'',1=>'apply',2=>'report',3=>'drug'];
 
     // 视频上传
-    public function videos(Request $request,$save_path=''){
+    public function videos(Request $request,$save_path='', $field_name = 'videos'){
 
 
         $type = $request->param('type',0,'int');
 
         $config = [
-            'field_name'=>'videos',
+            'field_name'=>$field_name,
             'media_type'=>2,
             'type'=>$type,
             'dir'=>'videos',
@@ -35,12 +35,12 @@ class Uploads{
         return $this->uploadFile($request,$config);
     }
     // 音频上传
-    public function audios(Request $request,$save_path=''){
+    public function audios(Request $request,$save_path='', $field_name = 'audios'){
 
         $type = $request->param('type',0,'int');
 
         $config = [
-            'field_name'=>'audios',
+            'field_name'=>$field_name,
             'media_type'=>1,
             'type'=>$type,
             'dir'=>'audios',
@@ -55,12 +55,12 @@ class Uploads{
 
     }
 
-    public function images(Request $request,$save_path=''){
+    public function images(Request $request,$save_path='', $field_name = 'images'){
 
         $type = $request->param('type',0,'int');
 
         $config = [
-            'field_name' => 'images',
+            'field_name' => $field_name,
             'media_type' => 0,
             'type' => $type,
             'dir' => self::TYPES[$type],

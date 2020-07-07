@@ -7,7 +7,7 @@ use think\Validate;
 class TroubleshootPersonVer extends Validate
 {
 	protected $rule = [
-	    'TEMPLATE_ID' => 'require',
+	    'TEMPLATE_ID' => 'require|gt:0',
 	    'NAME' => 'require',
 	    'ID_CODE' => 'require',
 	    'DOMICILE_COUNTY_CODE' => 'require',
@@ -17,6 +17,7 @@ class TroubleshootPersonVer extends Validate
     
     protected $message = [
         'TEMPLATE_ID.require' => '缺少模板ID',
+        'TEMPLATE_ID.gt' => '缺少模板ID',
         'NAME.require' => '缺少被排除人员姓名',
         'ID_CODE.require' => '缺少被排除人员身份证号码',
         'DOMICILE_COUNTY_CODE.require' => '缺少户籍地县市区代码',

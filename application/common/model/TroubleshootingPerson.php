@@ -14,7 +14,7 @@ class TroubleshootingPerson extends BaseModel
         'HANDLED' => '已排查'
     ];
 
-    const EXECUTE_STATUS_UNHANDLED = '未排查';
-    const EXECUTE_STATUS_HANDLED = '已排查';
+    const EXECUTE_STATUS_UNHANDLED = 'UNHANDLED';
+    const EXECUTE_STATUS_HANDLED = 'HANDLED';
 
 }

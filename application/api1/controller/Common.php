@@ -92,11 +92,11 @@ class Common extends Controller
     }
 
 
-    protected function uploadImages(Request $request, $dir=[]){
+    protected function uploadImages(Request $request, $dir=[], $fieldName = 'images'){
 
         $save_path = './uploads/'.implode('/',$dir);
 
-        $res = (new Uploads())->images($request, $save_path);
+        $res = (new Uploads())->images($request, $save_path, $fieldName);
 
         if (empty($res['save_files'])) {
             return false;
@@ -105,11 +105,11 @@ class Common extends Controller
         return ['images'=>$res['save_files'],'errors'=>$res['errors']];
     }
 
-    protected function uploadAudios(Request $request,$dir=[]){
+    protected function uploadAudios(Request $request,$dir=[], $fieldName = 'audios'){
 
         //$save_path = './uploads/'.implode('/',$dir);
 
-        $res = (new Uploads())->audios($request);
+        $res = (new Uploads())->audios($request, '', $fieldName);
         //print_r($res);
         if(empty($res['save_files'])){
             return false;
@@ -118,11 +118,11 @@ class Common extends Controller
         return ['audios'=>$res['save_files'],'errors'=>$res['errors']];
     }
 
-    protected function uploadVideos(Request $request,$dir=[]){
+    protected function uploadVideos(Request $request,$dir=[], $fieldName = 'videos'){
 
         //$save_path = './uploads/'.implode('/',$dir);
 
-        $res = (new Uploads())->videos($request);
+        $res = (new Uploads())->videos($request, '', $fieldName);
 
         if(empty($res['save_files'])){
             return false;

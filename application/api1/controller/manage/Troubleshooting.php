@@ -11,13 +11,16 @@ use app\common\library\AppLogHelper;
 use app\common\model\DecisionImgs;
 use app\common\model\NbAuthDept;
 use app\common\model\Subareas;
+use app\common\model\TroubleshootingAssignment;
 use app\common\model\TroubleshootingPerson;
+use app\common\model\TroubleshootingPersonExtension;
 use app\common\model\TroubleshootingTemplate;
 use app\common\model\TroubleshootingTemplateField;
 use app\common\model\Upareatable;
 use app\common\model\UserDecisions;
 use app\common\validate\TroubleshootPersonVer;
 use app\common\validate\UserDecisionsVer;
+use Carbon\Carbon;
 use think\Request;
 
 class Troubleshooting extends Common {
@@ -55,52 +58,121 @@ class Troubleshooting extends Common {
         $domicileStreetCode = $request->param('DOMICILE_STREET_CODE', '', 'trim');
         $domicileCommunityCode = $request->param('DOMICILE_COMMUNITY_CODE', '', 'trim');
         $domicileAddress = $request->param('DOMICILE_ADDRESS', '', 'trim');
-        $executorMobile = $request->param('EXECUTOR_MOBILE', '', 'trim');
-        $executorName = $request->param('EXECUTOR_NAME', '', 'trim');
-        $executeTime = $request->param('EXECUTE_TIME', null, 'trim');
-        $executeStatus = $request->param('EXECUTE_STATUS', TroubleshootingPerson::EXECUTE_STATUS_UNHANDLED, 'trim');
         $effective = $request->param('EFFECTIVE', EFFECTIVE, 'trim');
         $remark = $request->param('REMARK', '', 'trim');
-        $domicileUpAreas = Upareatable::where('UPAREAID','in', [$domicileProvinceCode, $domicileCityCode])->order('UPAREAID','asc')->select()->column('NAME');
-        $domicileSubAreas = Subareas::where('CODE12','in', [$domicileProvinceCode, $domicileCityCode])->order('CODE12','asc')->select()->column('NAME');
-        $domicileProvinceName = $domicileUpAreas[0];
-        $domicileCityName = $domicileUpAreas[1];
-        $domicileCountyName = $domicileSubAreas[0];
-        $domicileStreetName = $domicileSubAreas[1];
-        $domicileCommunityName = $domicileSubAreas[2];
         $data = [
             'TEMPLATE_ID' => $templateId,
             'NAME' => $name,
             'ID_CODE' => $idCode,
             'DOMICILE_PROVINCE_CODE' => $domicileProvinceCode,
-            'DOMICILE_PROVINCE_NAME' => $domicileProvinceName,
             'DOMICILE_CITY_CODE' => $domicileCityCode,
-            'DOMICILE_CITY_NAME' => $domicileCityName,
             'DOMICILE_COUNTY_CODE' => $domicileCountyCode,
-            'DOMICILE_COUNTY_NAME' => $domicileCountyName,
             'DOMICILE_STREET_CODE' => $domicileStreetCode,
-            'DOMICILE_STREET_NAME' => $domicileStreetName,
             'DOMICILE_COMMUNITY_CODE' => $domicileCommunityCode,
-            'DOMICILE_COMMUNITY_NAME' => $domicileCommunityName,
             'DOMICILE_ADDRESS' => $domicileAddress,
-            'EXECUTOR_MOBILE' => $executorMobile,
-            'EXECUTOR_NAME' => $executorName,
-            'EXECUTE_TIME' => $executeTime,
-            'EXECUTE_STATUS' => $executeStatus,
+            'EXECUTE_STATUS' => TroubleshootingPerson::EXECUTE_STATUS_UNHANDLED,
             'EFFECTIVE' => $effective,
             'REMARK' => $remark
         ];
+        $cnt = TroubleshootingPerson::where(['EFFECTIVE' => EFFECTIVE, 'ID_CODE' => $idCode])->count();
+        if ($cnt > 0) {
+            return $this->fail("重复的身份证号码");
+        }
         $ver = new TroubleshootPersonVer();
         if (!$ver->scene('create')->check($data)) {
             return $this->fail($ver->getError());
         }
+        $domicileUpAreas = Upareatable::where('UPAREAID','in', [$domicileProvinceCode, $domicileCityCode])->order('UPAREAID','asc')->select()->column('NAME');
+        $domicileSubAreas = Subareas::where('CODE12','in', [$domicileCountyCode, $domicileStreetCode, $domicileCommunityCode])->order('CODE12','asc')->select()->column('NAME');
+        $domicileProvinceName = $domicileUpAreas[0];
+        $domicileCityName = $domicileUpAreas[1];
+        $domicileCountyName = $domicileSubAreas[0];
+        $domicileStreetName = $domicileSubAreas[1];
+        $domicileCommunityName = $domicileSubAreas[2];
+        $data = array_merge($data, [
+            'DOMICILE_PROVINCE_NAME' => $domicileProvinceName,
+            'DOMICILE_CITY_NAME' => $domicileCityName,
+            'DOMICILE_COUNTY_NAME' => $domicileCountyName,
+            'DOMICILE_STREET_NAME' => $domicileStreetName,
+            'DOMICILE_COMMUNITY_NAME' => $domicileCommunityName
+        ]);
         $fields = TroubleshootingTemplateField::where(['EFFECTIVE' => EFFECTIVE, 'TEMPLATE_ID' => $templateId])->all();
-        $fileTypes = ['IMAGE', 'VIDEO', 'AUDIO'];
+        $extensions = [];
         foreach ($fields as $field) {
-            if (in_array($field->WIDGET, $fileTypes)) {
-//                $value = $request->file($field->CODE);
+            $code = $field->CODE;
+            $name = $field->NAME;
+            $widget = $field->WIDGET;
+            if ($widget == TroubleshootingTemplateField::WIDGET_TEXT) {
+                $value = $request->param($code);
             }
+            elseif ($widget == TroubleshootingTemplateField::WIDGET_TEXTAREA) {
+                $value = $request->param($code);
+            }
+            elseif ($widget == TroubleshootingTemplateField::WIDGET_IMAGE) {
+                $result = $this->uploadImages($request, ['troubleshooting/'], $code);
+                if ($result && !empty($result['images'])) {
+                    $value = implode(",", $result['images']);
+                }
+            }
+            elseif ($widget == TroubleshootingTemplateField::WIDGET_AUDIO) {
+                $result = $this->uploadAudios($request, ['troubleshooting/'], $code);
+                if ($result && !empty($result['audios'])) {
+                    $value = implode(",", $result['audios']);
+                }
+            }
+            elseif ($widget == TroubleshootingTemplateField::WIDGET_VIDEO) {
+                $result = $this->uploadAudios($request, ['troubleshooting/'], $code);
+                if ($result && !empty($result['videos'])) {
+                    $value = implode(",", $result['videos']);
+                }
+            }
+            else {
+                $value = $request->param($code);
+            }
+            if ($field->NULLABLE == WHETHER_YES && empty($value)) {
+                return $this->fail("缺少$name");
+            }
+            $extension = new TroubleshootingPersonExtension();
+            $extension->TEMPLATE_ID = $templateId;
+            $extension->FIELD_ID = $field->ID;
+            $extension->FIELD_VALUE = $value;
+            $extension->CREATE_TIME = Carbon::now();
+            $extension->UPDATE_TIME = Carbon::now();
+            array_push($extensions, $extension);
         }
+        $user = $request->User;
+        $person = new TroubleshootingPerson();
+        $data = array_merge($data, [
+            'CREATE_USER_ID' => $user->ID,
+            'CREATE_USER_NAME' => $user->NAME,
+            'CREATE_TIME' => Carbon::now(),
+            'CREATE_TERMINAL' => TERMINAL_APP,
+            'UPDATE_USER_ID' => $user->ID,
+            'UPDATE_USER_NAME' => $user->NAME,
+            'UPDATE_TIME' => Carbon::now(),
+            'UPDATE_TERMINAL' => TERMINAL_APP
+        ]);
+        $person->save($data);
+        if (empty($person->ID)) {
+            return $this->fail("排查人员信息添加失败");
+        }
+        foreach ($extensions as $extension) {
+            $extension->PERSON_ID = $person->ID;
+            $extension->save();
+        }
+        $assignment = new TroubleshootingAssignment();
+        $assignment->COUNTY_CODE = $domicileCountyCode;
+        $assignment->COUNTY_NAME = $domicileCountyName;
+        $assignment->STREET_CODE = $domicileStreetCode;
+        $assignment->STREET_NAME = $domicileStreetName;
+        $assignment->COMMUNITY_CODE = $domicileCommunityCode;
+        $assignment->COMMUNITY_NAME = $domicileCommunityName;
+        $assignment->REASON = "系统根据户籍地信息自动指派";
+        $assignment->ACTION = TroubleshootingAssignment::ACTION_ASSIGN;
+        $assignment->CREATE_USER_ID = $user->ID;
+        $assignment->CREATE_USER_NAME = $user->NAME;
+        $assignment->CREATE_TIME = Carbon::now();
+        $assignment->save();
         return $this->ok('排查人员信息添加成功');
     }
 
