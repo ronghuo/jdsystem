@@ -48,6 +48,47 @@ class Troubleshooting extends Common {
         ]);
     }
 
+    public function getPersonList(Request $request) {
+        $templateId = $request->param('TEMPLATE_ID', 0, 'int');
+        $executeStatus = $request->param('EXECUTE_STATUS', '', 'trim');
+        $domicileCountyCode = $request->param('DOMICILE_COUNTY_CODE', '', 'trim');
+        $domicileStreetCode = $request->param('DOMICILE_STREET_CODE', '', 'trim');
+        $domicileCommunityCode = $request->param('DOMICILE_COMMUNITY_CODE', '', 'trim');
+        $queryFields = [
+            'A.ID',
+            'A.NAME',
+            'A.EXECUTE_STATUS',
+            'B.NAME TEMPLATE_NAME'
+        ];
+        $query = TroubleshootingPerson::alias('A')
+            ->leftJoin('troubleshoot_template B', 'A.TEMPLATE_ID = B.ID')
+            ->where('A.EFFECTIVE', EFFECTIVE)
+            ->field($queryFields)
+            ->order('A.EXECUTE_STATUS', 'ASC');
+        if (!empty($templateId)) {
+            $query->where('B.ID', $templateId);
+        }
+        if (!empty($executeStatus)) {
+            $query->where('A.EXECUTE_STATUS', $executeStatus);
+        }
+        if (!empty($domicileCountyCode)) {
+            $query->where('A.DOMICILE_COUNTY_CODE', $domicileCountyCode);
+        }
+        if (!empty($domicileStreetCode)) {
+            $query->where('A.DOMICILE_STREET_CODE', $domicileStreetCode);
+        }
+        if (!empty($domicileCommunityCode)) {
+            $query->where('A.DOMICILE_COMMUNITY_CODE', $domicileCommunityCode);
+        }
+        $rows = $query->select()->each(function($item) {
+            $item->EXECUTE_STATUS = in_array($item->EXECUTE_STATUS, array_keys(TroubleshootingPerson::EXECUTE_STATUS_LIST)) ? TroubleshootingPerson::EXECUTE_STATUS_LIST[$item->EXECUTE_STATUS] : '未知';
+            return $item;
+        });
+        return $this->ok('Success', [
+            'list' => $rows
+        ]);
+    }
+
     public function addPerson(Request $request) {
         $templateId = $request->param('TEMPLATE_ID', 0, 'int');
         $name = $request->param('NAME', '', 'trim');
@@ -74,8 +115,12 @@ class Troubleshooting extends Common {
             'EFFECTIVE' => $effective,
             'REMARK' => $remark
         ];
-        $cnt = TroubleshootingPerson::where(['EFFECTIVE' => EFFECTIVE, 'ID_CODE' => $idCode])->count();
-        if ($cnt > 0) {
+        $templateCount = TroubleshootingTemplate::where(['EFFECTIVE' => EFFECTIVE, 'ID' => $templateId])->count();
+        if ($templateCount > 0) {
+            return $this->fail("模板不存在或已删除");
+        }
+        $personCount = TroubleshootingPerson::where(['EFFECTIVE' => EFFECTIVE, 'ID_CODE' => $idCode])->count();
+        if ($personCount > 0) {
             return $this->fail("重复的身份证号码");
         }
         $ver = new TroubleshootPersonVer();
