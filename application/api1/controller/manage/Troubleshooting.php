@@ -221,6 +221,66 @@ class Troubleshooting extends Common {
         return $this->ok('排查人员信息添加成功');
     }
 
+    public function getPersonInfo(Request $request) {
+        $id = $request->param('ID');
+        if (empty($id)) {
+            $this->fail('参数错误');
+        }
+        $queryFields = [
+            'A.ID',
+            'A.NAME',
+            'A.ID_CODE',
+            'A.DOMICILE_PROVINCE_CODE',
+            'A.DOMICILE_PROVINCE_NAME',
+            'A.DOMICILE_CITY_CODE',
+            'A.DOMICILE_CITY_NAME',
+            'A.DOMICILE_COUNTY_CODE',
+            'A.DOMICILE_COUNTY_NAME',
+            'A.DOMICILE_STREET_CODE',
+            'A.DOMICILE_STREET_NAME',
+            'A.DOMICILE_COMMUNITY_CODE',
+            'A.DOMICILE_COMMUNITY_NAME',
+            'A.DOMICILE_ADDRESS',
+            'A.EXECUTOR_MOBILE',
+            'A.EXECUTOR_NAME',
+            'A.EXECUTE_TIME',
+            'A.EXECUTE_STATUS',
+            'A.REMARK',
+            'B.ID TEMPLATE_ID',
+            'B.NAME TEMPLATE_NAME'
+        ];
+        $info = TroubleshootingPerson::alias('A')
+            ->leftJoin('troubleshoot_template B', 'A.TEMPLATE_ID = B.ID')
+            ->where('A.EFFECTIVE', EFFECTIVE)
+            ->where('B.EFFECTIVE', EFFECTIVE)
+            ->field($queryFields)
+            ->find($id);
+        if (empty($info)) {
+            $this->fail("排查人员信息已删除或不存在");
+        }
+        $queryFields = [
+            'B.ID',
+            'A.ID FIELD_ID',
+            'A.CODE FIELD_CODE',
+            'A.NAME FIELD_NAME',
+            'A.WIDGET FIELD_WIDGET',
+            'A.NULLABLE FIELD_NULLABLE',
+            'B.FIELD_VALUE'
+        ];
+
+        $extension = TroubleshootingTemplateField::alias('A')
+            ->leftJoin('troubleshoot_person_extension B', "B.FIELD_ID = A.ID and B.PERSON_ID = $id")
+            ->where('A.TEMPLATE_ID', $info->TEMPLATE_ID)
+            ->where('A.EFFECTIVE', EFFECTIVE)
+            ->field($queryFields)
+            ->select();
+        $info->EXTENSION = $extension;
+
+        return $this->ok('Success', [
+            'info' => $info
+        ]);
+    }
+
     public function index(Request $request) {
 
         $page = $request->param('page',1,'int');

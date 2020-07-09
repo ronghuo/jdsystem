@@ -145,6 +145,7 @@ Route::post('/manage/agreement/save','api1/manage.AgreementAPI/save')->middlewar
 Route::get('/manage/troubleshooting/template_list','api1/manage.Troubleshooting/getTemplateList')->middleware('Api1ManageAuth');
 Route::get('/manage/troubleshooting/template_field_list','api1/manage.Troubleshooting/getTemplateFieldList')->middleware('Api1ManageAuth');
 Route::get('/manage/troubleshooting/person_list','api1/manage.Troubleshooting/getPersonList')->middleware('Api1ManageAuth');
+Route::get('/manage/troubleshooting/person_info','api1/manage.Troubleshooting/getPersonInfo')->middleware('Api1ManageAuth');
 Route::post('/manage/troubleshooting/add_person','api1/manage.Troubleshooting/addPerson')->middleware('Api1ManageAuth');
 
 //-----------------------------------------------------//
