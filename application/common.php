@@ -434,10 +434,10 @@ function ifEmptyThenNull($var) {
     return $var;
 }
 
-function exportExcel($headerRows, $list, $title='Sheet1', $fileName='demo')
+function exportExcel($headerRows, $list = [], $title='Sheet1', $fileName='demo')
 {
-    if (empty($headerRows) || empty($list)) {
-        return '列名或者内容不能为空';
+    if (empty($headerRows)) {
+        return '列名不能为空';
     }
 
     //实例化PHPExcel类

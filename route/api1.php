@@ -147,6 +147,7 @@ Route::get('/manage/troubleshooting/template_field_list','api1/manage.Troublesho
 Route::get('/manage/troubleshooting/person_list','api1/manage.Troubleshooting/getPersonList')->middleware('Api1ManageAuth');
 Route::get('/manage/troubleshooting/person_info','api1/manage.Troubleshooting/getPersonInfo')->middleware('Api1ManageAuth');
 Route::post('/manage/troubleshooting/add_person','api1/manage.Troubleshooting/addPerson')->middleware('Api1ManageAuth');
+Route::post('/manage/troubleshooting/modify_person','api1/manage.Troubleshooting/modifyPerson')->middleware('Api1ManageAuth');
 
 //-----------------------------------------------------//
 //--------------------其他---------------------------//

@@ -89,6 +89,85 @@ class Troubleshooting extends Common {
         ]);
     }
 
+    public function modifyPerson(Request $request) {
+        $id = $request->param('ID', 0, 'int');
+        $templateId = $request->param('TEMPLATE_ID', 0, 'int');
+        $templateCount = TroubleshootingTemplate::where(['EFFECTIVE' => EFFECTIVE, 'ID' => $templateId])->count();
+        if ($templateCount == 0) {
+            return $this->fail("模板不存在或已删除");
+        }
+        $person = TroubleshootingPerson::where(['EFFECTIVE' => EFFECTIVE, 'ID' => $id])->find();
+        if (empty($person)) {
+            return $this->fail("人员信息不存在或已删除");
+        }
+        $fields = TroubleshootingTemplateField::where(['EFFECTIVE' => EFFECTIVE, 'TEMPLATE_ID' => $templateId])->all();
+        foreach ($fields as $field) {
+            $code = $field->CODE;
+            $name = $field->NAME;
+            $widget = $field->WIDGET;
+            if ($widget == TroubleshootingTemplateField::WIDGET_TEXT) {
+                $value = $request->param($code);
+            }
+            elseif ($widget == TroubleshootingTemplateField::WIDGET_TEXTAREA) {
+                $value = $request->param($code);
+            }
+            elseif ($widget == TroubleshootingTemplateField::WIDGET_IMAGE) {
+                $result = $this->uploadImages($request, ['troubleshooting/'], $code);
+                if ($result && !empty($result['images'])) {
+                    $value = implode(",", $result['images']);
+                } else {
+                    $value = '';
+                }
+            }
+            elseif ($widget == TroubleshootingTemplateField::WIDGET_AUDIO) {
+                $result = $this->uploadAudios($request, ['troubleshooting/'], $code);
+                if ($result && !empty($result['audios'])) {
+                    $value = implode(",", $result['audios']);
+                } else {
+                    $value = '';
+                }
+            }
+            elseif ($widget == TroubleshootingTemplateField::WIDGET_VIDEO) {
+                $result = $this->uploadVideos($request, ['troubleshooting/'], $code);
+                if ($result && !empty($result['videos'])) {
+                    $value = implode(",", $result['videos']);
+                } else {
+                    $value = '';
+                }
+            }
+            else {
+                $value = $request->param($code);
+            }
+            if ($field->NULLABLE == WHETHER_NO && empty($value)) {
+                return $this->fail("缺少$name");
+            }
+            $extension = TroubleshootingPersonExtension::where(['PERSON_ID' => $id, 'FIELD_ID' => $field->ID])->find();
+            if (empty($extension)) {
+                $extension = new TroubleshootingPersonExtension();
+                $extension->TEMPLATE_ID = $templateId;
+                $extension->PERSON_ID = $person->ID;
+                $extension->FIELD_ID = $field->ID;
+                $extension->CREATE_TIME = Carbon::now();
+            }
+            $extension->FIELD_VALUE = $value;
+            $extension->UPDATE_TIME = Carbon::now();
+            $extension->save();
+        }
+        $user = $request->User;
+        $data = [
+            'EXECUTE_STATUS' => TroubleshootingPerson::EXECUTE_STATUS_HANDLED,
+            'EXECUTE_TIME' => $request->param('EXECUTE_TIME', null),
+            'EXECUTOR_NAME' => $request->param('EXECUTE_NAME', '', 'trim'),
+            'EXECUTOR_MOBILE' => $request->param('EXECUTOR_MOBILE', '', 'trim'),
+            'UPDATE_USER_ID' => $user->ID,
+            'UPDATE_USER_NAME' => $user->NAME,
+            'UPDATE_TIME' => Carbon::now(),
+            'UPDATE_TERMINAL' => TERMINAL_APP
+        ];
+        $person->save($data);
+        return $this->ok('排查人员信息修改成功');
+    }
+
     public function addPerson(Request $request) {
         $templateId = $request->param('TEMPLATE_ID', 0, 'int');
         $name = $request->param('NAME', '', 'trim');
@@ -116,7 +195,7 @@ class Troubleshooting extends Common {
             'REMARK' => $remark
         ];
         $templateCount = TroubleshootingTemplate::where(['EFFECTIVE' => EFFECTIVE, 'ID' => $templateId])->count();
-        if ($templateCount > 0) {
+        if ($templateCount == 0) {
             return $this->fail("模板不存在或已删除");
         }
         $personCount = TroubleshootingPerson::where(['EFFECTIVE' => EFFECTIVE, 'ID_CODE' => $idCode])->count();
@@ -157,24 +236,30 @@ class Troubleshooting extends Common {
                 $result = $this->uploadImages($request, ['troubleshooting/'], $code);
                 if ($result && !empty($result['images'])) {
                     $value = implode(",", $result['images']);
+                } else {
+                    $value = '';
                 }
             }
             elseif ($widget == TroubleshootingTemplateField::WIDGET_AUDIO) {
                 $result = $this->uploadAudios($request, ['troubleshooting/'], $code);
                 if ($result && !empty($result['audios'])) {
                     $value = implode(",", $result['audios']);
+                } else {
+                    $value = '';
                 }
             }
             elseif ($widget == TroubleshootingTemplateField::WIDGET_VIDEO) {
-                $result = $this->uploadAudios($request, ['troubleshooting/'], $code);
+                $result = $this->uploadVideos($request, ['troubleshooting/'], $code);
                 if ($result && !empty($result['videos'])) {
                     $value = implode(",", $result['videos']);
+                } else {
+                    $value = '';
                 }
             }
             else {
                 $value = $request->param($code);
             }
-            if ($field->NULLABLE == WHETHER_YES && empty($value)) {
+            if ($field->NULLABLE == WHETHER_NO && empty($value)) {
                 return $this->fail("缺少$name");
             }
             $extension = new TroubleshootingPersonExtension();
