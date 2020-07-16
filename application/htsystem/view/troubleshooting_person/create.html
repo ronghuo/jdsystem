@@ -4,70 +4,44 @@
             <div class="span12">
                 <div class="primary-head">
 
-                    <div class="span3"><h3 class="page-header">安保排查模板字段</h3></div>
+                    <div class="span3"><h3 class="page-header">安保排查人员</h3></div>
                     <div class="span9">
-                        <a href="{:url('TroubleshootingTemplateField/index')}" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
+                        <a href="{:url('TroubleshootingPerson/index')}" class="btn pull-right"><i class="icon-reply"></i> 返回</a>
                     </div>
                 </div>
             </div>
         </div>
-        <form class="form-horizontal left-align" method="post" action="{if isset($info)}{:url('TroubleshootingTemplateField/modify')}{else/}{:url('TroubleshootingTemplateField/create')}{/if}">
-            {if isset($info)}
-                <input type="hidden" name="ID" value="{$info.ID}" />
-            {/if}
+        <form class="form-horizontal left-align" method="post" action="{:url('TroubleshootingPerson/modify')}">
+            <input type="hidden" name="ID" value="{$info.ID}" />
             <div class="control-group">
-                <label class="control-label"><span class="error">*</span> 模板</label>
+                <label class="control-label"><span class="error">*</span> 被排除人员姓名</label>
                 <div class="controls">
-                    <select name="TEMPLATE_ID" {if isset($info)}disabled{/if}>
-                        <option value="">请选择</option>
-                        {foreach name="templateList" key="ID" item="NAME"}
-                            <option value="{$ID}" {if isset($info) and $ID eq $info.TEMPLATE_ID}selected{/if}>{$NAME}</option>
-                        {/foreach}
-                    </select>
+                    <input type="text" name="NAME" value="{if isset($info)}{$info.NAME}{/if}" class="input" placeholder="请输入被排除人员姓名" />
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label"><span class="error">*</span> 代码</label>
+                <label class="control-label"><span class="error">*</span> 被排除人员身份证号码</label>
                 <div class="controls">
-                    <input type="text" name="CODE" value="{if isset($info)}{$info.CODE}{/if}" class="input" placeholder="请输入字段代码" />
+                    <input type="text" name="ID_CODE" value="{if isset($info)}{$info.ID_CODE}{/if}" class="input" placeholder="请输入被排除人员身份证号码" />
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label"><span class="error">*</span> 名称</label>
-                <div class="controls">
-                    <input type="text" name="NAME" value="{if isset($info)}{$info.NAME}{/if}" class="input" placeholder="请输入字段名称" />
+                <label class="control-label"> 被排除人员户籍地 </label>
+                <div class="controls" id="domicileAreas">
+                    <select name="DOMICILE_COUNTY_CODE" class="lv1" data-value="{if isset($info)}{$info.DOMICILE_COUNTY_CODE}{/if}"></select>
+                    <select name="DOMICILE_STREET_CODE" class="lv2" data-value="{if isset($info)}{$info.DOMICILE_STREET_CODE}{/if}"></select>
+                    <select name="DOMICILE_COMMUNITY_CODE" class="lv3" data-value="{if isset($info)}{$info.DOMICILE_COMMUNITY_CODE}{/if}"></select>
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label"><span class="error">*</span> 控件</label>
+                <label class="control-label"> 被排除人员户籍地详址</label>
                 <div class="controls">
-                    <select name="WIDGET">
-                        <option value="">请选择</option>
-                        {foreach name="widgetList" key="ID" item="NAME"}
-                            <option value="{$ID}" {if isset($info) and $ID eq $info.WIDGET}selected{/if}>{$NAME}</option>
-                        {/foreach}
-                    </select>
-                </div>
-            </div>
-            <div class="control-group">
-                <label class="control-label"><span class="error">*</span> 排序号</label>
-                <div class="controls">
-                    <input type="text" name="SORT" value="{if isset($info)}{$info.SORT}{/if}" class="input" placeholder="请输入字段排序号" />
-                </div>
-            </div>
-            <div class="control-group">
-                <label class="control-label"><span class="error">*</span> 是否可为空</label>
-                <div class="controls">
-                    <select name="NULLABLE">
-                        <option value="">请选择</option>
-                        <option value="Y" {if isset($info) and 'Y' eq $info.NULLABLE}selected{/if}>是</option>
-                        <option value="N" {if isset($info) and 'N' eq $info.NULLABLE}selected{/if}>否</option>
-                    </select>
+                    <input type="text" name="DOMICILE_ADDRESS" value="{if isset($info)}{$info.DOMICILE_ADDRESS}{/if}" class="input" placeholder="请输入被排除人员户籍地详址" />
                 </div>
             </div>
             <div class="control-group">
                 <label class="control-label"> 备注</label>
-                <div class="controls"><textarea class="span8 ml0" name="DESC" rows="20" style="height: 200px;" placeholder="">{if isset($info)}{$info.DESC}{/if}</textarea>
+                <div class="controls"><textarea class="span8 ml0" name="REMARK" rows="20" style="height: 200px;" placeholder="">{if isset($info)}{$info.REMARK}{/if}</textarea>
                 </div>
             </div>
 

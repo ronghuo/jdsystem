@@ -5,13 +5,23 @@
     <div class="row-fluid">
         <table class="stat-table responsive table table-stats table-striped table-bordered">
             <tbody>
-            <tr><td>所属模板</td><td>{$info.TEMPLATE_NAME}</td></tr>
+            <tr><td><div style="width: 140px;">所属模板</div></td><td>{$info.TEMPLATE_NAME}</td></tr>
             <tr><td>被排除人员姓名</td><td>{$info.NAME}</td></tr>
             <tr><td>被排除人员身份证号码</td><td>{$info.ID_CODE}</td></tr>
             <tr><td>被排查人员户籍地</td><td>{$info.DOMICILE_PLACE}</td></tr>
             {if isset($info.extension)}
                 {foreach name="info.extension" item="item"}
-                    <tr><td>{$item.FIELD_NAME}</td><td>{$item.FIELD_VALUE}</td></tr>
+                    <tr>
+                        <td>{$item.FIELD_NAME}</td>
+                        <td>
+                            {notempty name="item.IS_MULTI_MEDIA"}
+                                {foreach name="item.FIELD_VALUE" item="value"}
+                                    <a href="{$value}" target="_blank">{$value}</a>
+                                {/foreach}
+                            {else/}{$item.FIELD_VALUE}
+                            {/notempty}
+                        </td>
+                    </tr>
                 {/foreach}
             {/if}
 

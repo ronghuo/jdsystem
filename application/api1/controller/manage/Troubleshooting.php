@@ -7,9 +7,6 @@
 namespace app\api1\controller\manage;
 
 use app\api1\controller\Common;
-use app\common\library\AppLogHelper;
-use app\common\model\DecisionImgs;
-use app\common\model\NbAuthDept;
 use app\common\model\Subareas;
 use app\common\model\TroubleshootingAssignment;
 use app\common\model\TroubleshootingPerson;
@@ -17,9 +14,7 @@ use app\common\model\TroubleshootingPersonExtension;
 use app\common\model\TroubleshootingTemplate;
 use app\common\model\TroubleshootingTemplateField;
 use app\common\model\Upareatable;
-use app\common\model\UserDecisions;
 use app\common\validate\TroubleshootPersonVer;
-use app\common\validate\UserDecisionsVer;
 use Carbon\Carbon;
 use think\Request;
 
@@ -28,7 +23,7 @@ class Troubleshooting extends Common {
     public function getTemplateList() {
         $rows = TroubleshootingTemplate::where('EFFECTIVE', EFFECTIVE)
             ->field('ID, NAME, REMARK')->all();
-        return $this->ok('Success', [
+        $this->ok('Success', [
             'list' => $rows
         ]);
     }
@@ -43,7 +38,7 @@ class Troubleshooting extends Common {
             ->field('ID, CODE, NAME, WIDGET, SORT, NULLABLE, DESC')
             ->order('SORT ASC')
             ->select();
-        return $this->ok('Success', [
+        $this->ok('Success', [
             'list' => $rows
         ]);
     }
@@ -84,53 +79,46 @@ class Troubleshooting extends Common {
             $item->EXECUTE_STATUS = in_array($item->EXECUTE_STATUS, array_keys(TroubleshootingPerson::EXECUTE_STATUS_LIST)) ? TroubleshootingPerson::EXECUTE_STATUS_LIST[$item->EXECUTE_STATUS] : '未知';
             return $item;
         });
-        return $this->ok('Success', [
+        $this->ok('Success', [
             'list' => $rows
         ]);
     }
 
     public function modifyPerson(Request $request) {
         $id = $request->param('ID', 0, 'int');
-        $templateId = $request->param('TEMPLATE_ID', 0, 'int');
-        $templateCount = TroubleshootingTemplate::where(['EFFECTIVE' => EFFECTIVE, 'ID' => $templateId])->count();
-        if ($templateCount == 0) {
-            return $this->fail("模板不存在或已删除");
-        }
         $person = TroubleshootingPerson::where(['EFFECTIVE' => EFFECTIVE, 'ID' => $id])->find();
         if (empty($person)) {
             return $this->fail("人员信息不存在或已删除");
         }
+        $templateId = $person->TEMPLATE_ID;
         $fields = TroubleshootingTemplateField::where(['EFFECTIVE' => EFFECTIVE, 'TEMPLATE_ID' => $templateId])->all();
         foreach ($fields as $field) {
             $code = $field->CODE;
             $name = $field->NAME;
             $widget = $field->WIDGET;
-            if ($widget == TroubleshootingTemplateField::WIDGET_TEXT) {
-                $value = $request->param($code);
-            }
-            elseif ($widget == TroubleshootingTemplateField::WIDGET_TEXTAREA) {
-                $value = $request->param($code);
-            }
-            elseif ($widget == TroubleshootingTemplateField::WIDGET_IMAGE) {
+            $isImage = $widget == TroubleshootingTemplateField::WIDGET_IMAGE;
+            $isAudio = $widget == TroubleshootingTemplateField::WIDGET_AUDIO;
+            $isVideo = $widget == TroubleshootingTemplateField::WIDGET_VIDEO;
+            if ($isImage) {
                 $result = $this->uploadImages($request, ['troubleshooting/'], $code);
                 if ($result && !empty($result['images'])) {
-                    $value = implode(",", $result['images']);
+                    $value = $this->getMultiMediaValue($result['fileNames'], $result['images']);
                 } else {
                     $value = '';
                 }
             }
-            elseif ($widget == TroubleshootingTemplateField::WIDGET_AUDIO) {
+            elseif ($isAudio) {
                 $result = $this->uploadAudios($request, ['troubleshooting/'], $code);
                 if ($result && !empty($result['audios'])) {
-                    $value = implode(",", $result['audios']);
+                    $value = $this->getMultiMediaValue($result['fileNames'], $result['audios']);
                 } else {
                     $value = '';
                 }
             }
-            elseif ($widget == TroubleshootingTemplateField::WIDGET_VIDEO) {
+            elseif ($isVideo) {
                 $result = $this->uploadVideos($request, ['troubleshooting/'], $code);
                 if ($result && !empty($result['videos'])) {
-                    $value = implode(",", $result['videos']);
+                    $value = $this->getMultiMediaValue($result['fileNames'], $result['videos']);
                 } else {
                     $value = '';
                 }
@@ -138,18 +126,48 @@ class Troubleshooting extends Common {
             else {
                 $value = $request->param($code);
             }
-            if ($field->NULLABLE == WHETHER_NO && empty($value)) {
+            // 检验人员扩展信息
+            $extension = TroubleshootingPersonExtension::where(['PERSON_ID' => $id, 'FIELD_ID' => $field->ID])->find();
+            $isMultiMedia = in_array($widget, TroubleshootingTemplateField::WIDGET_MULTI_MEDIA);
+            $isValid = true;
+            if ($field->NULLABLE == WHETHER_NO) {
+                if (!$isMultiMedia  && empty($value)) {
+                    $isValid = false;
+                }
+                elseif ($isMultiMedia && empty($value)) {
+                    if (empty($extension) || empty($extension->FIELD_VALUE)) {
+                        $isValid = false;
+                    }
+                }
+            }
+            if (!$isValid) {
                 return $this->fail("缺少$name");
             }
-            $extension = TroubleshootingPersonExtension::where(['PERSON_ID' => $id, 'FIELD_ID' => $field->ID])->find();
+
+            // 新增或修改人员扩展信息
             if (empty($extension)) {
                 $extension = new TroubleshootingPersonExtension();
                 $extension->TEMPLATE_ID = $templateId;
                 $extension->PERSON_ID = $person->ID;
                 $extension->FIELD_ID = $field->ID;
                 $extension->CREATE_TIME = Carbon::now();
+                $extension->FIELD_VALUE = $value;
+            } else {
+                if (!$isMultiMedia) {
+                    $extension->FIELD_VALUE = $value;
+                }
+                elseif ($isMultiMedia && empty($extension->FIELD_VALUE)) {
+                    $extension->FIELD_VALUE = $value;
+                }
+                elseif ($isMultiMedia && !empty($value) && !empty($extension->FIELD_VALUE)) {
+                    if ($isImage) {
+                        $newValue = array_merge(json_decode($extension->FIELD_VALUE), json_decode($value));
+                        $extension->FIELD_VALUE = json_encode($newValue);
+                    } else {
+                        $extension->FIELD_VALUE = $value;
+                    }
+                }
             }
-            $extension->FIELD_VALUE = $value;
             $extension->UPDATE_TIME = Carbon::now();
             $extension->save();
         }
@@ -157,7 +175,7 @@ class Troubleshooting extends Common {
         $data = [
             'EXECUTE_STATUS' => TroubleshootingPerson::EXECUTE_STATUS_HANDLED,
             'EXECUTE_TIME' => $request->param('EXECUTE_TIME', null),
-            'EXECUTOR_NAME' => $request->param('EXECUTE_NAME', '', 'trim'),
+            'EXECUTOR_NAME' => $request->param('EXECUTOR_NAME', '', 'trim'),
             'EXECUTOR_MOBILE' => $request->param('EXECUTOR_MOBILE', '', 'trim'),
             'UPDATE_USER_ID' => $user->ID,
             'UPDATE_USER_NAME' => $user->NAME,
@@ -165,7 +183,20 @@ class Troubleshooting extends Common {
             'UPDATE_TERMINAL' => TERMINAL_APP
         ];
         $person->save($data);
-        return $this->ok('排查人员信息修改成功');
+        $this->ok('排查人员信息修改成功');
+    }
+
+    private function getMultiMediaValue($fileNames, $filePaths) {
+        $value = [];
+        for ($i = 0; $i < count($fileNames); $i++) {
+            $fileName = $fileNames[$i];
+            $fileName = substr($fileName, 0, strpos($fileName, "."));
+            $value[] = [
+                'ID' => $fileName,
+                'URL' => $filePaths[$i]
+            ];
+        }
+        return json_encode($value);
     }
 
     public function addPerson(Request $request) {
@@ -284,13 +315,14 @@ class Troubleshooting extends Common {
         ]);
         $person->save($data);
         if (empty($person->ID)) {
-            return $this->fail("排查人员信息添加失败");
+            $this->fail("排查人员信息添加失败");
         }
         foreach ($extensions as $extension) {
             $extension->PERSON_ID = $person->ID;
             $extension->save();
         }
         $assignment = new TroubleshootingAssignment();
+        $assignment->PERSON_ID = $person->ID;
         $assignment->COUNTY_CODE = $domicileCountyCode;
         $assignment->COUNTY_NAME = $domicileCountyName;
         $assignment->STREET_CODE = $domicileStreetCode;
@@ -303,7 +335,7 @@ class Troubleshooting extends Common {
         $assignment->CREATE_USER_NAME = $user->NAME;
         $assignment->CREATE_TIME = Carbon::now();
         $assignment->save();
-        return $this->ok('排查人员信息添加成功');
+        $this->ok('排查人员信息添加成功');
     }
 
     public function getPersonInfo(Request $request) {
@@ -360,90 +392,51 @@ class Troubleshooting extends Common {
             ->field($queryFields)
             ->select();
         $info->EXTENSION = $extension;
+        foreach ($info->EXTENSION as $item) {
+            if (empty($item->FIELD_VALUE)) {
+                continue;
+            }
+            if (in_array($item->FIELD_WIDGET, TroubleshootingTemplateField::WIDGET_MULTI_MEDIA)) {
+                $values = json_decode($item->FIELD_VALUE);
+                foreach ($values as &$value) {
+                    $value->URL = build_http_img_url($value->URL);
+                }
+                $item->FIELD_VALUE = $values;
+            }
+        }
 
-        return $this->ok('Success', [
+        $this->ok('Success', [
             'info' => $info
         ]);
     }
 
-    public function index(Request $request) {
-
-        $page = $request->param('page',1,'int');
-        $user_id = $request->param('userid',0,'int');
-        $decision_id = $request->param('id', 0, 'int');
-
-        $list = UserDecisions::where(function($st) use($user_id, $decision_id, $request) {
-                if (!$request->User->isTopPower) {
-                    $st->whereIn('UUID', $this->getManageUserIds($request->MUID));
+    public function deleteFile(Request $request) {
+        $personId = $request->param('PERSON_ID', 0, 'int');
+        $fieldId = $request->param('FIELD_ID', 0, 'int');
+        $fileId = $request->param('FILE_ID', '', 'trim');
+        if (empty($personId) || empty($fieldId) || empty($fileId)) {
+            $this->fail("参数错误");
+        }
+        $extension = TroubleshootingPersonExtension::where(['PERSON_ID' => $personId, 'FIELD_ID' => $fieldId])->find();
+        if (empty($extension)) {
+            $this->fail("排查人员扩展信息不存在");
+        }
+        $field = TroubleshootingTemplateField::where('ID', $fieldId)->find();
+        if (!in_array($field->WIDGET, TroubleshootingTemplateField::WIDGET_MULTI_MEDIA)) {
+            $this->fail("非多媒体文件字段类型");
+        }
+        if (!empty($extension->FIELD_VALUE)) {
+            $value = json_decode($extension->FIELD_VALUE);
+            foreach ($value as $index => $item) {
+                if ($item->ID == $fileId) {
+                    unset($value[$index]);
+                    break;
                 }
-                if ($user_id > 0) {
-                    $st->where('UUID', '=', $user_id);
-                }
-                if ($decision_id > 0) {
-                    $st->where('ID', '=', $decision_id);
-                }
-            })
-            ->order('ADD_TIME','DESC')
-            ->page($page,self::PAGE_SIZE)
-            ->select()->map(function($t) {
-                $t->imgs->map(function($tt) {
-                    $tt->IMG_URL = build_http_img_url($tt->SRC_PATH);
-                    return $tt;
-                });
-                return $t;
-            });
-
-        AppLogHelper::logManager($request, AppLogHelper::ACTION_ID_M_DECISION_QUERY, $user_id, [
-            'ID' => $decision_id,
-            'UUID' => $user_id
-        ]);
-
-        return $this->ok('',[
-            'list' => !empty($list) ? $list->toArray() : []
-        ]);
-    }
-
-    public function save(Request $request) {
-        $dmmid = $request->User->DMM_ID;
-        $dmm = NbAuthDept::find($dmmid);
-
-        if (!$dmm) {
-            return $this->fail('登记单位信息有误');
+            }
+            $extension->FIELD_VALUE = empty($value) ? '' : json_encode(array_values($value));
+            $extension->save();
         }
-
-        $data = [
-            'UUID' => $request->param('UUID','','int'),
-            'TITLE' => $request->param('TITLE','','trim'),
-            'CONTENT' => $request->param('CONTENT','','trim'),
-            'ADD_USER_MOBILE' => $request->User->MOBILE,
-            'ADD_USER_NAME' => $request->User->NAME,
-            'ADD_DEPT_CODE' => $dmm->DEPTCODE,
-            'ADD_DEPT_NAME' => $dmm->DEPTNAME,
-            'ADD_TERMINAL' => TERMINAL_APP,
-            'ADD_TIME' => date('Y-m-d H:i:s'),
-            'UPDATE_TIME' => date('Y-m-d H:i:s'),
-            'BEGIN_TIME' => $request->param('BEGIN_TIME', '', 'trim')
-        ];
-        $v = new UserDecisionsVer();
-        if (!$v->check($data)) {
-            return $this->fail($v->getError());
-        }
-
-        $decision_id = (new UserDecisions())->insertGetId($data);
-        if (!$decision_id) {
-            return $this->fail('决定书信息保存失败');
-        }
-
-        $res = $this->uploadImages($request, ['decisions/']);
-
-        if ($res && !empty($res['images'])) {
-            (new DecisionImgs())->saveData($decision_id, $res['images']);
-            $data['IMAGES'] = $res['images'];
-        }
-
-        AppLogHelper::logManager($request, AppLogHelper::ACTION_ID_M_DECISION_ADD, $data['UUID'], $data);
-
-        return $this->ok('决定书信息保存成功');
+        $this->ok('文件删除成功');
     }
 
 }

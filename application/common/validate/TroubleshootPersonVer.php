@@ -27,6 +27,7 @@ class TroubleshootPersonVer extends Validate
 
     protected $scene = [
         'create' => ['TEMPLATE_ID','NAME','ID_CODE','DOMICILE_COUNTY_CODE','DOMICILE_STREET_CODE','DOMICILE_COMMUNITY_CODE'],
-        'modify' => ['TEMPLATE_ID','NAME','ID_CODE','DOMICILE_COUNTY_CODE','DOMICILE_STREET_CODE','DOMICILE_COMMUNITY_CODE']
+        'modify' => ['TEMPLATE_ID','NAME','ID_CODE','DOMICILE_COUNTY_CODE','DOMICILE_STREET_CODE','DOMICILE_COMMUNITY_CODE'],
+        'web.modify' => ['NAME', 'ID_CODE']
     ];
 }

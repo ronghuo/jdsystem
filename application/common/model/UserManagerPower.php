@@ -50,5 +50,4 @@ class UserManagerPower extends BaseModel
     }
 
 
-
 }

@@ -102,7 +102,7 @@ class Common extends Controller
             return false;
         }
 
-        return ['images'=>$res['save_files'],'errors'=>$res['errors']];
+        return ['images' => $res['save_files'], 'fileNames' => $res['save_file_names'], 'errors'=>$res['errors']];
     }
 
     protected function uploadAudios(Request $request,$dir=[], $fieldName = 'audios'){
@@ -115,7 +115,7 @@ class Common extends Controller
             return false;
         }
 
-        return ['audios'=>$res['save_files'],'errors'=>$res['errors']];
+        return ['audios'=>$res['save_files'], 'fileNames' => $res['save_file_names'],'errors'=>$res['errors']];
     }
 
     protected function uploadVideos(Request $request,$dir=[], $fieldName = 'videos'){
@@ -128,6 +128,6 @@ class Common extends Controller
             return false;
         }
 
-        return ['videos'=>$res['save_files'],'errors'=>$res['errors']];
+        return ['videos'=>$res['save_files'], 'fileNames' => $res['save_file_names'],'errors'=>$res['errors']];
     }
 }

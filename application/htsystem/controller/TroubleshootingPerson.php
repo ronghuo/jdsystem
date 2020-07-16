@@ -2,7 +2,10 @@
 
 namespace app\htsystem\controller;
 
+use app\common\model\Subareas;
+use app\common\model\TroubleshootingAssignment;
 use app\common\model\TroubleshootingPersonExtension;
+use app\common\validate\TroubleshootPersonVer;
 use app\common\validate\TroubleshootTemplateFieldVer;
 use Carbon\Carbon;
 use think\Request;
@@ -43,10 +46,21 @@ class TroubleshootingPerson extends Common
             'A.REMARK',
             'B.NAME TEMPLATE_NAME'
         ];
+        $assignmentSql = TroubleshootingAssignment::order('CREATE_TIME DESC')->buildSql();
+        $assignmentSql = db()->table("$assignmentSql A")->group('PERSON_ID')->buildSql();
         $query = TroubleshootingPersonModel::alias('A')
             ->leftJoin('troubleshoot_template B', 'A.TEMPLATE_ID = B.ID')
+            ->leftJoin("$assignmentSql C", 'A.ID = C.PERSON_ID')
             ->where('A.EFFECTIVE', EFFECTIVE)
             ->where('B.EFFECTIVE', EFFECTIVE)
+            ->where(function ($query) {
+                $where = $this->getManageWhere();
+                if (!empty($where)) {
+                    foreach ($where as $fd => $wh) {
+                        $query->where("C.$fd", $wh);
+                    }
+                }
+            })
             ->field($queryFields);
         if (!empty($templateId)) {
             $is_so = true;
@@ -115,7 +129,7 @@ class TroubleshootingPerson extends Common
             ->where('A.EFFECTIVE', EFFECTIVE)
             ->where('B.EFFECTIVE', EFFECTIVE)
             ->field($queryFields)
-            ->find();
+            ->find($id);
         if (empty($info)) {
             $this->error("排查人员信息已删除或不存在");
         }
@@ -123,6 +137,7 @@ class TroubleshootingPerson extends Common
             'A.ID',
             'A.FIELD_ID',
             'B.NAME FIELD_NAME',
+            'B.WIDGET FIELD_WIDGET',
             'A.FIELD_VALUE'
         ];
         $extension = TroubleshootingPersonExtension::alias('A')
@@ -132,6 +147,20 @@ class TroubleshootingPerson extends Common
             ->field($queryFields)
             ->select();
         $info->extension = $extension;
+        foreach ($info->extension as $item) {
+            if (empty($item->FIELD_VALUE)) {
+                continue;
+            }
+            if (in_array($item->FIELD_WIDGET, TroubleshootingTemplateFieldModel::WIDGET_MULTI_MEDIA)) {
+                $item->IS_MULTI_MEDIA = true;
+                $value4View = [];
+                $values = json_decode($item->FIELD_VALUE);
+                foreach ($values as $value) {
+                    $value4View[] = build_http_img_url($value->URL);
+                }
+                $item->FIELD_VALUE = $value4View;
+            }
+        }
 
         $info->DOMICILE_PLACE = $info->DOMICILE_PROVINCE_NAME . $info->DOMICILE_CITY_NAME . $info->DOMICILE_COUNTY_NAME
             . $info->DOMICILE_STREET_NAME . $info->DOMICILE_COMMUNITY_NAME . $info->DOMICILE_ADDRESS;
@@ -192,49 +221,47 @@ class TroubleshootingPerson extends Common
         if (empty($id)) {
             $this->error('非法操作');
         }
-        $info = TroubleshootingTemplateFieldModel::find($id);
+        $info = TroubleshootingPersonModel::find($id);
         if (empty($info)) {
-            $this->error("字段已删除或不存在");
+            $this->error("排查人员已删除或不存在");
         }
         if ($request->isPost()) {
             $data = [
-                'CODE' => $request->param('CODE'),
                 'NAME' => $request->param('NAME'),
-                'WIDGET' => $request->param('WIDGET'),
-                'NULLABLE' => $request->param('NULLABLE'),
-                'SORT' => $request->param('SORT'),
-                'DESC' => $request->param('DESC'),
+                'ID_CODE' => $request->param('ID_CODE'),
+                'DOMICILE_COUNTY_CODE' => $request->param('DOMICILE_COUNTY_CODE'),
+                'DOMICILE_STREET_CODE' => $request->param('DOMICILE_STREET_CODE'),
+                'DOMICILE_COMMUNITY_CODE' => $request->param('DOMICILE_COMMUNITY_CODE'),
+                'DOMICILE_ADDRESS' => $request->param('DOMICILE_ADDRESS'),
+                'REMARK' => $request->param('REMARK'),
                 'UPDATE_USER_ID' => session('user_id'),
                 'UPDATE_USER_NAME' => session('name'),
-                'UPDATE_TIME' => Carbon::now()
+                'UPDATE_TIME' => Carbon::now(),
+                'UPDATE_TERMINAL' => TERMINAL_WEB
             ];
-            $ver = new TroubleshootTemplateFieldVer();
-            if (!$ver->scene('modify')->check($data)) {
+            $ver = new TroubleshootPersonVer();
+            if (!$ver->scene('web.modify')->check($data)) {
                 $this->error($ver->getError());
             }
-            $field = TroubleshootingTemplateFieldModel::where('EFFECTIVE', EFFECTIVE)
-                ->where('TEMPLATE_ID', $info->TEMPLATE_ID)
+            $personCount = TroubleshootingPersonModel::where('EFFECTIVE', EFFECTIVE)
+                ->where('ID_CODE', $data['ID_CODE'])
                 ->where('ID', '<>', $id)
-                ->where(function ($query) use ($data) {
-                    $query->where('CODE', $data['CODE'])->whereOr('NAME', $data['NAME']);
-                })->find();
-            if (!empty($field)) {
-                if ($field->CODE == $data['CODE']) {
-                    $this->error('字段代码不能重复');
-                }
-                elseif ($field->NAME == $data['NAME']) {
-                    $this->error('字段名称不能重复');
-                }
+                ->count();
+            if ($personCount > 0) {
+                $this->error("重复的被排除人员身份证号码");
             }
+            $areaNames = Subareas::where('CODE12', 'in', [$data['DOMICILE_COUNTY_CODE'], $data['DOMICILE_STREET_CODE'], $data['DOMICILE_COMMUNITY_CODE']])
+                ->order('CODE12 ASC')
+                ->column('NAME');
+            $data['DOMICILE_COUNTY_NAME'] = count($areaNames) >= 1 ? $areaNames[0] : '';
+            $data['DOMICILE_STREET_NAME'] = count($areaNames) >= 2 ? $areaNames[1] : '';
+            $data['DOMICILE_COMMUNITY_NAME'] = count($areaNames) >= 3 ? $areaNames[2] : '';
             $info->save($data);
-            return $this->success('安保排查模板字段修改成功', url('TroubleshootingTemplateField/index'));
+            return $this->success('安保排查人员信息修改成功', url('TroubleshootingPerson/index'));
         }
-        $templateList = $this->getTemplateList();
-        $js = $this->loadJsCss(array('troubleshooting_template_field_create'), 'js', 'admin');
+        $js = $this->loadJsCss(array('p:cate/jquery.cate', 'troubleshooting_person_create'), 'js', 'admin');
         $this->assign('footjs', $js);
-        $this->assign('templateList', $templateList);
         $this->assign('info', $info);
-        $this->assign('widgetList', self::WIDGET_LIST);
         return $this->fetch('create');
     }
 
@@ -254,6 +281,92 @@ class TroubleshootingPerson extends Common
         $info->EFFECTIVE = INEFFECTIVE;
         $info->save();
         $this->success('安保排查人员信息删除成功');
+    }
+
+    public function assigns(Request $request){
+        $id = $request->param('ID');
+        if (empty($id)) {
+            $this->error("非法操作");
+        }
+        $info = TroubleshootingPersonModel::find($id);
+        if (!$info) {
+            $this->error('排查人员已删除或不存在');
+        }
+        $powerLevel = $this->getPowerLevel();
+        if ($request->isPost()) {
+            $countyCode = $request->param('COUNTY_CODE', '', 'trim');
+            $streetCode = $request->param('STREET_CODE', '', 'trim');
+            $communityCode = $request->param('COMMUNITY_CODE', '', 'trim');
+
+            $areaNames = Subareas::where('CODE12', 'in', [$countyCode, $streetCode, $communityCode])
+                ->order('CODE12 ASC')
+                ->column('NAME');
+            $countyName = count($areaNames) >= 1 ? $areaNames[0] : '';
+            $streetName = count($areaNames) >= 2 ? $areaNames[1] : '';
+            $communityName = count($areaNames) >= 3 ? $areaNames[2] : '';
+
+            $reason = $request->param('REASON', '', 'trim');
+            $action = $request->param('ACTION', TroubleshootingAssignment::ACTION_ASSIGN, 'trim');
+            $assignment = new TroubleshootingAssignment();
+            $assignment->PERSON_ID = $id;
+            $assignment->COUNTY_CODE = $countyCode;
+            $assignment->COUNTY_NAME = $countyName;
+            $assignment->STREET_CODE = $streetCode;
+            $assignment->STREET_NAME = $streetName;
+            $assignment->COMMUNITY_CODE = $communityCode;
+            $assignment->COMMUNITY_NAME = $communityName;
+            $assignment->REASON = $reason;
+            $assignment->ACTION = $action;
+            $assignment->CREATE_USER_ID = session('user_id');
+            $assignment->CREATE_USER_NAME = session('name');
+            $assignment->CREATE_TIME = Carbon::now();
+            $assignment->save();
+            $this->jsalert("排查人员指派成功",3);
+        }
+        $assignment = TroubleshootingAssignment::where(['PERSON_ID' => $id])->order("CREATE_TIME DESC")->limit(1)->select();
+        if ($assignment->isEmpty()) {
+            $assignment = new TroubleshootingAssignment();
+            $assignment->COUNTY_CODE = $info->DOMICILE_COUNTY_CODE;
+            $assignment->STREET_CODE = $info->DOMICILE_STREET_CODE;
+            $assignment->COMMUNITY_CODE = $info->DOMICILE_COMMUNITY_CODE;
+        } else {
+            $assignment = $assignment[0];
+        }
+        $info->DOMICILE_PLACE = $info->DOMICILE_PROVINCE_NAME . $info->DOMICILE_CITY_NAME . $info->DOMICILE_COUNTY_NAME
+            . $info->DOMICILE_STREET_NAME . $info->DOMICILE_COMMUNITY_NAME . $info->DOMICILE_ADDRESS;
+        $js = $this->loadJsCss(array('p:cate/jquery.cate','troubleshooting_person_assign'), 'js', 'admin');
+        $this->assign('footjs', $js);
+        $this->assign('info', $info);
+        $this->assign('assignment', $assignment);
+        $this->assign('powerLevel', $powerLevel);
+        return $this->fetch('assign');
+    }
+
+    protected function getManageWhere() {
+        $where = [];
+        $superadmin = session('superadmin');
+        if ($superadmin) {
+            return $where;
+        }
+        $power_level = session('power_level');
+        $admin = session('info');
+        // 市级
+        if ($power_level == self::POWER_LEVEL_CITY) {
+            return $where;
+        }
+        // 县级
+        elseif ($power_level == self::POWER_LEVEL_COUNTY) {
+            $where['COUNTY_CODE'] = $admin['POWER_COUNTY_ID_12'];
+        }
+        // 乡级
+        elseif ($power_level == self::POWER_LEVEL_STREET) {
+            $where['STREET_CODE'] = $admin['POWER_STREET_ID'];
+        }
+        // 村级
+        elseif ($power_level == self::POWER_LEVEL_COMMUNITY) {
+            $where['COMMUNITY_CODE'] = $admin['POWER_COMMUNITY_ID'];
+        }
+        return $where;
     }
 
 }

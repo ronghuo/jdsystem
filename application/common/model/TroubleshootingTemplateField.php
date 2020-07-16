@@ -14,6 +14,11 @@ class TroubleshootingTemplateField extends BaseModel
     const WIDGET_IMAGE = 'IMAGE';
     const WIDGET_VIDEO = 'VIDEO';
     const WIDGET_AUDIO = 'AUDIO';
+    const WIDGET_MULTI_MEDIA = [
+        self::WIDGET_IMAGE,
+        self::WIDGET_VIDEO,
+        self::WIDGET_AUDIO
+    ];
 
     public function template(){
         return $this->belongsTo('TroubleshootingTemplate','TEMPLATE_ID','ID');

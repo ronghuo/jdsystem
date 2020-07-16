@@ -91,6 +91,7 @@ class Uploads{
             $save_files = [];
             $errors = [];
             $returns = [];
+            $fileNames = [];
             if(isset($config['save_path']) && $config['save_path']){
                 $save_path = $config['save_path'];
             }else{
@@ -108,6 +109,7 @@ class Uploads{
                     $file_path = str_replace("\\",'/',$save_path.'/'.$info->getSaveName());
                     $save_files[] = $file_path;
                     $returns[] = build_http_img_url($file_path);
+                    $fileNames[] = $info->getFilename();
 //                    $thumb_path = build_thumb_img_path($save_path.'/'.$info->getSaveName(), 600);
 //                    $returns[] = build_http_img_url(str_replace("\\",'/',$thumb_path));
 //                echo $info->getFilename();
@@ -134,6 +136,7 @@ class Uploads{
                 'success'=>count($returns)>0 ? true : false,
                 $config['field_name']=> $returns,
                 'save_files'=>$save_files,
+                'save_file_names' => $fileNames,
                 'errors'=>$errors
             ];
 

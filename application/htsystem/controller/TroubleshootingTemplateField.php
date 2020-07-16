@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use think\Request;
 use app\common\model\TroubleshootingTemplateField as TroubleshootingTemplateFieldModel;
 use app\common\model\TroubleshootingTemplate as TroubleshootingTemplateModel;
+use app\common\model\TroubleshootingPerson as TroubleshootingPersonModel;
 
 class TroubleshootingTemplateField extends Common
 {
@@ -125,6 +126,10 @@ class TroubleshootingTemplateField extends Common
             $ver = new TroubleshootTemplateFieldVer();
             if (!$ver->scene('modify')->check($data)) {
                 $this->error($ver->getError());
+            }
+            $excludedFields = (new TroubleshootingPersonModel())->getTableFields();
+            if (in_array($data['CODE'], $excludedFields)) {
+                $this->error('该字段代码已被系统');
             }
             $field = TroubleshootingTemplateFieldModel::where('EFFECTIVE', EFFECTIVE)
                 ->where('TEMPLATE_ID', $info->TEMPLATE_ID)
