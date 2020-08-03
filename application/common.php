@@ -18,11 +18,13 @@ define('TERMINAL_APP', 'APP');  // 手机
 define('TERMINAL_WEB', 'WEB');  // 后台
 
 /**
- * 地区代码
+ * 默认地区信息
  */
 define('MINISTRY_ID', '010000');            // 部
 define('DEFAULT_PROVINCE_ID', '430000');    // 湖南省
 define('DEFAULT_CITY_ID', '431200');        // 怀化市
+define('DEFAULT_PROVINCE_NAME', '湖南省');   // 湖南省
+define('DEFAULT_CITY_NAME', '怀化市');       // 怀化市
 define('TOP_MANAGE_DEPT_ID', '10074');      // 怀化市禁毒委员会
 
 /**
@@ -434,6 +436,14 @@ function ifEmptyThenNull($var) {
     return $var;
 }
 
+/**
+ * 导出Excel
+ * @param $headerRows   标题行
+ * @param array $list   数据行
+ * @param string $title Sheet标题
+ * @param string $fileName  文件名
+ * @return string
+ */
 function exportExcel($headerRows, $list = [], $title='Sheet1', $fileName='demo')
 {
     if (empty($headerRows)) {
@@ -493,10 +503,10 @@ function exportExcel($headerRows, $list = [], $title='Sheet1', $fileName='demo')
         }
     }
     else {
-        if (count($list[0]) != count($headerRows)) {
+        if (!empty($list[0]) && count($list[0]) != count($headerRows)) {
             return '列名跟数据的列不一致';
         }
-        for ($i = 0; $i < count($list[0]); $i++) {
+        for ($i = 0; $i < count($headerRows); $i++) {
             $sheet->setCellValue("$letter[$i]1","$headerRows[$i]");
         }
         $row++;
@@ -514,6 +524,46 @@ function exportExcel($headerRows, $list = [], $title='Sheet1', $fileName='demo')
     header('Content-Disposition: attachment;filename='.$fileName.'.xlsx');
     header('Cache-Control: max-age=0');
     $PHPWriter->save("php://output");
+}
+
+function importExcel($concernedHeaders = [], $filePath = '') {
+    $fileType = PHPExcel_IOFactory::identify($filePath);
+    $objReader = PHPExcel_IOFactory::createReader($fileType);
+    $objPHPExcel = $objReader->load($filePath);
+    $data = [];
+    foreach($objPHPExcel->getWorksheetIterator() as $sheet) {
+        $concernedColumns = [];
+        foreach ($sheet->getRowIterator() as $row) {
+            $rowIndex = $row->getRowIndex();
+            if ($rowIndex == 1) {
+                foreach($row->getCellIterator() as $cell) {
+                    $value = trim($cell->getValue());
+                    $columnIndex = $cell->getColumn();
+                    if (empty($concernedHeaders)) {
+                        $concernedColumns[$columnIndex] = $value;
+                    }
+                    elseif (in_array($value, $concernedHeaders)) {
+                        $concernedColumns[$columnIndex] = $value;
+                    }
+                }
+                continue;
+            }
+            if (empty($concernedColumns)) {
+                return false;
+            }
+            $item = [];
+            foreach ($row->getCellIterator() as $cell) {
+                $columnIndex = $cell->getColumn();
+                if (!in_array($columnIndex, array_keys($concernedColumns))) {
+                    continue;
+                }
+                $columnName = $concernedColumns[$columnIndex];
+                $item[$columnName] = trim($cell->getValue());
+            }
+            $data[] = $item;
+        }
+    }
+    return $data;
 }
 
 /**

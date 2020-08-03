@@ -1,0 +1,38 @@
+{__NOLAYOUT__}
+{include file="common/layerheader"/}
+<div class="container">
+    <div class="row-fluid">
+        <fieldset class="default padd10">
+            <legend>基础信息</legend>
+            <form class="form-horizontal mt10" action="{:url('TroubleshootingPerson/import')}" method="post" id="postform" enctype="multipart/form-data">
+                <div class="control-group">
+                    <label class="control-label"><span class="error">*</span> 模板</label>
+                    <div class="controls">
+                        <select name="TEMPLATE_ID">
+                        <option value="">请选择</option>
+                        {foreach name="templateList" key="ID" item="NAME"}
+                            <option value="{$ID}">{$NAME}</option>
+                        {/foreach}
+                        </select>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label"><span class="error">*</span> 人员清单</label>
+                    <div class="controls">
+                        <input type="file" name="PERSON_LIST" class="input" placeholder="请选择要导入的人员清单" />
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <input type="button" class="btn btn-primary" value="导入" id="btnImport"/>
+                    <a href="javascript:;" class="btn" onclick="closePlayer();">取消</a>
+                </div>
+            </form>
+        </fieldset>
+    </div>
+</div>
+<script type="text/javascript">
+</script>
+{include file="common/layerfooter"/}
+
+
+

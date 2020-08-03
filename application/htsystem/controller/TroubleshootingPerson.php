@@ -2,6 +2,7 @@
 
 namespace app\htsystem\controller;
 
+use app\common\library\Uploads;
 use app\common\model\Subareas;
 use app\common\model\TroubleshootingAssignment;
 use app\common\model\TroubleshootingPersonExtension;
@@ -23,9 +24,86 @@ class TroubleshootingPerson extends Common
         'AUDIO' => '语音',
         'VIDEO' => '视频'
     ];
+    const PERSON_INFO_NAME = '姓名';
+    const PERSON_INFO_ID_CODE = '公民身份证号';
+    const PERSON_INFO_DOMICILE_ADDRESS = '户籍地址';
+    const PERSON_INFO_LIST = [
+        self::PERSON_INFO_ID_CODE,
+        self::PERSON_INFO_NAME,
+        self::PERSON_INFO_DOMICILE_ADDRESS
+    ];
 
     public function index(Request $request) {
-        $is_so = false;
+        $templateId = $request->param('TEMPLATE_ID', '', 'int');
+        $executeStatus = $request->param('EXECUTE_STATUS', '', 'trim');
+        $keywords = $request->param('keywords', '', 'trim');
+        $is_so = !empty($templateId) || !empty($executeStatus) || !empty($keywords);
+        $rows = $this->loadData($request, false, false);
+
+        $templateList = $this->getTemplateList();
+        $this->assign('templateList', $templateList);
+        $this->assign('executeStatusList', TroubleshootingPersonModel::EXECUTE_STATUS_LIST);
+        $this->assign('list', $rows);
+        $this->assign('page', $rows->render());
+        $this->assign('total', $rows->total());
+        $this->assign('is_so', $is_so);
+        $this->assign('keywords', $keywords);
+        $this->assign('templateId', $templateId);
+        $this->assign('executeStatus', $executeStatus);
+        $js = $this->loadJsCss(array('troubleshooting_person_index'), 'js', 'admin');
+        $this->assign('footjs', $js);
+        return $this->fetch();
+    }
+
+    public function export(Request $request) {
+        $data = $this->loadData($request, true, true);
+        $headers = [
+            '所属模板',
+            '被排查人员姓名',
+            '被排查人员身份证号码',
+            '被排查人员户籍地',
+            '排查状态',
+            '排查专干姓名',
+            '排查时间'
+        ];
+        $data4Excel = [];
+        if (!empty($data)) {
+            $i = 0;
+            foreach ($data as $item) {
+                $data4Excel[$i++] = [
+                    $item['TEMPLATE_NAME'],
+                    $item['NAME'],
+                    $item['ID_CODE'] . "\t",
+                    $item['DOMICILE_PLACE'],
+                    $item['EXECUTE_STATUS'],
+                    $item['EXECUTOR_NAME'],
+                    $item['EXECUTE_TIME']
+                ];
+            }
+            $templateId = $request->param('TEMPLATE_ID', '', 'int');
+            if (!empty($templateId)) {
+                $fields = TroubleshootingTemplateFieldModel::where('EFFECTIVE', EFFECTIVE)
+                    ->where('TEMPLATE_ID', $templateId)
+                    ->field('ID, CODE, NAME, WIDGET')
+                    ->order('SORT ASC')
+                    ->select();
+                foreach ($fields as $field) {
+                    $headers[] = $field->NAME;
+                    $i = 0;
+                    foreach ($data as $item) {
+                        if (in_array($field->WIDGET, TroubleshootingTemplateFieldModel::WIDGET_MULTI_MEDIA)) {
+                            $data4Excel[$i++][] = empty($item[$field->CODE]) ? '无' : '有';
+                        } else {
+                            $data4Excel[$i++][] = $item[$field->CODE] . "\t";
+                        }
+                    }
+                }
+            }
+        }
+        exportExcel($headers, $data4Excel, "Sheet1", "安保排查人员清单");
+    }
+
+    private function loadData(Request $request, $toArray = false, $forExport = false) {
         $templateId = $request->param('TEMPLATE_ID', '', 'int');
         $executeStatus = $request->param('EXECUTE_STATUS', '', 'trim');
         $keywords = $request->param('keywords', '', 'trim');
@@ -60,42 +138,53 @@ class TroubleshootingPerson extends Common
                         $query->where("C.$fd", $wh);
                     }
                 }
-            })
-            ->field($queryFields);
+            });
+        if ($forExport) {
+            $fields = TroubleshootingTemplateFieldModel::where('EFFECTIVE', EFFECTIVE)
+                ->where('TEMPLATE_ID', $templateId)
+                ->field('ID, CODE')
+                ->order('SORT ASC')
+                ->select();
+            $extensionSql = "select PERSON_ID,";
+            foreach ($fields as $field) {
+                $fieldId = $field->ID;
+                $fieldCode = $field->CODE;
+                array_push($queryFields, "D.$fieldCode");
+                $extensionSql .= "MAX(case FIELD_ID when $fieldId then FIELD_VALUE else null end) $fieldCode,";
+            }
+            $extensionSql = substr($extensionSql, 0, -1);
+            $extensionSql .= " from troubleshoot_person_extension group by PERSON_ID";
+            $query->leftJoin("($extensionSql) D", "A.ID = D.PERSON_ID");
+        }
+
+        $query->field($queryFields);
         if (!empty($templateId)) {
-            $is_so = true;
             $query->where('B.ID', $templateId);
         }
         if (!empty($executeStatus)) {
-            $is_so = true;
             $query->where('A.EXECUTE_STATUS', $executeStatus);
         }
         if (!empty($keywords)) {
-            $is_so = true;
             $fields = ['A.NAME', 'A.ID_CODE', 'A.REMARK'];
             $query->whereLike(implode('|', $fields), "%$keywords%");
         }
-        $rows = $query->paginate(self::PAGE_SIZE, false, [
-            'query' => request()->param()
-        ])->each(function($item) {
+        if (!$forExport) {
+            $rows = $query->paginate(self::PAGE_SIZE, false, [
+                'query' => request()->param()
+            ]);
+        } else {
+            $rows = $query->select();
+        }
+        $rows->each(function($item) {
             $item->DOMICILE_PLACE = $item->DOMICILE_PROVINCE_NAME . $item->DOMICILE_CITY_NAME . $item->DOMICILE_COUNTY_NAME
                 . $item->DOMICILE_STREET_NAME . $item->DOMICILE_COMMUNITY_NAME . $item->DOMICILE_ADDRESS;
             $item->EXECUTE_STATUS = in_array($item->EXECUTE_STATUS, array_keys(TroubleshootingPersonModel::EXECUTE_STATUS_LIST)) ? TroubleshootingPersonModel::EXECUTE_STATUS_LIST[$item->EXECUTE_STATUS] : '未知';
             return $item;
         });
-        $templateList = $this->getTemplateList();
-        $this->assign('templateList', $templateList);
-        $this->assign('executeStatusList', TroubleshootingPersonModel::EXECUTE_STATUS_LIST);
-        $this->assign('list', $rows);
-        $this->assign('page', $rows->render());
-        $this->assign('total', $rows->total());
-        $this->assign('is_so', $is_so);
-        $this->assign('keywords', $keywords);
-        $this->assign('templateId', $templateId);
-        $this->assign('executeStatus', $executeStatus);
-        $js = $this->loadJsCss(array('troubleshooting_person_index'), 'js', 'admin');
-        $this->assign('footjs', $js);
-        return $this->fetch();
+        if ($toArray) {
+            $rows = $rows->toArray();
+        }
+        return $rows;
     }
 
     public function read(Request $request) {
@@ -340,6 +429,180 @@ class TroubleshootingPerson extends Common
         $this->assign('assignment', $assignment);
         $this->assign('powerLevel', $powerLevel);
         return $this->fetch('assign');
+    }
+
+    public function import(Request $request) {
+        if ($request->isPost()) {
+            $templateId = $request->param('TEMPLATE_ID');
+            $personListFile = (new Uploads())->excel($request, '', "PERSON_LIST");
+            if (empty($personListFile)) {
+                $this->error("非法操作");
+            }
+            $fileName = $personListFile['save_files'][0];
+            $data = importExcel(self::PERSON_INFO_LIST, $fileName);
+            if ($data) {
+                $subareas = Subareas::field(['CODE12', 'NAME', 'PID'])->select()->toArray();
+                foreach ($data as $item) {
+                    $item['ID_CODE'] = $item[self::PERSON_INFO_ID_CODE];
+                    $item['NAME'] = $item[self::PERSON_INFO_NAME];
+                    if (empty($item['ID_CODE']) || empty($item['NAME'])) {
+                        continue;
+                    }
+                    $item['TEMPLATE_ID'] = $templateId;
+                    $item['DOMICILE_PROVINCE_CODE'] = DEFAULT_PROVINCE_ID .'000000';
+                    $item['DOMICILE_PROVINCE_NAME'] = DEFAULT_PROVINCE_NAME;
+                    $item['DOMICILE_CITY_CODE'] = DEFAULT_CITY_ID . '000000';
+                    $item['DOMICILE_CITY_NAME'] = DEFAULT_CITY_NAME;
+                    $domicileAddress = $item[self::PERSON_INFO_DOMICILE_ADDRESS];
+                    $myBusiness = false;
+                    if (!empty($domicileAddress)) {
+                        if (is_numeric(mb_strpos($domicileAddress, DEFAULT_PROVINCE_NAME))) {
+                            $domicileAddress = str_replace(DEFAULT_PROVINCE_NAME, '', $domicileAddress);
+                            $this->splitAndSetDomicileAddress($domicileAddress, $item, $subareas);
+                            $myBusiness = true;
+                        }
+                        if (is_numeric(mb_strpos($domicileAddress, DEFAULT_CITY_NAME))) {
+                            $domicileAddress = str_replace(DEFAULT_CITY_NAME, '', $domicileAddress);
+                            $this->splitAndSetDomicileAddress($domicileAddress, $item, $subareas);
+                            $myBusiness = true;
+                        }
+                        if (!$myBusiness) {
+                            $item['DOMICILE_PROVINCE_CODE'] = '';
+                            $item['DOMICILE_PROVINCE_NAME'] = '';
+                            $item['DOMICILE_CITY_CODE'] = '';
+                            $item['DOMICILE_CITY_NAME'] = '';
+                        }
+                    }
+                    unset($item[self::PERSON_INFO_ID_CODE]);
+                    unset($item[self::PERSON_INFO_NAME]);
+                    unset($item[self::PERSON_INFO_DOMICILE_ADDRESS]);
+                    $this->addPerson($item);
+                }
+            }
+            $this->jsalert("排查人员清单导入成功",3);
+        }
+        $templateList = $this->getTemplateList();
+        $js = $this->loadJsCss(array('troubleshooting_person_import'), 'js', 'admin');
+        $this->assign('footjs', $js);
+        $this->assign('templateList', $templateList);
+        return $this->fetch();
+    }
+
+    private function splitAndSetDomicileAddress($domicileAddress, &$item, $subareas, $areaTags = [
+        'COUNTY' => [
+            '管理区',
+            '区',
+            '自治县',
+            '县',
+            '市'
+        ],
+        'STREET' => [
+            '街道',
+            '乡',
+            '镇',
+            '服务中心'
+        ],
+        'COMMUNITY' => [
+            '居委会',
+            '村委会',
+            '村',
+            '社区'
+        ]
+    ]) {
+        foreach ($areaTags as $areaType => $areaTag) {
+            if ('COUNTY' == $areaType) {
+                $pid = $item['DOMICILE_CITY_CODE'];
+            }
+            elseif ('STREET' == $areaType) {
+                $pid = $item['DOMICILE_COUNTY_CODE'];
+            }
+            elseif ('COMMUNITY' == $areaType) {
+                $pid = $item['DOMICILE_STREET_CODE'];
+            }
+            $areaCode = $areaName = '';
+            foreach ($areaTag as $tag) {
+                $tagIndex = mb_strpos($domicileAddress, $tag, 0);
+                if (!$tagIndex) {
+                    continue;
+                }
+                $areaName = mb_substr($domicileAddress, 0, $tagIndex + 1);
+                $isDone = false;
+                foreach ($subareas as $subarea) {
+                    if ($subarea['NAME'] != $areaName) {
+                        continue;
+                    }
+                    if ($pid != $subarea['PID']) {
+                        continue;
+                    }
+                    $areaCode = $subarea['CODE12'];
+                    $isDone = true;
+                    break;
+                }
+                if ($isDone) {
+                    $domicileAddress = mb_substr($domicileAddress, $tagIndex + 1);
+                    break;
+                }
+                $areaName = '';
+            }
+            if ('COUNTY' == $areaType) {
+                $item['DOMICILE_COUNTY_CODE'] = $areaCode;
+                $item['DOMICILE_COUNTY_NAME'] = $areaName;
+            }
+            elseif ('STREET' == $areaType) {
+                $item['DOMICILE_STREET_CODE'] = $areaCode;
+                $item['DOMICILE_STREET_NAME'] = $areaName;
+            }
+            elseif ('COMMUNITY' == $areaType) {
+                $item['DOMICILE_COMMUNITY_CODE'] = $areaCode;
+                $item['DOMICILE_COMMUNITY_NAME'] = $areaName;
+            }
+        }
+        $item['DOMICILE_ADDRESS'] = $domicileAddress;
+    }
+
+    private function addPerson($data) {
+        $templateCount = TroubleshootingTemplateModel::where(['EFFECTIVE' => EFFECTIVE, 'ID' => $data['TEMPLATE_ID']])->count();
+        if ($templateCount == 0) {
+            return $this->fail("模板不存在或已删除");
+        }
+        $personCount = TroubleshootingPersonModel::where(['EFFECTIVE' => EFFECTIVE, 'ID_CODE' => $data['ID_CODE']])->count();
+        if ($personCount > 0) {
+            return $this->error("重复的身份证号码");
+        }
+        $ver = new TroubleshootPersonVer();
+        if (!$ver->scene('create')->check($data)) {
+            return $this->error($ver->getError());
+        }
+        $person = new TroubleshootingPersonModel();
+        $data = array_merge($data, [
+            'CREATE_USER_ID' => session('user_id'),
+            'CREATE_USER_NAME' => session('name'),
+            'CREATE_TIME' => Carbon::now(),
+            'CREATE_TERMINAL' => TERMINAL_WEB,
+            'UPDATE_USER_ID' => session('user_id'),
+            'UPDATE_USER_NAME' => session('name'),
+            'UPDATE_TIME' => Carbon::now(),
+            'UPDATE_TERMINAL' => TERMINAL_WEB
+        ]);
+        $person->save($data);
+        if (empty($person->ID)) {
+            return false;
+        }
+        $assignment = new TroubleshootingAssignment();
+        $assignment->PERSON_ID = $person->ID;
+        $assignment->COUNTY_CODE = $data['DOMICILE_COUNTY_CODE'];
+        $assignment->COUNTY_NAME = $data['DOMICILE_COUNTY_NAME'];
+        $assignment->STREET_CODE = $data['DOMICILE_STREET_CODE'];
+        $assignment->STREET_NAME = $data['DOMICILE_STREET_NAME'];
+        $assignment->COMMUNITY_CODE = $data['DOMICILE_COMMUNITY_CODE'];
+        $assignment->COMMUNITY_NAME = $data['DOMICILE_COMMUNITY_NAME'];
+        $assignment->REASON = "系统根据户籍地信息自动指派";
+        $assignment->ACTION = TroubleshootingAssignment::ACTION_ASSIGN;
+        $assignment->CREATE_USER_ID = session('user_id');
+        $assignment->CREATE_USER_NAME = session('name');
+        $assignment->CREATE_TIME = Carbon::now();
+        $assignment->save();
+        return true;
     }
 
     protected function getManageWhere() {

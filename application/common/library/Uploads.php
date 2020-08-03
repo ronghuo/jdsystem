@@ -74,6 +74,18 @@ class Uploads{
         return $this->uploadFile($request, $config);
     }
 
+    public function excel(Request $request, $save_path = '', $field_name = ''){
+        $config = [
+            'field_name' => $field_name,
+            'dir' => '',
+            'size_limit' => 10 * 1024 * 1024,
+            'ext_limit' => 'xlsx,xls',
+            'save_path' => rtrim($save_path,'/')
+        ];
+
+        return $this->uploadFile($request, $config);
+    }
+
     protected function uploadFile(Request $request,$config=[]){
         $files = [];
         try{
@@ -97,7 +109,9 @@ class Uploads{
             }else{
                 $save_path = './uploads/'.$config['dir'];
             }
-
+            if (!is_array($files)) {
+                $files = [$files];
+            }
             foreach($files as $file) {
                 // 移动到框架应用根目录/uploads/ 目录下
                 $info = $file->rule('buildUploadFileName')->validate(['size'=>$config['size_limit'],'ext'=>$config['ext_limit']])->move($save_path);
