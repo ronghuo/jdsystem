@@ -130,7 +130,6 @@ class TroubleshootingPerson extends Common
             ->leftJoin('troubleshoot_template B', 'A.TEMPLATE_ID = B.ID')
             ->leftJoin("$assignmentSql C", 'A.ID = C.PERSON_ID')
             ->where('A.EFFECTIVE', EFFECTIVE)
-            ->where('B.EFFECTIVE', EFFECTIVE)
             ->where(function ($query) {
                 $where = $this->getManageWhere();
                 if (!empty($where)) {
@@ -449,9 +448,9 @@ class TroubleshootingPerson extends Common
                         continue;
                     }
                     $item['TEMPLATE_ID'] = $templateId;
-                    $item['DOMICILE_PROVINCE_CODE'] = DEFAULT_PROVINCE_ID .'000000';
+                    $item['DOMICILE_PROVINCE_CODE'] = convertCodeTo12Chars(DEFAULT_PROVINCE_ID);
                     $item['DOMICILE_PROVINCE_NAME'] = DEFAULT_PROVINCE_NAME;
-                    $item['DOMICILE_CITY_CODE'] = DEFAULT_CITY_ID . '000000';
+                    $item['DOMICILE_CITY_CODE'] = convertCodeTo12Chars(DEFAULT_CITY_ID);
                     $item['DOMICILE_CITY_NAME'] = DEFAULT_CITY_NAME;
                     $domicileAddress = $item[self::PERSON_INFO_DOMICILE_ADDRESS];
                     $myBusiness = false;

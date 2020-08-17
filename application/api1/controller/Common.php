@@ -7,6 +7,7 @@
 namespace app\api1\controller;
 
 use think\Controller;
+use think\db\Query;
 use think\exception\HttpResponseException;
 use think\Request;
 use think\Response;
@@ -48,6 +49,24 @@ class Common extends Controller
         cache($cache_key,$ids,30);
 
         return $ids;
+    }
+
+    protected function contactWithArea($managerId, Query &$query, $countyField, $streetField, $communityField) {
+        $cacheKey = 'power_areas:' . $managerId;
+        $areas = cache($cacheKey);
+        if (!$areas) {
+            $areas = (new UserManagerPower())->getPowerSettings($managerId);
+            cache($cacheKey, $areas,30);
+        }
+        if (!empty($areas['COMMUNITY_IDS'])) {
+            $query->whereOr($communityField, 'in', $areas['COMMUNITY_IDS']);
+        }
+        if(!empty($areas['STREET_IDS'])){
+            $query->whereOr($streetField,'in', $areas['STREET_IDS']);
+        }
+        if(!empty($areas['COUNTY_IDS'])){
+            $query->whereOr($countyField,'in', $areas['COUNTY_IDS']);
+        }
     }
 
     protected function log($mesg,$file='test'){

@@ -311,7 +311,7 @@ class UserUsers extends Common
         $estimate = input('estimate', '');
         if ($estimate != '') {
             $subQuery = db()->table('user_estimates')->order('add_time desc')->buildSql();
-            $subQuery = db()->table("$subQuery C")->group('UUID')->buildSql();
+            $subQuery = db()->table("$subQuery C")->group('UUID')->field(['UUID', 'DANGER_LEVEL_ID'])->buildSql();
             $query->leftJoin("$subQuery B", 'A.ID = B.UUID');
             if ($estimate == 0) {
                 $query->where(function ($query) {
@@ -388,7 +388,7 @@ class UserUsers extends Common
 
             $info->HEAD_IMG_URL = build_http_img_url($info->HEAD_IMG);
             //12位
-            $info->COUNTY_ID = $info->COUNTY_ID.'000000';
+            $info->COUNTY_ID = convertCodeTo12Chars($info->COUNTY_ID);
             $liveids = explode(',',$info->LIVE_IDS);
             $modids = explode(',',$info->DOMICILE_IDS);
             $dmids = explode(',',$info->DMMC_IDS);
@@ -569,7 +569,7 @@ class UserUsers extends Common
             $this->error('访问错误');
         }
 
-        if(!$this->checkUUid($info->ID)){
+        if (!$this->checkUUid($info->ID)) {
             $this->error('权限不足');
         }
 

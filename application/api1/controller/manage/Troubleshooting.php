@@ -46,18 +46,24 @@ class Troubleshooting extends Common {
     public function getPersonList(Request $request) {
         $templateId = $request->param('TEMPLATE_ID', 0, 'int');
         $executeStatus = $request->param('EXECUTE_STATUS', '', 'trim');
-        $domicileCountyCode = $request->param('DOMICILE_COUNTY_CODE', '', 'trim');
-        $domicileStreetCode = $request->param('DOMICILE_STREET_CODE', '', 'trim');
-        $domicileCommunityCode = $request->param('DOMICILE_COMMUNITY_CODE', '', 'trim');
+        $assignCountyCode = $request->param('DOMICILE_COUNTY_CODE', '', 'trim');
+        $assignStreetCode = $request->param('DOMICILE_STREET_CODE', '', 'trim');
+        $assignCommunityCode = $request->param('DOMICILE_COMMUNITY_CODE', '', 'trim');
         $queryFields = [
             'A.ID',
             'A.NAME',
             'A.EXECUTE_STATUS',
             'B.NAME TEMPLATE_NAME'
         ];
+        $assignmentSql = TroubleshootingAssignment::order('CREATE_TIME DESC')->buildSql();
+        $assignmentSql = db()->table("$assignmentSql A")->group('PERSON_ID')->buildSql();
         $query = TroubleshootingPerson::alias('A')
             ->leftJoin('troubleshoot_template B', 'A.TEMPLATE_ID = B.ID')
+            ->leftJoin("$assignmentSql C", 'A.ID = C.PERSON_ID')
             ->where('A.EFFECTIVE', EFFECTIVE)
+            ->where(function ($query) use ($request) {
+                $this->contactWithArea($request->User->ID, $query, 'C.COUNTY_CODE', 'C.STREET_CODE', 'C.COMMUNITY_CODE');
+            })
             ->field($queryFields)
             ->order('A.EXECUTE_STATUS', 'ASC');
         if (!empty($templateId)) {
@@ -66,14 +72,14 @@ class Troubleshooting extends Common {
         if (!empty($executeStatus)) {
             $query->where('A.EXECUTE_STATUS', $executeStatus);
         }
-        if (!empty($domicileCountyCode)) {
-            $query->where('A.DOMICILE_COUNTY_CODE', $domicileCountyCode);
+        if (!empty($assignCountyCode)) {
+            $query->where('C.COUNTY_CODE', $assignCountyCode);
         }
-        if (!empty($domicileStreetCode)) {
-            $query->where('A.DOMICILE_STREET_CODE', $domicileStreetCode);
+        if (!empty($assignStreetCode)) {
+            $query->where('C.STREET_CODE', $assignStreetCode);
         }
-        if (!empty($domicileCommunityCode)) {
-            $query->where('A.DOMICILE_COMMUNITY_CODE', $domicileCommunityCode);
+        if (!empty($assignCommunityCode)) {
+            $query->where('C.COMMUNITY_CODE', $assignCommunityCode);
         }
         $rows = $query->select()->each(function($item) {
             $item->EXECUTE_STATUS = in_array($item->EXECUTE_STATUS, array_keys(TroubleshootingPerson::EXECUTE_STATUS_LIST)) ? TroubleshootingPerson::EXECUTE_STATUS_LIST[$item->EXECUTE_STATUS] : '未知';
